@@ -70,6 +70,6 @@ case "$action" in
     "${kube[@]}" -n rundt wait --for=condition=Ready cluster/herbsfest-postgres --timeout=600s
     "${kube[@]}" -n rundt rollout status deployment/herbsfest --timeout=600s
     "${kube[@]}" -n rundt wait --for=condition=Ready certificate/herbsfest-tls --timeout=300s
-    echo 'Deployed: https://verwaltung.ringinger-herbstfest.de (basic-auth user: mvr)'
+    echo 'Deployed: https://herbstfest.r-und-t.app (basic-auth user: mvr)'
     ;;
 esac

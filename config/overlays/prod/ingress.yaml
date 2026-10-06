@@ -10,7 +10,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: verwaltung.ringinger-herbstfest.de
+    - host: herbstfest.r-und-t.app
       http:
         paths:
           - path: /
@@ -22,7 +22,7 @@ spec:
                   name: http
   tls:
     - hosts:
-        - verwaltung.ringinger-herbstfest.de
+        - herbstfest.r-und-t.app
       secretName: herbsfest-tls
 ---
 apiVersion: networking.k8s.io/v1
@@ -35,7 +35,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: verwaltung.ringinger-herbstfest.de
+    - host: herbstfest.r-und-t.app
       http:
         paths:
           - path: /

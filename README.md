@@ -122,9 +122,9 @@ The prod overlay follows the existing apps in
 
 - Existing namespace `rundt` and image pull Secret `oci-registry-cred`.
 - Image repository `artifacts.r-und-t.app/herbsfest`, built by ko.
-- Traefik serves `https://verwaltung.ringinger-herbstfest.de`; HTTP redirects
+- Traefik serves `https://herbstfest.r-und-t.app`; HTTP redirects
   to HTTPS before authentication. All HTTPS paths require basic auth.
-- cert-manager issues `herbsfest-tls` using `bunnycdn-issuer`. The festival DNS
+- cert-manager issues `herbsfest-tls` using `bunnycdn-issuer`. The `r-und-t.app` DNS
   zone must be accessible to that issuer's Bunny DNS credentials.
 - A single CNPG instance with 5Gi Longhorn storage, matching the small apps in
   the infrastructure repo. CNPG creates `herbsfest-postgres-app`; the app and
@@ -206,9 +206,9 @@ After deployment, HTTP should redirect to HTTPS, and an unauthenticated HTTPS
 request should return `401` with a basic-auth challenge:
 
 ```sh
-curl -I http://verwaltung.ringinger-herbstfest.de/
-curl -I https://verwaltung.ringinger-herbstfest.de/
-curl --user mvr https://verwaltung.ringinger-herbstfest.de/ # prompts for password
+curl -I http://herbstfest.r-und-t.app/
+curl -I https://herbstfest.r-und-t.app/
+curl --user mvr https://herbstfest.r-und-t.app/ # prompts for password
 ```
 
 The migration command uses GORM `AutoMigrate` for the initial scaffold and runs
