@@ -138,109 +138,77 @@ namespace and registry Secret; it does not create or take ownership of them.
 
 ### GitOps deployment
 
-The infrastructure repository manages this app through the OVH Flux
-Kustomization `rundt-herbsfest`, pointing at `flux/apps/rundt/prod/herbsfest`.
-Its base is `flux/apps/rundt/base/herbsfest`, including the encrypted auth
-Secret. The registry credentials remain in the existing `PROD_RUNDT` GitHub
-environment in that repository.
+This repository owns the production app manifests, including the sealed
+basic-auth Secret, in `config/overlays/prod`. The infrastructure repository
+registers the public app repository as Flux source `herbsfest`; the existing OVH
+Kustomization `rundt-herbsfest` reconciles this overlay. Both poll every minute.
+The shared namespace, registry pull Secret, and cluster operators stay in infra.
 
-Every push to this app's `main` runs `.github/workflows/ci.yml`. It generates,
-tests, and vets the Go app, checks that generated templates are committed, then
-dispatches the existing `build-herbsfest-image` workflow in `k8s-infra` with the
-exact app commit SHA. Pull requests run the same checks without publishing.
-The app CI waits for the downstream run and fails if publishing or the GitOps
-update fails. The downstream link appears in its job summary.
+Every push to `main` runs `.github/workflows/ci.yml`:
 
-The infrastructure workflow checks out that app commit, builds/pushes with ko
-to `artifacts.r-und-t.app/herbsfest`, and commits the published digest for both
-the web container and migration container. It also records the source SHA in
-`flux/apps/rundt/base/herbsfest/source.json` and enables the Flux entry.
-Flux reconciles that Git commit and rolls out the new image. The pipeline
-does not need cluster credentials or call kubectl.
+1. Generate templates, run Go tests and vet, and check generated files are committed.
+2. Build with ko for `linux/amd64` and push to `artifacts.r-und-t.app/herbsfest`,
+   tagged with the source commit SHA.
+3. Commit the published image digest into the production Kustomize overlay.
+   The same override updates both the web and migration containers.
+4. Flux reads that commit and rolls out the image to production.
 
-Builds queue without canceling pending revisions (up to GitHub's 100-run queue
-limit). Each dispatched revision publishes an image tagged with its commit SHA.
-Automatic releases update production only while that SHA is still the app's
-`main` tip, so a slower old run cannot overwrite the latest deployment.
-Manual dispatch in `k8s-infra` still supports deliberate releases/rollbacks
-using `source_ref`; leave its `automatic` input false for that case.
+Pull requests only run checks. CI never needs Kubernetes credentials. Publishing
+uses these repository Actions secrets (already configured):
 
-#### One-time cross-repository authentication
+- `OCI_REGISTRY_URL`
+- `OCI_REGISTRY_USER`
+- `OCI_REGISTRY_PASSWORD`
 
-The app's built-in `GITHUB_TOKEN` is scoped to this repository. Use a GitHub
-App installed on `rasche-thalhofer/k8s-infra` with **Actions: read and write**.
-The dispatch token is restricted to that repository and permission; the infra
-workflow uses its own `GITHUB_TOKEN` to commit manifests. Registry credentials
-stay in its existing `PROD_RUNDT` environment.
+The digest commit uses this repo's built-in `GITHUB_TOKEN` with `contents: write`.
+No GitHub App or cross-repository workflow dispatch is needed. GitHub suppresses
+new workflow runs for token-generated pushes; the commit also includes `[skip ci]`.
+Repository rules must allow the Actions bot to push the digest update to `main`.
 
-Add these Actions secrets to `tjrasche/HerbsfestOS`:
+Builds queue without cancellation (up to GitHub's 100 pending-run limit). Each
+revision publishes an image, but only a build whose source SHA still matches
+`main` can push a deployment update. A newer commit winning that race prevents
+an older build from replacing production. CI success confirms publishing and
+the Git update; Flux readiness is checked separately.
 
-- `GITOPS_APP_ID`: the GitHub App ID.
-- `GITOPS_APP_PRIVATE_KEY`: that App's PEM private key.
+To retry a release, run the `CI` workflow manually on `main`. To roll back, commit
+the desired previously published digest in `config/overlays/prod/kustomization.yaml`
+with `[skip ci]` in the commit message so CI doesn't rebuild over the rollback.
+Flux applies the committed digest. A later normal source push resumes releases.
 
-The existing Flux App can be reused if it has the required Actions permission;
-its current credentials are not automatically shared with this app repository.
-Run the host setup script with `gh` authenticated. It prompts for the App ID and
-local private-key file path, stores both secrets directly in GitHub, and triggers
-CI on `main`:
+The database Cluster disables Flux pruning to retain festival data if the app
+is removed. Database deletion is a separate explicit operation. CNPG backups
+are not configured yet.
+
+### Host-side production tools
+
+Use `scripts/check-prod.sh` on your host to reconcile and check the deployment:
 
 ```sh
-bash scripts/configure-ci.sh
+bash scripts/check-prod.sh YOUR_PRODUCTION_CONTEXT
 ```
 
-Do not put the private key in this repository. Once those secrets are configured,
-push to `main` or run the app's `CI` workflow manually. Authentication and
-dispatch use [GitHub's App token action](https://github.com/actions/create-github-app-token)
-and [workflow dispatch API](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event).
+This needs `flux` and `kubectl` and checks CNPG, the Deployment, and the TLS
+certificate. The source must have been registered by the infra reconciliation.
 
-### Host-side deployment tools
-
-The commands below are available for sealing credentials and for a manual
-deployment before adopting Flux. Once Flux owns the app, use its workflow to
-release changes instead of applying the manual bundle.
-
-Run the following **on your host**, where your production Kubernetes context
-and registry credentials are available. Install `kubeseal` and Apache `htpasswd`
-in addition to the development tools. On macOS, `brew install kubeseal httpd`
-provides them; add `$(brew --prefix httpd)/bin` to `PATH` if needed.
+To rotate basic-auth credentials, install `kubeseal` and Apache `htpasswd`.
+On macOS, `brew install kubeseal httpd` provides them; add
+`$(brew --prefix httpd)/bin` to `PATH` if needed. Run on your host:
 
 ```sh
-kubectl config get-contexts
-
-# If you only want to provide the public certificate to the sandbox:
 bash scripts/prod.sh cert YOUR_PRODUCTION_CONTEXT
-
-# Encrypt basic-auth credentials. Enter the agreed password for mvr at the prompt.
 bash scripts/prod.sh seal YOUR_PRODUCTION_CONTEXT
-
-# Log in with your usual internal registry account, then build and deploy.
-docker login artifacts.r-und-t.app
-bash scripts/prod.sh deploy YOUR_PRODUCTION_CONTEXT
 ```
 
-The script fetches the public certificate from `sealed-secrets-controller` in
-namespace `sealed-secrets`. Passwords and unencrypted Secret manifests never
-reach disk. The generated `dist/herbsfest-basic-auth.sealed.yaml` is scoped
-strictly to name `herbsfest-basic-auth` and namespace `rundt`.
-The deploy command checks that the selected cluster can decrypt it, detects
-the node architecture, builds/publishes with ko, applies `dist/prod.yaml`, and
-waits for CNPG, the Deployment, and TLS. It seals credentials automatically
-if the generated file is missing. Every Kubernetes operation names the context.
+The seal command prompts for the password for `mvr`, fetches the public
+certificate from `sealed-secrets-controller` in namespace `sealed-secrets`,
+and validates the result against that cluster. It updates
+`config/overlays/prod/sealedsecret-basic-auth.yaml`; commit that encrypted file
+to deploy the new credentials. Plain passwords and unencrypted Secret manifests
+never reach disk. The ciphertext is scoped to `rundt/herbsfest-basic-auth`.
 
-To prepare a complete deployment bundle for review without applying it:
-
-```sh
-make prod-resolve                      # requires the seal step and registry login
-# Apple Silicon local Go builds still target production amd64 by default.
-# Override if your production nodes use another architecture:
-make prod-resolve PROD_PLATFORM=linux/arm64
-```
-
-The bundle includes the SealedSecret and digest-pinned images for both the app
-and migration container. `make render OVERLAY=prod` only renders the static app
-overlay and retains `ko://` references; it does not include generated credentials.
-All generated files are under ignored `dist/`. Only the encrypted SealedSecret
-belongs in Git. This setup does not yet configure CNPG backups.
+`make render OVERLAY=prod` renders the complete app configuration, including the
+committed digest and SealedSecret. Development still uses ko to build local images.
 
 After deployment, HTTP should redirect to HTTPS, and an unauthenticated HTTPS
 request should return `401` with a basic-auth challenge:

@@ -22,33 +22,72 @@ jobs:
       - run: make test
       - name: Check generated templates are committed
         run: git diff --exit-code -- internal
+      - name: Check production publishing and manifests
+        run: |
+          go install sigs.k8s.io/kustomize/kustomize/v5@v5.8.2
+          python3 scripts/test-publish-manifest.py
+          kustomize build config/overlays/prod > /dev/null
+          kustomize build config/overlays/dev > /dev/null
 
   publish:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    permissions:
+      contents: write
+    concurrency:
+      group: production-image
+      cancel-in-progress: false
+      queue: max
+    env:
+      KO_DOCKER_REPO: ${{ secrets.OCI_REGISTRY_URL }}/herbsfest
     steps:
       - uses: actions/checkout@v4
-      - name: Check dispatch credentials
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Check registry credentials
         env:
-          GITOPS_APP_ID: ${{ secrets.GITOPS_APP_ID }}
-          GITOPS_APP_PRIVATE_KEY: ${{ secrets.GITOPS_APP_PRIVATE_KEY }}
+          OCI_REGISTRY_URL: ${{ secrets.OCI_REGISTRY_URL }}
+          OCI_REGISTRY_USER: ${{ secrets.OCI_REGISTRY_USER }}
+          OCI_REGISTRY_PASSWORD: ${{ secrets.OCI_REGISTRY_PASSWORD }}
         run: |
-          test -n "$GITOPS_APP_ID" && test -n "$GITOPS_APP_PRIVATE_KEY" || {
-            echo '::error::Configure GITOPS_APP_ID and GITOPS_APP_PRIVATE_KEY. The App must be installed on rasche-thalhofer/k8s-infra with Actions: read and write.'
+          test -n "$OCI_REGISTRY_URL" && test -n "$OCI_REGISTRY_USER" && test -n "$OCI_REGISTRY_PASSWORD" || {
+            echo '::error::Configure OCI_REGISTRY_URL, OCI_REGISTRY_USER, and OCI_REGISTRY_PASSWORD as repository Actions secrets.'
             exit 1
           }
-      - name: Create token for the GitOps builder
-        id: gitops
-        uses: actions/create-github-app-token@v2
+      - name: Set up ko
+        uses: ko-build/setup-ko@v0.9
         with:
-          app-id: ${{ secrets.GITOPS_APP_ID }}
-          private-key: ${{ secrets.GITOPS_APP_PRIVATE_KEY }}
-          owner: rasche-thalhofer
-          repositories: k8s-infra
-          permission-actions: write
-      - name: Publish image and update GitOps
+          version: v0.19.1
+      - name: Set up Kustomize
+        run: go install sigs.k8s.io/kustomize/kustomize/v5@v5.8.2
+      - name: Generate templates
+        run: make generate
+      - name: Log in to OCI registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.OCI_REGISTRY_URL }}
+          username: ${{ secrets.OCI_REGISTRY_USER }}
+          password: ${{ secrets.OCI_REGISTRY_PASSWORD }}
+      - name: Build and push image
+        id: image
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          ko build --bare --platform=linux/amd64 --tags="$GITHUB_SHA" \
+            --image-refs=dist/image-refs.txt ./cmd/web
+          published=$(cat dist/image-refs.txt)
+          [[ "$published" == "$KO_DOCKER_REPO:$GITHUB_SHA"@sha256:* ]]
+          digest=${published##*@}
+          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          printf 'ref=%s@%s\n' "$KO_DOCKER_REPO" "$digest" >> "$GITHUB_OUTPUT"
+      - name: Commit production image digest
         env:
-          GH_TOKEN: ${{ steps.gitops.outputs.token }}
-        run: bash scripts/dispatch-build.sh "$GITHUB_SHA"
+          IMAGE_REF: ${{ steps.image.outputs.ref }}
+        run: bash scripts/publish-manifest.sh "$GITHUB_SHA" "$IMAGE_REF"

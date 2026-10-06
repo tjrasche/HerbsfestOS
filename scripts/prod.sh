@@ -8,8 +8,8 @@ umask 077
 cd "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 action=${1:-}
 context=${2:-}
-if [[ ! "$action" =~ ^(cert|seal|deploy)$ || -z "$context" ]]; then
-  echo "Usage: bash scripts/prod.sh {cert|seal|deploy} PRODUCTION_CONTEXT" >&2
+if [[ ! "$action" =~ ^(cert|seal)$ || -z "$context" ]]; then
+  echo "Usage: bash scripts/prod.sh {cert|seal} PRODUCTION_CONTEXT" >&2
   exit 1
 fi
 
@@ -48,28 +48,13 @@ seal_auth() {
       > dist/herbsfest-basic-auth.sealed.yaml.tmp
   unset auth_password
   mv dist/herbsfest-basic-auth.sealed.yaml.tmp dist/herbsfest-basic-auth.sealed.yaml
-  echo 'Sealed credentials written to dist/herbsfest-basic-auth.sealed.yaml'
+  kubeseal --context "$context" --controller-name=sealed-secrets-controller \
+    --controller-namespace=sealed-secrets --validate < dist/herbsfest-basic-auth.sealed.yaml
+  cp dist/herbsfest-basic-auth.sealed.yaml config/overlays/prod/sealedsecret-basic-auth.yaml
+  echo 'Sealed credentials updated in config/overlays/prod/sealedsecret-basic-auth.yaml; commit this file to deploy them.'
 }
 
 case "$action" in
   cert) fetch_cert ;;
   seal) seal_auth ;;
-  deploy)
-    for tool in go make ko kustomize; do require "$tool"; done
-    "${kube[@]}" -n rundt get secret oci-registry-cred >/dev/null
-    "${kube[@]}" get storageclass longhorn >/dev/null
-    "${kube[@]}" get clusterissuer bunnycdn-issuer >/dev/null
-    # Validate existing ciphertext against the selected cluster before applying it.
-    if [[ ! -s dist/herbsfest-basic-auth.sealed.yaml ]]; then seal_auth; fi
-    kubeseal --context "$context" --controller-name=sealed-secrets-controller \
-      --controller-namespace=sealed-secrets --validate < dist/herbsfest-basic-auth.sealed.yaml
-    prod_platform=$("${kube[@]}" get nodes -o jsonpath='{.items[0].status.nodeInfo.operatingSystem}/{.items[0].status.nodeInfo.architecture}')
-    test -n "$prod_platform"
-    make prod-resolve PROD_PLATFORM="$prod_platform"
-    "${kube[@]}" apply -f dist/prod.yaml
-    "${kube[@]}" -n rundt wait --for=condition=Ready cluster/herbsfest-postgres --timeout=600s
-    "${kube[@]}" -n rundt rollout status deployment/herbsfest --timeout=600s
-    "${kube[@]}" -n rundt wait --for=condition=Ready certificate/herbsfest-tls --timeout=300s
-    echo 'Deployed: https://herbstfest.r-und-t.app (basic-auth user: mvr)'
-    ;;
 esac

@@ -6,6 +6,11 @@ resources:
   - ../../cnpg
   - ingress.yaml
   - middleware.yaml
+  - sealedsecret-basic-auth.yaml
 patches:
   - path: database-secret.yaml
   - path: postgres.yaml
+images:
+  - name: ko://github.com/tjrasche/HerbsfestOS/cmd/web
+    newName: artifacts.r-und-t.app/herbsfest
+    digest: sha256:0dbcf2b2a605db35bdc3b97e2032d6436a15a040f64926c0c3aca02df65d2f84
