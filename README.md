@@ -23,7 +23,7 @@ config/cnpg/             production CloudNativePG Cluster
 config/overlays/dev/     development namespace and database credentials
 config/overlays/prod/    production ingress, auth, CNPG and deployment patches
 config/kind/             local cluster configuration
-scripts/prod.sh          host-side sealing and production deployment
+scripts/prod.sh          host-side basic-auth credential sealing
 ```
 
 Add a package under `internal/` for each new domain entity. Keep its service,
@@ -66,7 +66,7 @@ Every kubectl target specifies `kind-<name>` explicitly.
 make test              # generate, test, vet
 make build             # binary at bin/web
 make render            # dev YAML, with unresolved ko:// image references
-make render OVERLAY=prod # app YAML; sealed auth is generated separately below
+make render OVERLAY=prod # complete app YAML with pinned image and sealed auth
 make kind-down         # deletes the local cluster and its database data
 ```
 
@@ -82,6 +82,11 @@ and keep its content/htmx fragments in the domain package. The feedback page
 demonstrates this: htmx swaps `#notes`, while the navigation and layout remain
 outside the fragment. Buttons accept templ attributes for native form behavior.
 Forms remain usable without JavaScript.
+
+The footer thanks Rasche & Thalhofer UG (haftungsbeschränkt) for providing free
+hosting. Its locally embedded logo comes from
+[rasche-thalhofer.cloud](https://rasche-thalhofer.cloud/assets/logo.svg.svg),
+and the credit uses that website's blue palette.
 
 Color, spacing, radius, and typography tokens are defined in
 `internal/ui/static/style.css`. Blue `#1565c0`, hover blue `#2d84e8`, orange

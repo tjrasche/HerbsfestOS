@@ -45,7 +45,18 @@ templ Layout(title, activePage string) {
 					</header>
 					<main id="main" class="main-content" tabindex="-1">{ children... }
 </main>
-					<footer class="workspace-footer"><span>HerbstfestOS</span><span>Mit Herz organisiert. @Icon(IconHeart)</span></footer>
+					<footer class="workspace-footer">
+						<div class="workspace-footer__signature"><strong>HerbstfestOS</strong><span>Mit Herz organisiert.</span></div>
+						<a class="hosting-credit" href="https://rasche-thalhofer.cloud/" target="_blank" rel="noopener noreferrer">
+							<span class="hosting-credit__logo"><img src="/static/brand/rasche-thalhofer.svg" width="30" height="31" alt="" loading="lazy"/></span>
+							<span class="hosting-credit__copy">
+								<span class="hosting-credit__thanks">Mit freundlicher Unterstützung durch</span>
+								<span class="hosting-credit__company">Rasche &amp; Thalhofer <span>UG (haftungsbeschränkt)</span></span>
+								<span class="hosting-credit__gift">Hosting geschenkt, damit ihr feiern könnt. @Icon(IconHeart)</span>
+							</span>
+							<span class="sr-only">(öffnet in einem neuen Tab)</span>
+						</a>
+					</footer>
 				</div>
 			</div>
 			<div class="sr-only" id="app-status" role="status" aria-live="polite"></div>

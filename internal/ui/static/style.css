@@ -99,10 +99,20 @@ h3 { font-size: 17px; line-height: 1.4; }
 .topbar__link:hover { color: var(--color-brand); }
 .main-content { width: 100%; max-width: 1400px; margin-inline: auto; padding: 48px 44px 64px; flex: 1; }
 .main-content:focus { outline: none; }
-.workspace-footer { display: flex; justify-content: space-between; gap: 16px; padding: 20px 44px; color: var(--color-muted); font-size: 12px; }
-.workspace-footer > span:first-child { font-weight: 600; letter-spacing: .3px; }
-.workspace-footer > span:last-child { display: flex; gap: 7px; align-items: center; }
-.workspace-footer .icon { width: 13px; height: 13px; color: #c17d61; }
+.workspace-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px 24px; padding: 20px 44px; border-top: 1px solid var(--color-border); color: var(--color-muted); font-size: 12px; }
+.workspace-footer__signature { display: grid; gap: 4px; }
+.workspace-footer__signature strong { font-weight: 600; letter-spacing: .3px; color: var(--color-ink); }
+/* Hosting credit uses the logo and blue palette from rasche-thalhofer.cloud. */
+.hosting-credit { --hosting-blue: #1746f5; --hosting-blue-soft: #eef3ff; display: flex; align-items: center; gap: 12px; max-width: 100%; padding: 10px 14px; border: 1px solid #dfe8ff; border-radius: 12px; background: var(--hosting-blue-soft); color: var(--color-ink); transition: border-color .16s, background .16s; }
+.hosting-credit:hover { background: #dfe8ff; border-color: #bfd0ff; }
+.hosting-credit:focus-visible { outline-color: var(--hosting-blue); }
+.hosting-credit__logo { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; padding: 5px; border-radius: 8px; background: #fff; }
+.hosting-credit__copy { display: grid; gap: 3px; min-width: 0; line-height: 1.5; }
+.hosting-credit__thanks { color: var(--hosting-blue); font-size: 11px; }
+.hosting-credit__gift { font-size: 11px; color: #53627d; }
+.hosting-credit__gift .icon { width: 12px; height: 12px; margin-left: 3px; color: var(--hosting-blue); fill: currentColor; stroke-width: 1; }
+.hosting-credit__company { font-size: 13px; font-weight: 650; }
+.hosting-credit__company > span { font-size: 11px; font-weight: 400; color: #53627d; }
 
 /* Shared page and component primitives */
 .page-header { display: flex; justify-content: space-between; gap: 28px; align-items: center; padding-bottom: 38px; margin-bottom: 36px; border-bottom: 1px solid var(--color-border); }
@@ -292,7 +302,9 @@ h3 { font-size: 17px; line-height: 1.4; }
   .collection-empty .empty-state { padding: 36px 22px; }
   .collection-footnote { align-items: flex-start; }
   .collection-footnote .icon { margin-top: 3px; }
-  .workspace-footer { padding-inline: 20px; font-size: 11px; }
+  .workspace-footer { align-items: flex-start; flex-direction: column; padding-inline: 20px; font-size: 11px; }
+  .hosting-credit { padding: 10px 12px; gap: 10px; }
+  .hosting-credit__company > span { display: block; }
   .swatch-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .type-specimen { grid-template-columns: 1fr; padding: 24px; }
   .type-specimen__heading { font-size: 30px; }
