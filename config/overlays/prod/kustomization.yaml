@@ -11,6 +11,6 @@ patches:
 - path: database-secret.yaml
 - path: postgres.yaml
 images:
-- digest: sha256:19206ccad69e436354ee49a6d1ac1f4e062cfdce22a2960a10236a21183b42a7
+- digest: sha256:9320a01b3cfb043c6bd75c6ce53f40185f1f173c13cf564fd359b6bdcdd13c6c
   name: ko://github.com/tjrasche/HerbsfestOS/cmd/web
   newName: artifacts.r-und-t.app/herbsfest
