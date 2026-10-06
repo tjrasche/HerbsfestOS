@@ -180,11 +180,12 @@ Add these Actions secrets to `tjrasche/HerbsfestOS`:
 
 The existing Flux App can be reused if it has the required Actions permission;
 its current credentials are not automatically shared with this app repository.
-For example, from your host, using the App ID and your local key file:
+Run the host setup script with `gh` authenticated. It prompts for the App ID and
+local private-key file path, stores both secrets directly in GitHub, and triggers
+CI on `main`:
 
 ```sh
-gh secret set GITOPS_APP_ID --repo tjrasche/HerbsfestOS
-gh secret set GITOPS_APP_PRIVATE_KEY --repo tjrasche/HerbsfestOS < /path/to/app-private-key.pem
+bash scripts/configure-ci.sh
 ```
 
 Do not put the private key in this repository. Once those secrets are configured,
