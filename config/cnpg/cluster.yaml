@@ -1,0 +1,19 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: herbsfest-postgres
+spec:
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.6
+  instances: 3
+  bootstrap:
+    initdb:
+      database: herbsfest
+      owner: herbsfest
+  storage:
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi

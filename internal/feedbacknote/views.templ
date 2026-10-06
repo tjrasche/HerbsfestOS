@@ -1,0 +1,33 @@
+package feedbacknote
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ Page(notes []FeedbackNote, title, message string) {
+	@ui.Layout("HerbsfestOS") {
+		@Content(notes, title, message)
+	}
+}
+
+templ Content(notes []FeedbackNote, title, message string) {
+	<section id="notes">
+		<h1>HerbsfestOS</h1>
+		<h2>Feedback notes</h2>
+		<form method="post" action="/feedback-notes" hx-post="/feedback-notes" hx-target="#notes" hx-swap="outerHTML" hx-disabled-elt="find button" hx-sync="this:drop">
+			<label for="title">Title</label>
+			<input id="title" name="title" value={ title } required maxlength="200" autocomplete="off"/>
+			<button type="submit">Add feedback note</button>
+		</form>
+		if message != "" {
+			<p role="alert">{ message }</p>
+		}
+		if len(notes) == 0 {
+			<p>No feedback notes yet.</p>
+		} else {
+			<ul>
+				for _, note := range notes {
+					<li>{ note.Title }</li>
+				}
+			</ul>
+		}
+	</section>
+}
