@@ -144,14 +144,53 @@ Its base is `flux/apps/rundt/base/herbsfest`, including the encrypted auth
 Secret. The registry credentials remain in the existing `PROD_RUNDT` GitHub
 environment in that repository.
 
-The `build-herbsfest-image` workflow checks out this public app repository,
-tests it, builds with ko, and commits the published image digest for both the
-web container and migration container. The first successful build also
-unsuspends the Flux entry, so Flux never attempts to deploy the bootstrap image.
-To release another app revision, run that workflow in `k8s-infra` with the
-desired branch, tag, or commit as `source_ref`. It records the exact app commit
-in `flux/apps/rundt/base/herbsfest/source.json`. Updating that file in Git also
-triggers the build. Flux then reconciles the new digest automatically.
+Every push to this app's `main` runs `.github/workflows/ci.yml`. It generates,
+tests, and vets the Go app, checks that generated templates are committed, then
+dispatches the existing `build-herbsfest-image` workflow in `k8s-infra` with the
+exact app commit SHA. Pull requests run the same checks without publishing.
+The app CI waits for the downstream run and fails if publishing or the GitOps
+update fails. The downstream link appears in its job summary.
+
+The infrastructure workflow checks out that app commit, builds/pushes with ko
+to `artifacts.r-und-t.app/herbsfest`, and commits the published digest for both
+the web container and migration container. It also records the source SHA in
+`flux/apps/rundt/base/herbsfest/source.json` and enables the Flux entry.
+Flux reconciles that Git commit and rolls out the new image. The pipeline
+does not need cluster credentials or call kubectl.
+
+Builds queue without canceling pending revisions (up to GitHub's 100-run queue
+limit). Each dispatched revision publishes an image tagged with its commit SHA.
+Automatic releases update production only while that SHA is still the app's
+`main` tip, so a slower old run cannot overwrite the latest deployment.
+Manual dispatch in `k8s-infra` still supports deliberate releases/rollbacks
+using `source_ref`; leave its `automatic` input false for that case.
+
+#### One-time cross-repository authentication
+
+The app's built-in `GITHUB_TOKEN` is scoped to this repository. Use a GitHub
+App installed on `rasche-thalhofer/k8s-infra` with **Actions: read and write**.
+The dispatch token is restricted to that repository and permission; the infra
+workflow uses its own `GITHUB_TOKEN` to commit manifests. Registry credentials
+stay in its existing `PROD_RUNDT` environment.
+
+Add these Actions secrets to `tjrasche/HerbsfestOS`:
+
+- `GITOPS_APP_ID`: the GitHub App ID.
+- `GITOPS_APP_PRIVATE_KEY`: that App's PEM private key.
+
+The existing Flux App can be reused if it has the required Actions permission;
+its current credentials are not automatically shared with this app repository.
+For example, from your host, using the App ID and your local key file:
+
+```sh
+gh secret set GITOPS_APP_ID --repo tjrasche/HerbsfestOS
+gh secret set GITOPS_APP_PRIVATE_KEY --repo tjrasche/HerbsfestOS < /path/to/app-private-key.pem
+```
+
+Do not put the private key in this repository. Once those secrets are configured,
+push to `main` or run the app's `CI` workflow manually. Authentication and
+dispatch use [GitHub's App token action](https://github.com/actions/create-github-app-token)
+and [workflow dispatch API](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event).
 
 ### Host-side deployment tools
 
