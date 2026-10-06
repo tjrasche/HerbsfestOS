@@ -7,6 +7,8 @@ KIND ?= kind
 KUBECTL ?= kubectl
 DOCKER ?= docker
 KIND_CLUSTER_NAME ?= herbsfest
+PROD_IMAGE ?= artifacts.r-und-t.app/herbsfest
+PROD_PLATFORM ?= linux/amd64
 
 .PHONY: generate fmt test build run migrate render image resolve
 generate:
@@ -41,6 +43,16 @@ resolve: generate
 	@test -n "$(KO_DOCKER_REPO)" || (echo 'Set KO_DOCKER_REPO to your image registry'; exit 1)
 	mkdir -p dist
 	$(KUSTOMIZE) build config/overlays/$(OVERLAY) | $(KO) resolve -f - > dist/$(OVERLAY).yaml
+
+.PHONY: prod-resolve
+prod-resolve: generate
+	@test -s dist/herbsfest-basic-auth.sealed.yaml || (echo 'Run bash scripts/prod.sh seal YOUR_PRODUCTION_CONTEXT first'; exit 1)
+	mkdir -p dist
+	$(KUSTOMIZE) build config/overlays/prod | KO_DOCKER_REPO='$(PROD_IMAGE)' $(KO) resolve --bare --platform='$(PROD_PLATFORM)' -f - > dist/prod-app.yaml
+	cat dist/herbsfest-basic-auth.sealed.yaml > dist/prod.yaml.tmp
+	printf '\n---\n' >> dist/prod.yaml.tmp
+	cat dist/prod-app.yaml >> dist/prod.yaml.tmp
+	mv dist/prod.yaml.tmp dist/prod.yaml
 
 .PHONY: kind-up dev-deploy dev dev-forward kind-down
 kind-up:

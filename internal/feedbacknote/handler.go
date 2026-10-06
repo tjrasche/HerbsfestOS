@@ -30,7 +30,7 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	title := r.PostForm.Get("title")
 	if err := h.service.Create(r.Context(), title); err != nil {
 		if errors.Is(err, ErrInvalidTitle) {
-			h.show(w, r, title, err.Error(), http.StatusUnprocessableEntity)
+			h.show(w, r, title, "Bitte gib eine Notiz mit 1 bis 200 Zeichen ein.", http.StatusUnprocessableEntity)
 			return
 		}
 		slog.Error("create note", "error", err)

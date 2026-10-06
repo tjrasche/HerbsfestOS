@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: herbsfest
+  annotations:
+    cert-manager.io/cluster-issuer: bunnycdn-issuer
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: rundt-herbsfest-private-cache@kubernetescrd,rundt-herbsfest-basic-auth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: verwaltung.ringinger-herbstfest.de
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: herbsfest
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - verwaltung.ringinger-herbstfest.de
+      secretName: herbsfest-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: herbsfest-http
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: rundt-herbsfest-https-redirect@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: verwaltung.ringinger-herbstfest.de
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: herbsfest
+                port:
+                  name: http

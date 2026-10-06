@@ -1,0 +1,81 @@
+package ui
+
+templ PageHeader(eyebrow, title, description string) {
+	<header class="page-header">
+		<div class="page-header__copy">
+			<p class="eyebrow"><span class="brand-dot" aria-hidden="true"></span>{ eyebrow }</p>
+			<h1>{ title }</h1>
+			<p class="page-description">{ description }</p>
+		</div>
+		<div class="page-header__actions">
+			{ children... }
+		</div>
+	</header>
+}
+
+templ Button(label string, icon IconName, variant string, attributes templ.Attributes) {
+	<button class={ "button button--" + variant } { attributes... }>
+		if icon != "" {
+			@Icon(icon)
+		}
+		<span>{ label }</span>
+	</button>
+}
+
+templ ButtonLink(label, href string, icon IconName, variant string) {
+	<a class={ "button button--" + variant } href={ templ.URL(href) }>
+		if icon != "" {
+			@Icon(icon)
+		}
+		<span>{ label }</span>
+	</a>
+}
+
+templ Badge(label, tone string) {
+	<span class={ "badge badge--" + tone }><span class="badge__dot" aria-hidden="true"></span>{ label }</span>
+}
+
+templ Card(title, description string) {
+	<section class="card">
+		<header class="card__header">
+			<h2>{ title }</h2>
+			if description != "" {
+				<p>{ description }</p>
+			}
+		</header>
+		<div class="card__body">
+			{ children... }
+		</div>
+	</section>
+}
+
+templ TextField(name, label, value, placeholder, hint, message string, attributes templ.Attributes) {
+	<div class="field">
+		<label class="field__label" for={ name }>{ label }</label>
+		<input class="field__input" id={ name } name={ name } value={ value } placeholder={ placeholder } aria-invalid={ message != "" } aria-describedby={ name + "-hint" } { attributes... }/>
+		if message != "" {
+			<p class="field__error" id={ name + "-hint" } role="alert">
+				@Icon(IconInfo)
+				<span>{ message }</span>
+			</p>
+		} else {
+			<p class="field__hint" id={ name + "-hint" }>{ hint }</p>
+		}
+	</div>
+}
+
+templ Notice(title, description, tone string) {
+	<div class={ "notice notice--" + tone }>
+		@Icon(IconInfo)
+		<div><strong>{ title }</strong><p>{ description }</p></div>
+	</div>
+}
+
+templ EmptyState(title, description string) {
+	<div class="empty-state">
+		<div class="empty-state__icon">@Icon(IconNote)</div>
+		<h3>{ title }</h3>
+		<p>{ description }</p>
+		{ children... }
+	</div>
+}

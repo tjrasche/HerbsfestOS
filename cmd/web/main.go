@@ -48,6 +48,7 @@ func run() error {
 
 	mux := http.NewServeMux()
 	feedbacknote.NewHandler(feedbacknote.NewService(feedbacknote.NewRepository(db))).Register(mux)
+	ui.Register(mux)
 	mux.Handle("GET /static/", ui.Assets())
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

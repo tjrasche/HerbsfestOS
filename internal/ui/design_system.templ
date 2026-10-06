@@ -1,0 +1,64 @@
+package ui
+
+templ DesignSystem() {
+	@Layout("Designsystem · HerbstfestOS", "design-system") {
+		@PageHeader("Unser visueller Baukasten", "Ein Fest. Ein gemeinsamer Look.", "Die vertrauten Farben und das Maskottchen unseres Herbstfests. Eine klare, moderne Grundlage für alles, was wir hier gemeinsam gestalten.") {
+			@ButtonLink("Zum Feedback", "/", IconArrowRight, "secondary")
+		}
+		<div class="design-system">
+			<section id="brand" class="design-section" aria-labelledby="colors-title">
+				<div class="section-heading"><div><p class="section-kicker">01 / Identität</p><h2 id="colors-title">Unsere Farben. Neu zusammengedacht.</h2><p>Fest-Blau und ein Hauch Orange. Dazu ruhige, helle Flächen.</p></div></div>
+				<div class="swatch-grid">
+					@ColorSwatch("Fest-Blau", "brand", "#1565C0", "blue")
+					@ColorSwatch("Lebendiges Blau", "brand-hover", "#2D84E8", "bright")
+					@ColorSwatch("Tiefes Blau", "brand-deep", "#0F4787", "deep")
+					@ColorSwatch("Fest-Orange", "accent", "#FF5722", "orange")
+					@ColorSwatch("Tinte", "ink", "#172B45", "ink")
+					@ColorSwatch("Leinwand", "canvas", "#F5F7FB", "canvas")
+				</div>
+				<div class="brand-note"><img src="/static/brand/mascot.svg" width="64" height="64" alt="Maskottchen des Ringinger Herbstfests"/><div><strong>Unser Original. Mit einem neuen Zuhause.</strong><p>Das vertraute Maskottchen bleibt unverändert. Die Oberfläche darum wird klarer, leichter und moderner.</p></div></div>
+			</section>
+			<section id="typography" class="design-section" aria-labelledby="type-title">
+				<div class="section-heading"><div><p class="section-kicker">02 / Typografie</p><h2 id="type-title">Klar in der Sache. Freundlich im Ton.</h2><p>Source Sans 3 — auch auf unserer Fest-Website zu Hause.</p></div></div>
+				<div class="type-specimen card"><div><span class="specimen-label">Überschrift</span><p class="type-specimen__heading">Mit Herz organisiert.</p></div><div><span class="specimen-label">Fließtext</span><p class="type-specimen__body">Ein gutes Fest beginnt mit einem guten Miteinander. Wir halten Ideen fest, schaffen Überblick und machen die Organisation ein Stück leichter.</p></div><div><span class="specimen-label">Detail & Beschriftung</span><p class="eyebrow">Kleine Dinge machen den Unterschied</p></div></div>
+			</section>
+			<section class="design-section" aria-labelledby="components-title">
+				<div class="section-heading"><div><p class="section-kicker">03 / Komponenten</p><h2 id="components-title">Weniger neu bauen. Mehr zusammenbringen.</h2><p>Wiederverwendbare Bausteine für die nächsten Bereiche unserer App.</p></div></div>
+				<div class="component-grid">
+					@Card("Buttons & Links", "Eine klare Hauptaktion. Ruhige Alternativen.") {
+						<div class="component-example">
+							@ButtonLink("Primäre Aktion", "#fields", IconPlus, "primary")
+							@ButtonLink("Sekundäre Aktion", "#brand", IconArrowRight, "secondary")
+							@ButtonLink("Dezenter Link", "#typography", IconExternal, "quiet")
+							@Button("Nicht verfügbar", IconCheck, "primary", templ.Attributes{"type": "button", "disabled": true})
+						</div>
+					}
+					@Card("Badges", "Kleine Hinweise, die sich schnell erfassen lassen.") {
+						<div class="component-example">@Badge("Information", "brand") @Badge("Erledigt", "success") @Badge("Hinweis", "warning") @Badge("Entwurf", "neutral")</div>
+						<p class="demo-caption">Beispiele für künftige Bereiche. Feedbackpunkte haben bisher keinen Status.</p>
+					}
+					<div id="fields">
+						@Card("Formularfelder", "Sichtbare Labels. Verständliche Hinweise.") {
+							<form class="component-form" method="get" action="/design-system#fields">
+								@TextField("example", "Beispielnotiz", "", "Eine Idee für unser Fest …", "Dieses Feld zeigt die Standarddarstellung.", "", templ.Attributes{"required": true, "maxlength": "200"})
+								@Button("Beispiel prüfen", IconCheck, "secondary", templ.Attributes{"type": "submit"})
+							</form>
+							<div class="demo-divider"></div>
+							@TextField("example-error", "Feld mit Fehlerhinweis", "", "Deine Rückmeldung", "", "Bitte fülle dieses Feld aus.", templ.Attributes{})
+						}
+					</div>
+					@Card("Hinweise & leere Zustände", "Die nächste sinnvolle Aktion ist immer sichtbar.") {
+						@Notice("Gut zu wissen", "Eine gemeinsame Gestaltung macht neue Bereiche sofort vertraut.", "info")
+						@EmptyState("Hier ist Platz für gute Ideen.", "Ein leerer Zustand erklärt, was hier entstehen kann.") {
+							@ButtonLink("Feedback festhalten", "/#title", IconPlus, "secondary")
+						}
+					}
+				</div>
+			</section>
+		</div>
+	}
+}
+
+templ ColorSwatch(name, token, value, tone string) {
+	<div class="swatch"><div class={ "swatch__color swatch--" + tone }><span>{ value }</span></div><div class="swatch__description"><strong>{ name }</strong><span>{ "--color-" + token }</span></div></div>
+}

@@ -1,33 +1,67 @@
 package feedbacknote
 
-import "github.com/tjrasche/HerbsfestOS/internal/ui"
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/tjrasche/HerbsfestOS/internal/ui"
+)
 
 templ Page(notes []FeedbackNote, title, message string) {
-	@ui.Layout("HerbsfestOS") {
+	@ui.Layout("Feedback · HerbstfestOS", "feedback") {
 		@Content(notes, title, message)
 	}
 }
 
 templ Content(notes []FeedbackNote, title, message string) {
 	<section id="notes">
-		<h1>HerbsfestOS</h1>
-		<h2>Feedback notes</h2>
-		<form method="post" action="/feedback-notes" hx-post="/feedback-notes" hx-target="#notes" hx-swap="outerHTML" hx-disabled-elt="find button" hx-sync="this:drop">
-			<label for="title">Title</label>
-			<input id="title" name="title" value={ title } required maxlength="200" autocomplete="off"/>
-			<button type="submit">Add feedback note</button>
-		</form>
-		if message != "" {
-			<p role="alert">{ message }</p>
+		@ui.PageHeader("Zusammen wird’s besser", "Feedback fürs nächste Fest.", "Gute Ideen verdienen einen Platz. Sammeln wir, was wir beim nächsten Herbstfest noch besser machen können.") {
+			@ui.ButtonLink("Feedback festhalten", "#title", ui.IconPlus, "primary")
 		}
-		if len(notes) == 0 {
-			<p>No feedback notes yet.</p>
-		} else {
-			<ul>
-				for _, note := range notes {
-					<li>{ note.Title }</li>
+		<div class="feedback-layout">
+			<div class="feedback-collection">
+				<div class="section-heading">
+					<div><h2>Gesammelte Rückmeldungen <span class="count-badge">{ strconv.Itoa(len(notes)) }</span></h2><p>Alles an einem Ort. Nichts geht verloren.</p></div>
+					<span class="sort-label">Neueste zuerst</span>
+				</div>
+				if len(notes) == 0 {
+					<div class="card collection-empty">
+						@ui.EmptyState("Der erste Gedanke zählt.", "Was ist dir beim Fest aufgefallen? Halte deine erste Rückmeldung fest und mach den Anfang.") {
+							@ui.ButtonLink("Erste Notiz schreiben", "#title", ui.IconArrowRight, "secondary")
+						}
+					</div>
+				} else {
+					<ol class="note-list" aria-label="Feedbackpunkte">
+						for i, note := range notes {
+							<li class="note-row">
+								<span class="note-row__number" aria-hidden="true">{ fmt.Sprintf("%02d", i + 1) }</span>
+								<div class="note-row__content">
+									<h3>{ note.Title }</h3>
+									<p>
+										Feedbackpunkt<span aria-hidden="true">·</span>
+										if !note.CreatedAt.IsZero() {
+											<time datetime={ note.CreatedAt.Format("2006-01-02") }>{ note.CreatedAt.Format("02.01.2006") }</time>
+										} else {
+											<span>Soeben erfasst</span>
+										}
+									</p>
+								</div>
+							</li>
+						}
+					</ol>
 				}
-			</ul>
-		}
+				<p class="collection-footnote">@ui.Icon(ui.IconHeart) Jede Rückmeldung hilft, unser Fest ein Stück besser zu machen.</p>
+			</div>
+			<aside class="feedback-aside" aria-label="Feedback festhalten">
+				@ui.Card("Was nehmen wir mit?", "Ein Gedanke, eine Notiz. Für alles, was wir uns fürs nächste Mal merken möchten.") {
+					<form class="note-form" method="post" action="/feedback-notes" hx-post="/feedback-notes" hx-target="#notes" hx-swap="outerHTML" hx-disabled-elt="find button" hx-sync="this:drop">
+						@ui.TextField("title", "Deine Rückmeldung", title, "z. B. Mehr Wasserstationen am Festplatz", "Kurz und konkret. Maximal 200 Zeichen.", message, templ.Attributes{"required": true, "maxlength": "200", "autocomplete": "off"})
+						@ui.Button("Notiz speichern", ui.IconPlus, "primary", templ.Attributes{"type": "submit"})
+						<span class="form-progress" role="status">Wird gespeichert …</span>
+					</form>
+				}
+				<div class="writing-tip"><span class="writing-tip__icon">@ui.Icon(ui.IconInfo)</span><div><strong>Kleine Notiz, große Wirkung.</strong><p>Beschreibe einen konkreten Punkt. So können wir ihn später gemeinsam anpacken.</p></div></div>
+			</aside>
+		</div>
 	</section>
 }

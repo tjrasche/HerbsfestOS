@@ -1,0 +1,18 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: herbsfest-postgres
+spec:
+  instances: 1
+  enableSuperuserAccess: false
+  bootstrap:
+    initdb:
+      encoding: UTF8
+      dataChecksums: true
+  storage:
+    size: 5Gi
+    storageClass: longhorn
+  resources:
+    limits:
+      cpu: "1"
+      memory: 1Gi

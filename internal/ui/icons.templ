@@ -1,0 +1,42 @@
+package ui
+
+type IconName string
+
+const (
+	IconFeedback   IconName = "feedback"
+	IconPalette    IconName = "palette"
+	IconPlus       IconName = "plus"
+	IconArrowRight IconName = "arrow-right"
+	IconExternal   IconName = "external"
+	IconCheck      IconName = "check"
+	IconInfo       IconName = "info"
+	IconNote       IconName = "note"
+	IconHeart      IconName = "heart"
+)
+
+templ Icon(name IconName) {
+	<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+		switch name {
+			case IconFeedback:
+				<path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-2 2V11.5A8.5 8.5 0 0 1 10.5 3h2a8.5 8.5 0 0 1 8.5 8.5Z"></path>
+				<path d="M7 9h9M7 13h6"></path>
+			case IconPalette:
+				<path d="M12 3a9 9 0 1 0 0 18h1a2.5 2.5 0 0 0 1.8-4.2 1.5 1.5 0 0 1 1.1-2.6H18a3 3 0 0 0 3-3C21 6.7 17 3 12 3Z"></path>
+				<circle cx="7.5" cy="10" r=".6"></circle><circle cx="11" cy="7" r=".6"></circle><circle cx="15.5" cy="8" r=".6"></circle>
+			case IconPlus:
+				<path d="M12 5v14M5 12h14"></path>
+			case IconArrowRight:
+				<path d="M5 12h14m-6-6 6 6-6 6"></path>
+			case IconExternal:
+				<path d="M7 17 17 7M7 7h10v10"></path>
+			case IconCheck:
+				<path d="m5 12 4 4L19 6"></path>
+			case IconInfo:
+				<circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 7h.01"></path>
+			case IconNote:
+				<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Zm0 0v6h6M8 13h8M8 17h5"></path>
+			case IconHeart:
+				<path d="M20.5 4.5a5 5 0 0 0-7 0L12 6l-1.5-1.5a5 5 0 0 0-7 7L12 20l8.5-8.5a5 5 0 0 0 0-7Z"></path>
+		}
+	</svg>
+}
