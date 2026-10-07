@@ -24,17 +24,18 @@ kube=(kubectl --context "$context")
 
 case "$action" in
   register)
-    # Run only after the auth manifests are published to the watched main branch.
+    # Compatibility alias: the central inventory now registers every app.
     require kubeseal
     "${kube[@]}" -n flux-system get gitrepository herbsfest >/dev/null
     kubeseal --context "$context" --controller-name=sealed-secrets-controller \
       --controller-namespace=sealed-secrets --validate \
       < config/zitadel/sealedsecret-bootstrap.yaml
-    "${kube[@]}" apply -f config/flux/zitadel.yaml
+    bash scripts/reconcile-gitops.sh "$context"
     ;;
   check)
     require flux
     require curl
+    bash scripts/reconcile-gitops.sh "$context"
     flux --context "$context" reconcile kustomization rundt-zitadel \
       --namespace flux-system --with-source
     "${kube[@]}" -n rundt wait cluster/zitadel-postgres \

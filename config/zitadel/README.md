@@ -75,38 +75,32 @@ bootstrap admin password in YAML does not rotate an existing user password;
 use the console. Cookie-key rotation should retain the old key as the second
 comma-separated entry during the transition, as documented by the chart.
 
-## Register and verify later
+## Deploy and verify
 
-The existing application Flux Kustomization remains unchanged. The separate
-`config/flux/zitadel.yaml` registers `rundt-zitadel` against the existing
-`herbsfest` GitRepository, with dependencies on this cluster's namespace and
-operators. It is deliberately outside the application's reconciled overlay,
-so committing these files alone does not install ZITADEL.
+The central `config/flux/apps.yaml` inventory owns `rundt-zitadel` alongside
+the festival app. Both use the existing `herbsfest` GitRepository and retain
+this cluster's namespace/operator dependencies. Follow the
+[app inventory guide](../flux/README.md) to point the infra-owned
+`rundt-herbsfest` parent to `config/flux` once. There is no separate auth
+registration manifest to apply.
 
-For lasting GitOps ownership, include this Flux integration manifest in the
-infrastructure repository's OVH app inventory, following its existing
-`rundt-herbsfest` registration. The host `register` action below is an initial
-bootstrap fallback; it does not update the infrastructure inventory.
-
-Before registration, publish the manifests to the GitRepository's watched
-`main` branch and point DNS for `auth.r-und-t.app` to the same
-Traefik origin endpoint as the festival application. For direct ingress access,
-disable BunnyCDN Acceleration for this DNS record; use the cluster
-load-balancer address rather than a resolved CDN edge address. If routing
-through BunnyCDN, configure its custom hostname and edge certificate separately.
-The existing `bunnycdn-issuer` must be able to issue `zitadel-tls` for
-`auth.r-und-t.app`. Then run on the host:
+Publish both the application inventory and the infrastructure entrypoint
+change to their watched `main` branches. The existing wildcard DNS record
+can route `auth.r-und-t.app` to the Traefik endpoint. The
+`bunnycdn-issuer` requests `zitadel-tls` for that hostname. If routing through
+BunnyCDN, its custom hostname and edge certificate need their own configuration.
+Then run on the host:
 
 ```sh
-bash scripts/zitadel.sh register YOUR_PRODUCTION_CONTEXT
+bash scripts/reconcile-gitops.sh YOUR_PRODUCTION_CONTEXT
 bash scripts/zitadel.sh check YOUR_PRODUCTION_CONTEXT
 ```
 
-`register` validates the bootstrap ciphertext against the selected cluster's
-controller before applying the Flux integration manifest.
-`check` reconciles Flux, waits for CNPG, Helm, both Deployments and the
-certificate, and requests OIDC discovery. Open
-`https://auth.r-und-t.app/ui/console` to verify the interactive login
+`check` reconciles the parent inventory and auth child, waits for CNPG, Helm,
+both Deployments and the certificate, and requests OIDC discovery. The old
+`register` script action remains as a compatibility alias: it validates the
+bootstrap ciphertext, then reconciles the central inventory.
+Open `https://auth.r-und-t.app/ui/console` to verify the interactive login
 and forced password change. Before chart upgrades, back up the database and
 review [ZITADEL operations](https://zitadel.com/docs/self-hosting/deploy/kubernetes/operations).
 

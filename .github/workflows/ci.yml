@@ -29,6 +29,7 @@ jobs:
           kustomize build config/overlays/prod > /dev/null
           kustomize build config/overlays/dev > /dev/null
           kustomize build config/overlays/auth-prod > /dev/null
+          kustomize build config/flux > /dev/null
 
   publish:
     needs: test

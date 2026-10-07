@@ -9,8 +9,8 @@ fi
 for tool in kubectl flux; do
   command -v "$tool" >/dev/null || { echo "Required tool missing: $tool" >&2; exit 1; }
 done
-flux --context "$context" -n flux-system reconcile source git herbsfest
-flux --context "$context" -n flux-system reconcile kustomization rundt-herbsfest
+bash "$(dirname -- "${BASH_SOURCE[0]}")/reconcile-gitops.sh" "$context"
+flux --context "$context" -n flux-system reconcile kustomization rundt-herbsfest-web
 kubectl --context "$context" -n rundt wait --for=condition=Ready cluster/herbsfest-postgres --timeout=600s
 kubectl --context "$context" -n rundt rollout status deployment/herbsfest --timeout=600s
 kubectl --context "$context" -n rundt wait --for=condition=Ready certificate/herbsfest-tls --timeout=300s

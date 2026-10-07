@@ -1,5 +1,28 @@
-# Register this separately from the working application Kustomization.
-# The existing `herbsfest` GitRepository is owned by the infrastructure repo.
+# Application inventory reconciled by the infra-owned rundt-herbsfest parent.
+# Add new application Kustomizations here; keep shared operators in k8s-infra.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: rundt-herbsfest-web
+  namespace: flux-system
+spec:
+  interval: 1m
+  retryInterval: 1m
+  timeout: 10m
+  path: ./config/overlays/prod
+  prune: true
+  wait: true
+  dependsOn:
+  - name: rundt-namespace
+  - name: longhorn-config
+  - name: ingress
+  - name: cloudnative-pg-operator
+  - name: sealed-secrets
+  - name: cert-manager-config
+  sourceRef:
+    kind: GitRepository
+    name: herbsfest
+---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:

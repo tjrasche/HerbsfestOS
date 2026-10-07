@@ -23,7 +23,7 @@ config/cnpg/             production CloudNativePG Cluster
 config/overlays/dev/     development namespace and database credentials
 config/overlays/prod/    production ingress, auth, CNPG and deployment patches
 config/overlays/auth-prod/ ZITADEL identity provider and its database
-config/flux/            Flux registration for the identity provider
+config/flux/             central Flux app inventory (web and identity provider)
 config/zitadel/         pinned ZITADEL Helm release, ingress and sealed bootstrap
 config/kind/             local cluster configuration
 scripts/prod.sh          host-side basic-auth credential sealing
@@ -155,8 +155,12 @@ namespace and registry Secret; it does not create or take ownership of them.
 This repository owns the production app manifests, including the sealed
 basic-auth Secret, in `config/overlays/prod`. The infrastructure repository
 registers the public app repository as Flux source `herbsfest`; the existing OVH
-Kustomization `rundt-herbsfest` reconciles this overlay. Both poll every minute.
-The shared namespace, registry pull Secret, and cluster operators stay in infra.
+Kustomization `rundt-herbsfest` reads the central inventory in
+`config/flux/apps.yaml`. It automatically creates `rundt-herbsfest-web` for the
+production web overlay and `rundt-zitadel` for the auth overlay. Each app
+reconciles independently. The shared namespace, registry pull Secret, and
+cluster operators stay in infra. See [the inventory guide](config/flux/README.md)
+for the one-time infrastructure entrypoint change and host reconciliation command.
 
 Every push to `main` runs `.github/workflows/ci.yml`:
 
