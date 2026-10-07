@@ -13,7 +13,7 @@ patches:
 - path: postgres.yaml
 - path: auth.yaml
 images:
-- digest: sha256:1998b10bbec14254d328abaa47459e1096ee9963e3eea59d2d9a1ea4bc4d7406
+- digest: sha256:e555cfd1c32f77d25dbfc67546aea894b71bbdc91371e217d0a0cb5472008fe0
   name: ko://github.com/tjrasche/HerbsfestOS/cmd/web
   newName: artifacts.r-und-t.app/herbsfest
 configMapGenerator:
