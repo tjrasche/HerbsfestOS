@@ -5,7 +5,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: bunnycdn-issuer
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: rundt-herbsfest-private-cache@kubernetescrd,rundt-herbsfest-basic-auth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: rundt-herbsfest-private-cache@kubernetescrd
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   ingressClassName: traefik
