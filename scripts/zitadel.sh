@@ -38,7 +38,7 @@ case "$action" in
     bash scripts/reconcile-gitops.sh "$context"
     flux --context "$context" reconcile kustomization rundt-zitadel \
       --namespace flux-system --with-source
-    "${kube[@]}" -n rundt wait cluster/zitadel-postgres \
+    "${kube[@]}" -n rundt wait clusters.postgresql.cnpg.io/zitadel-postgres \
       --for=condition=Ready --timeout=15m
     "${kube[@]}" -n rundt wait helmrelease/zitadel \
       --for=condition=Ready --timeout=20m

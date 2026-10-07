@@ -11,7 +11,7 @@ for tool in kubectl flux; do
 done
 bash "$(dirname -- "${BASH_SOURCE[0]}")/reconcile-gitops.sh" "$context"
 flux --context "$context" -n flux-system reconcile kustomization rundt-herbsfest-web
-kubectl --context "$context" -n rundt wait --for=condition=Ready cluster/herbsfest-postgres --timeout=600s
+kubectl --context "$context" -n rundt wait --for=condition=Ready clusters.postgresql.cnpg.io/herbsfest-postgres --timeout=600s
 kubectl --context "$context" -n rundt rollout status deployment/herbsfest --timeout=600s
 kubectl --context "$context" -n rundt wait --for=condition=Ready certificate/herbsfest-tls --timeout=300s
 kubectl --context "$context" -n rundt get deployment herbsfest \
