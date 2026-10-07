@@ -1,0 +1,25 @@
+package ui
+
+templ PublicPage() {
+	<!DOCTYPE html>
+	<html lang="de">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>Ringinger Herbstfest</title>
+			<meta name="theme-color" content="#0f4787"/>
+			<link rel="icon" type="image/svg+xml" href="/static/brand/mascot.svg"/>
+			<link rel="stylesheet" href="/static/style.css"/>
+		</head>
+		<body>
+			<main class="main-content">
+				<img src="/static/brand/mascot.svg" width="80" height="80" alt=""/>
+				@PageHeader("Ringinger Herbstfest", "Ein Fest, das verbindet.", "Schön, dass du da bist.")
+				@Card("Gemeinsam feiern.", "Alle Informationen rund um unser Fest findest du auf unserer Fest-Website.") {
+					@ButtonLink("Zur Fest-Website", "https://ringinger-herbstfest.de/", IconExternal, "primary")
+					@ButtonLink("Zum Orga-Workspace", "/", IconArrowRight, "secondary")
+				}
+			</main>
+		</body>
+	</html>
+}

@@ -138,8 +138,12 @@ The app uses the official ZITADEL OIDC library with Authorization Code + PKCE.
 `POST /auth/logout` clears the app session and signs out of ZITADEL. Feedback
 reads/writes and the design-system gallery require the `club-member` role in
 project `394051632024780961`. Being a ZITADEL administrator alone does not grant
-access. Public assets and health probes remain accessible. Expired htmx sessions
-redirect the whole browser to login.
+access. `/public/` is an unauthenticated route group with a minimal landing
+page; `/public` redirects there. Unknown public subpaths return 404 without
+starting login. Register future public domain handlers on the `public` mux in
+`cmd/web/routes.go`, using paths relative to `/public`. Private domain handlers
+stay on the protected mux in `cmd/web/main.go`. Public assets and health probes
+remain accessible. Expired htmx sessions redirect the whole browser to login.
 
 Production configuration sets `AUTH_MODE=oidc`, `ZITADEL_ISSUER`, `APP_BASE_URL`,
 `ZITADEL_CLIENT_ID` and `ZITADEL_PROJECT_ID`. The separately sealed

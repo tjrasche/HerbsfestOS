@@ -61,10 +61,8 @@ func run() error {
 	private := http.NewServeMux()
 	feedbacknote.NewHandler(feedbacknote.NewService(feedbacknote.NewRepository(db))).Register(private)
 	ui.Register(private)
-	mux := http.NewServeMux()
+	mux := newMux(authHandler.Protect(private, ui.AccessDenied()))
 	authHandler.Register(mux)
-	mux.Handle("/", authHandler.Protect(private, ui.AccessDenied()))
-	mux.Handle("GET /static/", ui.Assets())
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
