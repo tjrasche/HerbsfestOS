@@ -33,7 +33,7 @@ spec:
     zitadel:
       masterkeySecretName: zitadel-bootstrap
       configmapConfig:
-        ExternalDomain: auth.herbstfest.r-und-t.app
+        ExternalDomain: auth.r-und-t.app
         ExternalPort: 443
         ExternalSecure: true
         TLS:
@@ -46,7 +46,7 @@ spec:
           Features:
             LoginV2:
               Required: true
-              BaseURI: https://auth.herbstfest.r-und-t.app/ui/v2/login
+              BaseURI: https://auth.r-und-t.app/ui/v2/login
         Database:
           Postgres:
             Host: zitadel-postgres-rw.rundt.svc.cluster.local

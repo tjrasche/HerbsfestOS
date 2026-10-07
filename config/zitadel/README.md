@@ -1,6 +1,6 @@
 # ZITADEL production deployment
 
-ZITADEL will serve `https://auth.herbstfest.r-und-t.app` in namespace `rundt`.
+ZITADEL will serve `https://auth.r-und-t.app` in namespace `rundt`.
 The independent `config/overlays/auth-prod` overlay contains the identity
 provider; the festival application's existing basic auth remains in place.
 Application OIDC integration and account/role mapping are separate work.
@@ -89,9 +89,13 @@ infrastructure repository's OVH app inventory, following its existing
 bootstrap fallback; it does not update the infrastructure inventory.
 
 Before registration, publish the manifests to the GitRepository's watched
-`main` branch and point DNS for `auth.herbstfest.r-und-t.app` to the same
-Traefik endpoint as the festival application. The existing `bunnycdn-issuer`
-must be able to issue `zitadel-tls` for that hostname. Then run on the host:
+`main` branch and point DNS for `auth.r-und-t.app` to the same
+Traefik origin endpoint as the festival application. For direct ingress access,
+disable BunnyCDN Acceleration for this DNS record; use the cluster
+load-balancer address rather than a resolved CDN edge address. If routing
+through BunnyCDN, configure its custom hostname and edge certificate separately.
+The existing `bunnycdn-issuer` must be able to issue `zitadel-tls` for
+`auth.r-und-t.app`. Then run on the host:
 
 ```sh
 bash scripts/zitadel.sh register YOUR_PRODUCTION_CONTEXT
@@ -102,7 +106,7 @@ bash scripts/zitadel.sh check YOUR_PRODUCTION_CONTEXT
 controller before applying the Flux integration manifest.
 `check` reconciles Flux, waits for CNPG, Helm, both Deployments and the
 certificate, and requests OIDC discovery. Open
-`https://auth.herbstfest.r-und-t.app/ui/console` to verify the interactive login
+`https://auth.r-und-t.app/ui/console` to verify the interactive login
 and forced password change. Before chart upgrades, back up the database and
 review [ZITADEL operations](https://zitadel.com/docs/self-hosting/deploy/kubernetes/operations).
 

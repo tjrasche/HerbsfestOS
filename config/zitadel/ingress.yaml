@@ -9,7 +9,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-  - host: auth.herbstfest.r-und-t.app
+  - host: auth.r-und-t.app
     http:
       paths:
       - path: /ui/v2/login
@@ -28,7 +28,7 @@ spec:
               number: 8080
   tls:
   - hosts:
-    - auth.herbstfest.r-und-t.app
+    - auth.r-und-t.app
     secretName: zitadel-tls
 ---
 apiVersion: traefik.io/v1alpha1
@@ -50,7 +50,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-  - host: auth.herbstfest.r-und-t.app
+  - host: auth.r-und-t.app
     http:
       paths:
       - path: /

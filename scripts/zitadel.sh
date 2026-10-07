@@ -46,7 +46,7 @@ case "$action" in
     "${kube[@]}" -n rundt wait certificate/zitadel-tls \
       --for=condition=Ready --timeout=5m
     curl --fail --silent --show-error \
-      https://auth.herbstfest.r-und-t.app/.well-known/openid-configuration
+      https://auth.r-und-t.app/.well-known/openid-configuration
     printf '\n'
     ;;
   password)

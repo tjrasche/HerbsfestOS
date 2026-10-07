@@ -126,7 +126,7 @@ make run
 ## Production configuration
 
 ZITADEL's initial SSO infrastructure is prepared separately at
-`config/overlays/auth-prod`, using `auth.herbstfest.r-und-t.app`. See
+`config/overlays/auth-prod`, using `auth.r-und-t.app`. See
 [the ZITADEL setup guide](config/zitadel/README.md) for DNS, Flux registration,
 bootstrap credentials, and host commands. The festival app keeps its current
 authentication while the identity provider is prepared.
