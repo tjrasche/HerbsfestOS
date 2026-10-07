@@ -13,15 +13,15 @@ patches:
 - path: postgres.yaml
 - path: auth.yaml
 images:
-- digest: sha256:793221ad130b2d878de0de15a2faae69c22e58d645f48acc27dbc83dfbde65a9
+- digest: sha256:cbbb366b539905fbee197a004d3da05bafd965126f1fb0939446b41ab59609d5
   name: ko://github.com/tjrasche/HerbsfestOS/cmd/web
   newName: artifacts.r-und-t.app/herbsfest
 configMapGenerator:
-- name: herbsfest-config
-  behavior: merge
+- behavior: merge
   literals:
   - AUTH_MODE=oidc
   - ZITADEL_ISSUER=https://auth.r-und-t.app
   - APP_BASE_URL=https://herbstfest.r-und-t.app
   - ZITADEL_CLIENT_ID=394051797699788961
   - ZITADEL_PROJECT_ID=394051632024780961
+  name: herbsfest-config
