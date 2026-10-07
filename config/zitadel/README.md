@@ -1,9 +1,12 @@
 # ZITADEL production deployment
 
-ZITADEL will serve `https://auth.r-und-t.app` in namespace `rundt`.
+ZITADEL serves `https://auth.r-und-t.app` in namespace `rundt`.
 The independent `config/overlays/auth-prod` overlay contains the identity
-provider; the festival application's existing basic auth remains in place.
-Application OIDC integration and account/role mapping are separate work.
+provider. The festival app uses OIDC/PKCE and requires the `club-member` role
+in its project; ingress Basic Auth is retired. See the
+[application README](../../README.md#routes-and-authentication) and
+[console setup guide](../../docs/zitadel-app-setup.txt) for login, local
+development and project membership.
 
 The official [ZITADEL Helm chart 10.3.0](https://github.com/zitadel/zitadel-charts/releases/tag/zitadel-10.3.0)
 pins the API and Login UI to `v4.19.2`. It requires Kubernetes 1.30 or newer.

@@ -1,33 +1,36 @@
-# HerbsfestOS
+# HerbstfestOS
 
 Barebones server-rendered Go application for managing a nonprofit festival.
 The first domain is a feedback note: a specific feedback point to track.
-Create and list notes at `/`; htmx updates the page without a full reload.
-The same form works with JavaScript disabled.
+Signed-in festival team members create and list notes at `/`; htmx updates
+the page without a full reload, and the form also works with JavaScript
+disabled. `/public/` is an anonymous landing page.
 
 ## Stack and structure
 
 - Go 1.26+, standard `net/http` routing and cross-origin protection.
 - templ for HTML, self-hosted htmx 2.0.11, plain CSS, embedded assets.
 - GORM with its PostgreSQL driver.
+- ZITADEL OIDC with PKCE for production login and project-role authorization.
 - ko for container builds; Kustomize for Kubernetes configuration.
 
 ```text
-cmd/web/                 dependency wiring, server lifecycle, migration command
-internal/feedbacknote/   entity, service, repository, handler, templates
-internal/database/       database connection and pool
-internal/auth/           OIDC login, encrypted sessions and project-role guard
-internal/ui/             shared layout and embedded frontend assets
-config/app/              application Deployment, Service, configuration
-config/postgres/         plain development Postgres StatefulSet and storage
-config/cnpg/             production CloudNativePG Cluster
-config/overlays/dev/     development namespace and database credentials
-config/overlays/prod/    production ingress, auth, CNPG and deployment patches
+cmd/web/                   server, dependency wiring, public/private routing, migrations
+internal/feedbacknote/     entity, service, repository, handler, templates
+internal/database/         database connection and pool
+internal/auth/             OIDC login, encrypted sessions and project-role guard
+internal/ui/               shared layout, public landing page and embedded assets
+config/app/                application Deployment, Service, configuration
+config/postgres/           plain development Postgres StatefulSet and storage
+config/cnpg/               production CloudNativePG Cluster
+config/overlays/dev/       kind development namespace, credentials and auth bypass
+config/overlays/prod/      web ingress, sealed session key, CNPG and deployment patches
 config/overlays/auth-prod/ ZITADEL identity provider and its database
-config/flux/             central Flux app inventory (web and identity provider)
-config/zitadel/         pinned ZITADEL Helm release, ingress and sealed bootstrap
-config/kind/             local cluster configuration
-scripts/prod.sh          host-side basic-auth credential sealing
+config/flux/               central Flux app inventory (web and identity provider)
+config/zitadel/            pinned ZITADEL Helm release, ingress and sealed bootstrap
+config/kind/               local cluster configuration
+docs/zitadel-app-setup.txt console setup for the application and club-member role
+scripts/                   host checks, reconciliation, sealing and CI publishing
 ```
 
 Add a package under `internal/` for each new domain entity. Keep its service,
@@ -60,6 +63,12 @@ public development credentials. kind's default storage provisioner handles it.
 Postgres is exported as an archive containing only the node's platform, which
 also works with Docker's containerd image store.
 
+Kind deploys the Go app and plain Postgres only. It sets
+`AUTH_MODE=development`: login and role checks are bypassed, and the private
+layout displays “Lokale Entwicklung”. ZITADEL is not deployed into kind.
+Full SSO in the kind Deployment is not configured; see the local OIDC
+instructions below to test the Go app against the production identity provider.
+
 After editing Go, templ, CSS, or configuration, run `make dev-deploy` again.
 The image contains all frontend assets. You may need to restart port forwarding
 when the pod is replaced. Override the cluster name with
@@ -79,6 +88,9 @@ make kind-down         # deletes the local cluster and its database data
 The feedback page uses a shared German application shell with responsive
 navigation. Visit `/design-system` for the live component gallery: colors,
 typography, buttons, badges, cards, form fields, notices, and empty states.
+In OIDC mode, the top bar shows the verified user's name and a POST logout
+button. A signed-in user without the required project role sees a friendly
+403 page with instructions to contact the organizers and sign in again.
 
 Shared templ components live in `internal/ui/components.templ`; icons live in
 `internal/ui/icons.templ`. Wrap a domain page in `ui.Layout(title, activePage)`
@@ -90,7 +102,9 @@ Forms remain usable without JavaScript.
 The footer thanks Rasche & Thalhofer UG (haftungsbeschränkt) for providing free
 hosting. Its locally embedded logo comes from
 [rasche-thalhofer.cloud](https://rasche-thalhofer.cloud/assets/logo.svg.svg),
-and the credit uses that website's blue palette.
+and the credit uses that website's blue palette. The acknowledgement reads
+“Mit freundlicher Unterstützung durch” and “Cloud geschenkt, damit ihr feiern
+könnt.” to make the hosting donation clear.
 
 Color, spacing, radius, and typography tokens are defined in
 `internal/ui/static/style.css`. Blue `#1565c0`, hover blue `#2d84e8`, orange
@@ -127,84 +141,209 @@ make run
 bypasses SSO and labels the session as local development. Running the binary
 without that setting defaults to OIDC and fails startup if configuration is missing.
 
-## Production configuration
+## Routes and authentication
 
-ZITADEL runs separately at `config/overlays/auth-prod`, using `auth.r-und-t.app`.
-See [the infrastructure guide](config/zitadel/README.md) for bootstrap credentials
-and [the application setup guide](docs/zitadel-app-setup.txt) for the console steps.
+The production app is served at <https://herbstfest.r-und-t.app>. ZITADEL's
+issuer is <https://auth.r-und-t.app>; its administrator console is at
+<https://auth.r-und-t.app/ui/console/>.
 
-The app uses the official ZITADEL OIDC library with Authorization Code + PKCE.
-`GET /auth/login` starts login, `GET /auth/callback` verifies the response, and
-`POST /auth/logout` clears the app session and signs out of ZITADEL. Feedback
-reads/writes and the design-system gallery require the `club-member` role in
-project `394051632024780961`. Being a ZITADEL administrator alone does not grant
-access. `/public/` is an unauthenticated route group with a minimal landing
-page; `/public` redirects there. Unknown public subpaths return 404 without
-starting login. Register future public domain handlers on the `public` mux in
-`cmd/web/routes.go`, using paths relative to `/public`. Private domain handlers
-stay on the protected mux in `cmd/web/main.go`. Public assets and health probes
-remain accessible. Expired htmx sessions redirect the whole browser to login.
+| Method | Route | Access and behavior |
+| --- | --- | --- |
+| GET | `/` | Feedback notes; requires the project role `club-member` |
+| POST | `/feedback-notes` | Creates a note; requires the same role |
+| GET | `/design-system` | Component gallery; requires the same role |
+| GET | `/public` | Anonymous redirect to `/public/` |
+| GET | `/public/` | Anonymous festival landing page |
+| GET | `/static/...` | Public embedded CSS, JavaScript, logos and fonts |
+| GET | `/auth/login` | Starts a ZITADEL login |
+| GET | `/auth/callback` | Validates the OIDC response and creates the app session |
+| POST | `/auth/logout` | Clears the app cookie and redirects to ZITADEL logout |
+| GET | `/healthz` | Public process liveness probe |
+| GET | `/readyz` | Public database readiness probe |
 
-Production configuration sets `AUTH_MODE=oidc`, `ZITADEL_ISSUER`, `APP_BASE_URL`,
-`ZITADEL_CLIENT_ID` and `ZITADEL_PROJECT_ID`. The separately sealed
-`herbsfest-auth` Secret supplies `AUTH_SESSION_KEY`: a base64-encoded random
-32-byte key, shared by app replicas. This is a session key, not a client secret;
-the PKCE client has no secret. AES-GCM encrypts and authenticates the host-only,
-Secure, HttpOnly, SameSite=Lax session cookie. Sessions last at most one hour
-and never outlive the ID token. Role changes take effect at the next login or
-session expiry; rotating the session key invalidates existing app sessions.
+`cmd/web/routes.go` mounts a separate public mux under `/public/`, outside the
+auth middleware. Public handlers register relative paths: `/signup` on that
+mux would become `/public/signup`. Register each future public domain handler
+there; keep private handlers on the protected mux in `cmd/web/main.go`. The
+initial public template is `internal/ui/public.templ` and reuses the design
+system components. Unknown public subpaths return 404 without starting login;
+paths such as `/publicity` remain protected. Cross-origin protection still
+applies to the whole server, including future public forms.
 
-Basic Auth stays enabled during the first rollout so the previous image remains
-protected until CI publishes the SSO image. After publishing this change and
-waiting for its image rollout, run on your host:
+### ZITADEL project and membership
+
+The app uses the official ZITADEL OIDC library with Authorization Code + PKCE,
+state and nonce validation, and verified ID tokens/userinfo. The Web/PKCE
+client has no client secret. Its configured public identifiers are:
+
+| Setting | Value |
+| --- | --- |
+| Project ID | `394051632024780961` |
+| Production client ID | `394051797699788961` |
+| Issuer | `https://auth.r-und-t.app` |
+| Redirect URI | `https://herbstfest.r-und-t.app/auth/callback` |
+| Post-logout redirect URI | `https://herbstfest.r-und-t.app/` |
+| Required project role | `club-member` |
+
+Project and application configuration is managed in the ZITADEL console.
+Enable **Assert Roles on Authentication**, create the `club-member` role,
+and explicitly assign it to each festival team member through the project's
+authorizations. Organization/instance administrator status alone does not
+grant app access. The app checks the project-specific roles claim; an
+identically named role in another project does not grant access. See the
+[console setup guide](docs/zitadel-app-setup.txt) for the detailed steps.
+
+Unauthenticated private requests return `303` to `/auth/login`. Expired htmx
+sessions return `401` with `HX-Redirect` so the whole browser goes to login.
+Authenticated users without `club-member` receive `403`; htmx redirects them
+to the full access-denied page. Successful login always returns to `/`.
+
+### Configuration and sessions
+
+Environment variables are read directly; `.env.example` is a reference, not
+an automatically loaded configuration file.
+
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Required PostgreSQL connection string |
+| `HTTP_ADDR` | Listen address; defaults to `:8080` |
+| `AUTH_MODE` | Defaults to `oidc`; `development` explicitly bypasses auth |
+| `ZITADEL_ISSUER` | OIDC issuer origin |
+| `APP_BASE_URL` | Browser-facing app origin, used for callback/logout URLs |
+| `ZITADEL_CLIENT_ID` | Web/PKCE application client ID |
+| `ZITADEL_PROJECT_ID` | Project whose `club-member` role grants access |
+| `AUTH_SESSION_KEY` | Base64-encoded random 32-byte app session key |
+
+OIDC mode fails startup if required auth configuration is missing. Origins
+must use HTTPS; HTTP is allowed only on localhost/loopback for local tests.
+The migration command exits before initializing authentication.
+
+The production ConfigMap contains the public OIDC settings. The separately
+sealed `rundt/herbsfest-auth` Secret supplies `AUTH_SESSION_KEY` to the web
+container only. This key is separate from ZITADEL's own secrets and shared by
+app replicas. AES-GCM encrypts and authenticates the host-only, Secure,
+HttpOnly, SameSite=Lax session cookie; local HTTP uses a non-Secure cookie.
+Sessions last at most one hour and never outlive the ID token. Role changes
+take effect at the next login or session expiry. Rotating the session key
+invalidates existing app sessions.
+
+### Test SSO locally
+
+Create a separate Web/PKCE client in the same project with these settings:
+
+- Redirect URI: `http://localhost:8080/auth/callback`.
+- Post-logout redirect URI: `http://localhost:8080/`.
+- Development mode enabled for this local client only.
+
+Keep the production client's development mode disabled. With kind's Postgres
+port-forwarded as described above, run the Go app directly:
 
 ```sh
-bash scripts/check-prod.sh YOUR_PRODUCTION_CONTEXT
-bash scripts/enable-sso.sh YOUR_PRODUCTION_CONTEXT
+export DATABASE_URL='postgres://herbsfest:herbsfest@localhost:5432/herbsfest?sslmode=disable'
+export AUTH_MODE=oidc
+export ZITADEL_ISSUER=https://auth.r-und-t.app
+export APP_BASE_URL=http://localhost:8080
+export ZITADEL_CLIENT_ID=YOUR_LOCAL_CLIENT_ID
+export ZITADEL_PROJECT_ID=394051632024780961
+export AUTH_SESSION_KEY="$(openssl rand -base64 32)"
+make run
 ```
 
-The second script checks login configuration and the feedback/design-system
-guards through a temporary local port forward. Only after those pass does it
-prepare removal of Basic Auth in `config/overlays/prod/ingress.yaml`. Review,
-commit and push that change; Flux then exposes the SSO login. The script does
-not apply cluster changes or publish commits. Keep the inactive Basic Auth
-Secret and middleware for rollback; reattach the middleware before reverting
-to an image without SSO.
+Use your local client ID and a user assigned `club-member` in the project.
+`make run` respects the explicit OIDC mode. These shell exports configure the
+local Go process; they do not change the kind Deployment. To run SSO inside
+kind, its dev ConfigMap would need OIDC settings and its Deployment a local
+session-key Secret reference; those are not part of the default dev overlay.
+
+## Production configuration
 
 The prod overlay follows the existing apps in
 [k8s-infra](https://github.com/rasche-thalhofer/k8s-infra/):
 
 - Existing namespace `rundt` and image pull Secret `oci-registry-cred`.
 - Image repository `artifacts.r-und-t.app/herbsfest`, built by ko.
-- Traefik serves `https://herbstfest.r-und-t.app`; HTTP redirects
-  to HTTPS before authentication. Basic Auth remains active until the verified SSO cutover described above.
-- cert-manager issues `herbsfest-tls` using `bunnycdn-issuer`. The `r-und-t.app` DNS
-  zone must be accessible to that issuer's Bunny DNS credentials.
-- A single CNPG instance with 5Gi Longhorn storage, matching the small apps in
-  the infrastructure repo. CNPG creates `herbsfest-postgres-app`; the app and
-  migration container read its `uri` key. This is not an HA database setup.
-- Traefik reads bcrypt credentials from `herbsfest-basic-auth`, removes the
-  Authorization header before forwarding, and sends `Cache-Control: private, no-store`.
+- Traefik serves `https://herbstfest.r-und-t.app`, redirects HTTP to HTTPS,
+  and sends `Cache-Control: private, no-store`.
+- cert-manager uses `bunnycdn-issuer` for `herbsfest-tls` and `zitadel-tls`.
+  The configured app and auth hostnames are `herbstfest.r-und-t.app` and
+  `auth.r-und-t.app`, using the existing `*.r-und-t.app` DNS setup.
+- The app uses one CNPG instance with 5Gi Longhorn storage. CNPG creates
+  `herbsfest-postgres-app`; the web and migration containers read its `uri`
+  key. This is not an HA database setup.
 
 The cluster needs Traefik, cert-manager, CloudNativePG, Sealed Secrets, and
 Longhorn installed by the infrastructure repository. The overlay reuses its
-namespace and registry Secret; it does not create or take ownership of them.
+namespace and registry Secret; it does not take ownership of them.
+
+ZITADEL is deployed independently through `config/overlays/auth-prod`: the
+official Helm chart is pinned to `10.3.0`, with API and Login V2 images pinned
+to `v4.19.2`. It uses one API replica, one Login UI replica, and its own
+PostgreSQL 17.11 CNPG instance with 5Gi Longhorn storage. Traefik terminates
+HTTPS and forwards h2c to the API on port 8080; `/ui/v2/login` routes to the
+Login UI on port 3000. The chart manages the Login UI system user and keys.
+
+`rundt/zitadel-bootstrap` is sealed separately and contains the masterkey,
+initial administrator password and Login UI cookie secret. The bootstrap
+administrator is `t@rasche-thalhofer.cloud`, with a required password change
+on first login. Self-registration is disabled in the bootstrap configuration.
+These bootstrap settings do not update existing accounts or policies when
+edited later; manage those through the console. See the
+[ZITADEL infrastructure guide](config/zitadel/README.md) for secrets, database
+TLS, chart operations and recovery. Both databases have Flux pruning disabled;
+backups and high availability are not configured.
+
+### Basic Auth retirement
+
+Production ingress now uses app-level ZITADEL SSO. Basic Auth has been removed
+from its middleware chain, allowing `/public/` and the login endpoints to be
+accessed anonymously. The private-cache middleware remains attached.
+
+The Basic Auth middleware and sealed Secret remain as inactive rollback
+resources. Reattach `rundt-herbsfest-basic-auth@kubernetescrd` before reverting
+to an image without SSO; doing so also protects public routes.
+`scripts/enable-sso.sh` is the host-side cutover check: it waits for rollout,
+verifies private-route guards and the production PKCE configuration through
+a temporary port forward, then removes Basic Auth from the local ingress
+file if still present. With the current ingress, it verifies the deployment
+without changing the file. It neither applies cluster changes nor publishes
+commits. The normal SSO cutover has already been completed.
 
 ### GitOps deployment
 
 This repository owns the production app manifests, including the sealed
-session key and Basic Auth Secret, in `config/overlays/prod`. The infrastructure repository
-registers the public app repository as Flux source `herbsfest`; the existing OVH
+session key and inactive Basic Auth Secret, in `config/overlays/prod`.
+The infrastructure repository registers the public app repository as Flux source `herbsfest`; the existing OVH
 Kustomization `rundt-herbsfest` reads the central inventory in
 `config/flux/apps.yaml`. It automatically creates `rundt-herbsfest-web` for the
 production web overlay and `rundt-zitadel` for the auth overlay. Each app
-reconciles independently. The shared namespace, registry pull Secret, and
-cluster operators stay in infra. See [the inventory guide](config/flux/README.md)
-for the one-time infrastructure entrypoint change and host reconciliation command.
+reconciles independently. The ownership chain is:
+
+```text
+k8s-infra: GitRepository herbsfest (this repository's main branch)
+           rundt-herbsfest -> ./config/flux/apps.yaml
+                               |- rundt-herbsfest-web -> ./config/overlays/prod
+                               `- rundt-zitadel       -> ./config/overlays/auth-prod
+```
+
+All these Flux objects live in namespace `flux-system`. The exact parent name
+is `rundt-herbsfest`, not `rundt-herbstfest`. The cluster-wide bootstrap
+Kustomization `flux-system` retains its existing name and belongs to infra.
+
+The parent applies the inventory with `wait: false` and `prune: false`; each
+child prunes its own application resources and has its own readiness checks.
+Removing a child entry does not automatically uninstall it. The database
+Clusters retain explicit pruning protection. The children have infrastructure
+dependencies, without depending on their parent and creating a readiness cycle.
+
+The shared namespace, registry pull Secret, and cluster operators stay in
+infra. See [the inventory guide](config/flux/README.md) for the one-time
+infrastructure entrypoint change and host reconciliation command.
 
 Every push to `main` runs `.github/workflows/ci.yml`:
 
-1. Generate templates, run Go tests and vet, and check generated files are committed.
+1. Generate templates, run Go tests and vet, check generated files are committed,
+   test the image-digest publisher, and render the dev, web prod, auth prod and
+   central Flux overlays.
 2. Build with ko for `linux/amd64` and push to `artifacts.r-und-t.app/herbsfest`,
    tagged with the source commit SHA.
 3. Commit the published image digest into the production Kustomize overlay.
@@ -223,8 +362,7 @@ No GitHub App or cross-repository workflow dispatch is needed. GitHub suppresses
 new workflow runs for token-generated pushes; the commit also includes `[skip ci]`.
 Repository rules must allow the Actions bot to push the digest update to `main`.
 
-Builds queue without cancellation (up to GitHub's 100 pending-run limit). Each
-revision publishes an image, but only a build whose source SHA still matches
+Builds queue without cancellation. Each revision publishes an image, but only a build whose source SHA still matches
 `main` can push a deployment update. A newer commit winning that race prevents
 an older build from replacing production. CI success confirms publishing and
 the Git update; Flux readiness is checked separately.
@@ -240,22 +378,71 @@ are not configured yet.
 
 ### Host-side production tools
 
-Use `scripts/check-prod.sh` on your host to reconcile and check the deployment:
+Run these from the repository on a host with your kubeconfig available. The
+examples use context `default`; replace it if your production context differs.
+The scripts always use the supplied context explicitly.
 
 ```sh
-bash scripts/check-prod.sh YOUR_PRODUCTION_CONTEXT
+# Reconcile the source and central application inventory.
+bash scripts/reconcile-gitops.sh default
+
+# Reconcile and check the app database, Deployment and TLS certificate.
+bash scripts/check-prod.sh default
+
+# Reconcile and check ZITADEL's database, Helm release, API/Login UI and TLS.
+bash scripts/zitadel.sh check default
+
+# Verify the deployed app's guards and PKCE settings; Basic Auth is already off.
+bash scripts/enable-sso.sh default
 ```
 
-This needs `flux` and `kubectl` and checks CNPG, the Deployment, and the TLS
-certificate. The source must have been registered by the infra reconciliation.
+The checks require `flux` and `kubectl`; the ZITADEL check also uses `curl`.
+The cutover check uses `kubectl`, `curl` and Python 3. The source and parent
+inventory must have been registered by infra first. For direct Flux commands:
+
+```sh
+flux --context default reconcile kustomization rundt-herbsfest -n flux-system --with-source
+flux --context default reconcile kustomization rundt-herbsfest-web -n flux-system
+flux --context default reconcile kustomization rundt-zitadel -n flux-system
+```
+
+Both database checks use the fully qualified `clusters.postgresql.cnpg.io`
+resource. Plain `cluster/NAME` can select the OVH operator's
+`clusters.kube.ovh.edixos.io` and report NotFound for a database that exists.
+To inspect the correct resources:
+
+```sh
+kubectl --context default -n rundt get clusters.postgresql.cnpg.io herbsfest-postgres zitadel-postgres
+```
+
+To retrieve the initial ZITADEL administrator password privately on the host
+(requires `kubectl` and Python 3):
+
+```sh
+bash scripts/zitadel.sh password default
+```
+
+This prints only the bootstrap password. After changing it in the console,
+the Secret does not reflect the current account password. To reseal the
+existing bootstrap values with the cluster's current public certificate
+(requires `kubeseal`):
+
+```sh
+bash scripts/zitadel.sh reseal default
+```
+
+Resealing preserves the masterkey and writes only ciphertext. Commit the
+updated `config/zitadel/sealedsecret-bootstrap.yaml`. Preserve the masterkey
+for the lifetime of the identity database and store recovery material
+securely alongside database and Sealed Secrets controller backups.
 
 To rotate the fallback Basic Auth credentials, install `kubeseal` and Apache `htpasswd`.
 On macOS, `brew install kubeseal httpd` provides them; add
 `$(brew --prefix httpd)/bin` to `PATH` if needed. Run on your host:
 
 ```sh
-bash scripts/prod.sh cert YOUR_PRODUCTION_CONTEXT
-bash scripts/prod.sh seal YOUR_PRODUCTION_CONTEXT
+bash scripts/prod.sh cert default
+bash scripts/prod.sh seal default
 ```
 
 The seal command prompts for the password for `mvr`, fetches the public
@@ -268,14 +455,15 @@ never reach disk. The ciphertext is scoped to `rundt/herbsfest-basic-auth`.
 `make render OVERLAY=prod` renders the complete app configuration, including the
 committed digest and SealedSecret. Development still uses ko to build local images.
 
-Before SSO cutover, an unauthenticated HTTPS request returns `401` with a
-Basic Auth challenge. After cutover, it returns `303` to `/auth/login`, which
-redirects to ZITADEL. HTTP continues to redirect to HTTPS:
+Expected browser-facing behavior after the corresponding app image rolls out:
 
 ```sh
-curl -I http://herbstfest.r-und-t.app/
-curl -I https://herbstfest.r-und-t.app/
-curl -I https://herbstfest.r-und-t.app/auth/login
+curl -I http://herbstfest.r-und-t.app/              # redirect to HTTPS
+curl -I https://herbstfest.r-und-t.app/             # 303 to /auth/login
+curl -I https://herbstfest.r-und-t.app/auth/login   # 302 to ZITADEL
+curl -I https://herbstfest.r-und-t.app/public/      # 200 without login
+curl -I https://herbstfest.r-und-t.app/public/missing # 404 without login
+curl --fail https://auth.r-und-t.app/.well-known/openid-configuration
 ```
 
 The migration command uses GORM `AutoMigrate` for the initial scaffold and runs
@@ -290,3 +478,6 @@ making destructive schema changes or scaling concurrent schema-changing rolls.
 - [GORM PostgreSQL setup](https://gorm.io/docs/connecting_to_the_database.html)
 - [ko configuration and kind integration](https://ko.build/configuration/)
 - [CNPG application connection Secrets](https://cloudnative-pg.io/documentation/1.26/applications/)
+- [ZITADEL application console setup](docs/zitadel-app-setup.txt)
+- [ZITADEL Kubernetes operations and bootstrap secrets](config/zitadel/README.md)
+- [Flux application inventory and ownership](config/flux/README.md)
