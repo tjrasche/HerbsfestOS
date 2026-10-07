@@ -1,0 +1,57 @@
+ZITADEL console setup for HerbsfestOS
+
+1. Sign in at https://auth.r-und-t.app/ui/console/ and select the Herbstfest
+   organization.
+
+2. Under Projects, create a project named HerbsfestOS. Note its Project ID.
+
+3. In that project, create an application:
+   Name: HerbsfestOS Web
+   Type: Web
+   Authentication method: PKCE (no client secret)
+   Redirect URI: https://herbstfest.r-und-t.app/auth/callback
+   Post-logout redirect URI: https://herbstfest.r-und-t.app/
+   Development mode: off for this production client
+
+   Save the application and note its Client ID. Both IDs are public and can
+   be shared with the coding agent. No admin password, API key or token is needed.
+
+4. For explicit project membership (recommended):
+   - Add a project role with Key "club-member" and Display Name "Festival-Team".
+   - In the project's general settings, enable "Assert Roles on Authentication".
+   - Under the project's authorizations, add your own user with the club-member role.
+     Organization/instance administrator status does not automatically grant
+     this application role.
+   - Assign the same role to each festival team member who should use the app.
+
+   The Go app enforces the club-member role in this specific project. A role
+   with the same key in another project does not grant access.
+
+5. Configured public IDs:
+   Project ID: 394051632024780961
+   Client ID: 394051797699788961
+
+   Issuer: https://auth.r-und-t.app
+   The app implements GET /auth/login, GET /auth/callback and POST /auth/logout,
+   encrypted session cookies, and protected feedback/design-system routes.
+   The production session key is sealed separately; it is not a client secret.
+
+6. Publish the app implementation and wait for CI/Flux to roll out its image.
+   On your host, run:
+      bash scripts/check-prod.sh YOUR_PRODUCTION_CONTEXT
+      bash scripts/enable-sso.sh YOUR_PRODUCTION_CONTEXT
+   The second script verifies the deployed app and edits the ingress to remove
+   Basic Auth. Review, commit and push that edit, then sign in with an assigned
+   club-member user. See README.md for rollout and rollback details.
+
+Local development can keep using make dev and localhost:8080 without SSO.
+For a real local OIDC test, create a separate Web/PKCE client in this project:
+   Redirect URI: http://localhost:8080/auth/callback
+   Post-logout redirect URI: http://localhost:8080/
+   Development mode: on for this local client only
+Do not enable development mode on the production client.
+
+References:
+https://zitadel.com/docs/examples/login/go
+https://zitadel.com/docs/guides/manage/console/projects-overview
+https://zitadel.com/docs/guides/integrate/retrieve-user-roles

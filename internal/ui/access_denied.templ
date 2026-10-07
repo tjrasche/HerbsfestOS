@@ -1,0 +1,14 @@
+package ui
+
+templ AccessDeniedPage() {
+	@Layout("Noch kein Zugang · HerbstfestOS", "access-denied") {
+		@PageHeader("Ein Platz im Festival-Team", "Du bist angemeldet.", "Für diesen Arbeitsbereich fehlt dir noch die Freigabe.")
+		<div class="card">
+			@EmptyState("Dein Zugang wartet noch.", "Bitte lass dir von der Orga die Rolle club-member im HerbstfestOS-Projekt zuweisen. Danach melde dich erneut an.") {
+				<form method="post" action="/auth/logout">
+					@Button("Abmelden", IconArrowRight, "secondary", templ.Attributes{"type": "submit"})
+				</form>
+			}
+		</div>
+	}
+}

@@ -1,5 +1,7 @@
 package ui
 
+import "github.com/tjrasche/HerbsfestOS/internal/auth"
+
 templ Layout(title, activePage string) {
 	<!DOCTYPE html>
 	<html lang="de">
@@ -41,7 +43,16 @@ templ Layout(title, activePage string) {
 				<div class="workspace">
 					<header class="topbar">
 						<div class="breadcrumb"><span>Organisation</span><span class="breadcrumb__separator" aria-hidden="true">/</span><strong>{ sectionTitle(activePage) }</strong></div>
-						<a class="topbar__link" href="https://ringinger-herbstfest.de/" target="_blank" rel="noopener noreferrer"><span>Ringinger Herbstfest</span>@Icon(IconExternal)<span class="sr-only">(öffnet in einem neuen Tab)</span></a>
+						<div class="topbar__session">
+							if auth.CurrentUser(ctx).Subject != "" {
+								<span class="topbar__user">{ auth.CurrentUser(ctx).DisplayName() }</span>
+								<form method="post" action="/auth/logout"><button class="button button--secondary" type="submit">Abmelden</button></form>
+							} else if auth.CurrentUser(ctx).Development {
+								<span class="topbar__user">Lokale Entwicklung</span>
+							} else {
+								<a class="topbar__link" href="https://ringinger-herbstfest.de/" target="_blank" rel="noopener noreferrer"><span>Ringinger Herbstfest</span>@Icon(IconExternal)<span class="sr-only">(öffnet in einem neuen Tab)</span></a>
+							}
+						</div>
 					</header>
 					<main id="main" class="main-content" tabindex="-1">{ children... }
 </main>

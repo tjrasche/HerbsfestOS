@@ -25,7 +25,7 @@ build: generate
 	CGO_ENABLED=0 go build -o bin/web ./cmd/web
 
 run: generate
-	go run ./cmd/web
+	AUTH_MODE=$${AUTH_MODE:-development} go run ./cmd/web
 
 migrate:
 	go run ./cmd/web -migrate

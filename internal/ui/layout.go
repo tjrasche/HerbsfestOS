@@ -8,6 +8,9 @@ func activePageValue(active bool) string {
 }
 
 func sectionTitle(page string) string {
+	if page == "access-denied" {
+		return "Zugang"
+	}
 	if page == "design-system" {
 		return "Designsystem"
 	}

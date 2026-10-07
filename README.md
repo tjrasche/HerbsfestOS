@@ -16,6 +16,7 @@ The same form works with JavaScript disabled.
 cmd/web/                 dependency wiring, server lifecycle, migration command
 internal/feedbacknote/   entity, service, repository, handler, templates
 internal/database/       database connection and pool
+internal/auth/           OIDC login, encrypted sessions and project-role guard
 internal/ui/             shared layout and embedded frontend assets
 config/app/              application Deployment, Service, configuration
 config/postgres/         plain development Postgres StatefulSet and storage
@@ -122,14 +123,49 @@ make run
 `HTTP_ADDR` defaults to `:8080`. Environment variables are read directly;
 `.env.example` is a reference, not an automatically loaded file.
 `/healthz` checks the HTTP process and `/readyz` checks the database connection.
+`make run` and the kind overlay explicitly set `AUTH_MODE=development`, which
+bypasses SSO and labels the session as local development. Running the binary
+without that setting defaults to OIDC and fails startup if configuration is missing.
 
 ## Production configuration
 
-ZITADEL's initial SSO infrastructure is prepared separately at
-`config/overlays/auth-prod`, using `auth.r-und-t.app`. See
-[the ZITADEL setup guide](config/zitadel/README.md) for DNS, Flux registration,
-bootstrap credentials, and host commands. The festival app keeps its current
-authentication while the identity provider is prepared.
+ZITADEL runs separately at `config/overlays/auth-prod`, using `auth.r-und-t.app`.
+See [the infrastructure guide](config/zitadel/README.md) for bootstrap credentials
+and [the application setup guide](docs/zitadel-app-setup.txt) for the console steps.
+
+The app uses the official ZITADEL OIDC library with Authorization Code + PKCE.
+`GET /auth/login` starts login, `GET /auth/callback` verifies the response, and
+`POST /auth/logout` clears the app session and signs out of ZITADEL. Feedback
+reads/writes and the design-system gallery require the `club-member` role in
+project `394051632024780961`. Being a ZITADEL administrator alone does not grant
+access. Public assets and health probes remain accessible. Expired htmx sessions
+redirect the whole browser to login.
+
+Production configuration sets `AUTH_MODE=oidc`, `ZITADEL_ISSUER`, `APP_BASE_URL`,
+`ZITADEL_CLIENT_ID` and `ZITADEL_PROJECT_ID`. The separately sealed
+`herbsfest-auth` Secret supplies `AUTH_SESSION_KEY`: a base64-encoded random
+32-byte key, shared by app replicas. This is a session key, not a client secret;
+the PKCE client has no secret. AES-GCM encrypts and authenticates the host-only,
+Secure, HttpOnly, SameSite=Lax session cookie. Sessions last at most one hour
+and never outlive the ID token. Role changes take effect at the next login or
+session expiry; rotating the session key invalidates existing app sessions.
+
+Basic Auth stays enabled during the first rollout so the previous image remains
+protected until CI publishes the SSO image. After publishing this change and
+waiting for its image rollout, run on your host:
+
+```sh
+bash scripts/check-prod.sh YOUR_PRODUCTION_CONTEXT
+bash scripts/enable-sso.sh YOUR_PRODUCTION_CONTEXT
+```
+
+The second script checks login configuration and the feedback/design-system
+guards through a temporary local port forward. Only after those pass does it
+prepare removal of Basic Auth in `config/overlays/prod/ingress.yaml`. Review,
+commit and push that change; Flux then exposes the SSO login. The script does
+not apply cluster changes or publish commits. Keep the inactive Basic Auth
+Secret and middleware for rollback; reattach the middleware before reverting
+to an image without SSO.
 
 The prod overlay follows the existing apps in
 [k8s-infra](https://github.com/rasche-thalhofer/k8s-infra/):
@@ -137,7 +173,7 @@ The prod overlay follows the existing apps in
 - Existing namespace `rundt` and image pull Secret `oci-registry-cred`.
 - Image repository `artifacts.r-und-t.app/herbsfest`, built by ko.
 - Traefik serves `https://herbstfest.r-und-t.app`; HTTP redirects
-  to HTTPS before authentication. All HTTPS paths require basic auth.
+  to HTTPS before authentication. Basic Auth remains active until the verified SSO cutover described above.
 - cert-manager issues `herbsfest-tls` using `bunnycdn-issuer`. The `r-und-t.app` DNS
   zone must be accessible to that issuer's Bunny DNS credentials.
 - A single CNPG instance with 5Gi Longhorn storage, matching the small apps in
@@ -153,7 +189,7 @@ namespace and registry Secret; it does not create or take ownership of them.
 ### GitOps deployment
 
 This repository owns the production app manifests, including the sealed
-basic-auth Secret, in `config/overlays/prod`. The infrastructure repository
+session key and Basic Auth Secret, in `config/overlays/prod`. The infrastructure repository
 registers the public app repository as Flux source `herbsfest`; the existing OVH
 Kustomization `rundt-herbsfest` reads the central inventory in
 `config/flux/apps.yaml`. It automatically creates `rundt-herbsfest-web` for the
@@ -209,7 +245,7 @@ bash scripts/check-prod.sh YOUR_PRODUCTION_CONTEXT
 This needs `flux` and `kubectl` and checks CNPG, the Deployment, and the TLS
 certificate. The source must have been registered by the infra reconciliation.
 
-To rotate basic-auth credentials, install `kubeseal` and Apache `htpasswd`.
+To rotate the fallback Basic Auth credentials, install `kubeseal` and Apache `htpasswd`.
 On macOS, `brew install kubeseal httpd` provides them; add
 `$(brew --prefix httpd)/bin` to `PATH` if needed. Run on your host:
 
@@ -228,13 +264,14 @@ never reach disk. The ciphertext is scoped to `rundt/herbsfest-basic-auth`.
 `make render OVERLAY=prod` renders the complete app configuration, including the
 committed digest and SealedSecret. Development still uses ko to build local images.
 
-After deployment, HTTP should redirect to HTTPS, and an unauthenticated HTTPS
-request should return `401` with a basic-auth challenge:
+Before SSO cutover, an unauthenticated HTTPS request returns `401` with a
+Basic Auth challenge. After cutover, it returns `303` to `/auth/login`, which
+redirects to ZITADEL. HTTP continues to redirect to HTTPS:
 
 ```sh
 curl -I http://herbstfest.r-und-t.app/
 curl -I https://herbstfest.r-und-t.app/
-curl --user mvr https://herbstfest.r-und-t.app/ # prompts for password
+curl -I https://herbstfest.r-und-t.app/auth/login
 ```
 
 The migration command uses GORM `AutoMigrate` for the initial scaffold and runs

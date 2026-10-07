@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/tjrasche/HerbsfestOS/internal/auth"
 	"github.com/tjrasche/HerbsfestOS/internal/database"
 	"github.com/tjrasche/HerbsfestOS/internal/feedbacknote"
 	"github.com/tjrasche/HerbsfestOS/internal/ui"
@@ -46,9 +47,23 @@ func run() error {
 		return db.WithContext(migrationCtx).AutoMigrate(&feedbacknote.FeedbackNote{})
 	}
 
+	authConfig, err := auth.ConfigFromEnv(os.Getenv)
+	if err != nil {
+		return err
+	}
+	authHandler, err := auth.New(ctx, authConfig)
+	if err != nil {
+		return err
+	}
+	if authConfig.Mode == "development" {
+		slog.Warn("authentication bypass enabled for local development")
+	}
+	private := http.NewServeMux()
+	feedbacknote.NewHandler(feedbacknote.NewService(feedbacknote.NewRepository(db))).Register(private)
+	ui.Register(private)
 	mux := http.NewServeMux()
-	feedbacknote.NewHandler(feedbacknote.NewService(feedbacknote.NewRepository(db))).Register(mux)
-	ui.Register(mux)
+	authHandler.Register(mux)
+	mux.Handle("/", authHandler.Protect(private, ui.AccessDenied()))
 	mux.Handle("GET /static/", ui.Assets())
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -71,7 +86,7 @@ func run() error {
 		Handler:           http.NewCrossOriginProtection().Handler(mux),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
-		WriteTimeout:      15 * time.Second,
+		WriteTimeout:      30 * time.Second,
 		IdleTimeout:       60 * time.Second,
 	}
 	errs := make(chan error, 1)

@@ -5,6 +5,11 @@ resources:
   - namespace.yaml
   - ../../app
   - ../../postgres
+configMapGenerator:
+  - name: herbsfest-config
+    behavior: merge
+    literals:
+      - AUTH_MODE=development
 # Development credentials only. Keep real credentials out of Git.
 secretGenerator:
   - name: postgres-credentials

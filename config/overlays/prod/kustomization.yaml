@@ -7,10 +7,21 @@ resources:
 - ingress.yaml
 - middleware.yaml
 - sealedsecret-basic-auth.yaml
+- sealedsecret-auth-session.yaml
 patches:
 - path: database-secret.yaml
 - path: postgres.yaml
+- path: auth.yaml
 images:
 - digest: sha256:793221ad130b2d878de0de15a2faae69c22e58d645f48acc27dbc83dfbde65a9
   name: ko://github.com/tjrasche/HerbsfestOS/cmd/web
   newName: artifacts.r-und-t.app/herbsfest
+configMapGenerator:
+- name: herbsfest-config
+  behavior: merge
+  literals:
+  - AUTH_MODE=oidc
+  - ZITADEL_ISSUER=https://auth.r-und-t.app
+  - APP_BASE_URL=https://herbstfest.r-und-t.app
+  - ZITADEL_CLIENT_ID=394051797699788961
+  - ZITADEL_PROJECT_ID=394051632024780961

@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: herbsfest
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          env:
+            - name: AUTH_SESSION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: herbsfest-auth
+                  key: AUTH_SESSION_KEY
