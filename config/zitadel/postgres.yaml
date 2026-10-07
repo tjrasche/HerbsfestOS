@@ -1,0 +1,26 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: zitadel-postgres
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.11
+  instances: 1
+  enableSuperuserAccess: false
+  bootstrap:
+    initdb:
+      database: zitadel
+      owner: zitadel
+      encoding: UTF8
+      dataChecksums: true
+  storage:
+    size: 5Gi
+    storageClass: longhorn
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi

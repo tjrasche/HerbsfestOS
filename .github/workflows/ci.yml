@@ -28,6 +28,7 @@ jobs:
           python3 scripts/test-publish-manifest.py
           kustomize build config/overlays/prod > /dev/null
           kustomize build config/overlays/dev > /dev/null
+          kustomize build config/overlays/auth-prod > /dev/null
 
   publish:
     needs: test

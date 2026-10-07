@@ -22,6 +22,9 @@ config/postgres/         plain development Postgres StatefulSet and storage
 config/cnpg/             production CloudNativePG Cluster
 config/overlays/dev/     development namespace and database credentials
 config/overlays/prod/    production ingress, auth, CNPG and deployment patches
+config/overlays/auth-prod/ ZITADEL identity provider and its database
+config/flux/            Flux registration for the identity provider
+config/zitadel/         pinned ZITADEL Helm release, ingress and sealed bootstrap
 config/kind/             local cluster configuration
 scripts/prod.sh          host-side basic-auth credential sealing
 ```
@@ -121,6 +124,12 @@ make run
 `/healthz` checks the HTTP process and `/readyz` checks the database connection.
 
 ## Production configuration
+
+ZITADEL's initial SSO infrastructure is prepared separately at
+`config/overlays/auth-prod`, using `auth.herbstfest.r-und-t.app`. See
+[the ZITADEL setup guide](config/zitadel/README.md) for DNS, Flux registration,
+bootstrap credentials, and host commands. The festival app keeps its current
+authentication while the identity provider is prepared.
 
 The prod overlay follows the existing apps in
 [k8s-infra](https://github.com/rasche-thalhofer/k8s-infra/):
