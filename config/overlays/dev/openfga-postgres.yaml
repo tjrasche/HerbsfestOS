@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: openfga-postgres
+spec:
+  serviceName: openfga-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openfga-postgres
+  template:
+    metadata:
+      labels:
+        app: openfga-postgres
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: openfga-postgres
+          image: postgres:17.6-alpine
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: openfga-database
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openfga-database
+                  key: password
+            - name: POSTGRES_DB
+              value: openfga
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          startupProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
+            periodSeconds: 2
+            failureThreshold: 60
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openfga-postgres
+spec:
+  clusterIP: None
+  selector:
+    app: openfga-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

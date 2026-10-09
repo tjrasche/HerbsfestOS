@@ -12,6 +12,7 @@ disabled. `/public/` is an anonymous landing page.
 - templ for HTML, self-hosted htmx 2.0.11, plain CSS, embedded assets.
 - GORM with its PostgreSQL driver.
 - ZITADEL OIDC with PKCE for production login and project-role authorization.
+- OpenFGA infrastructure and a standard-library Go client for future permissions.
 - ko for container builds; Kustomize for Kubernetes configuration.
 
 ```text
@@ -19,6 +20,7 @@ cmd/web/                   server, dependency wiring, public/private routing, mi
 internal/feedbacknote/     entity, service, repository, handler, templates
 internal/database/         database connection and pool
 internal/auth/             OIDC login, encrypted sessions and project-role guard
+internal/openfga/          reusable REST client, configuration and connectivity check
 internal/ui/               shared layout, public landing page and embedded assets
 config/app/                application Deployment, Service, configuration
 config/postgres/           plain development Postgres StatefulSet and storage
@@ -26,7 +28,9 @@ config/cnpg/               production CloudNativePG Cluster
 config/overlays/dev/       kind development namespace, credentials and auth bypass
 config/overlays/prod/      web ingress, sealed session key, CNPG and deployment patches
 config/overlays/auth-prod/ ZITADEL identity provider and its database
-config/flux/               central Flux app inventory (web and identity provider)
+config/overlays/openfga-prod/ internal OpenFGA API, sealed credential and CNPG
+config/openfga/            shared OpenFGA Deployment, migrations and Service
+config/flux/               central Flux app inventory (web, identity and permissions)
 config/zitadel/            pinned ZITADEL Helm release, ingress and sealed bootstrap
 config/kind/               local cluster configuration
 docs/zitadel-app-setup.txt console setup for the application and club-member role
@@ -55,17 +59,19 @@ make dev-forward
 ```
 
 Open <http://localhost:8080>. `make dev` creates the `herbsfest` kind cluster,
-generates templates, builds the application with ko, loads the application and
-Postgres images directly into kind, applies the dev overlay, and waits for the workloads. No registry or
+generates templates, builds the application with ko, loads the application,
+Postgres and OpenFGA images directly into kind, applies the dev overlay, and waits for the workloads. No registry or
 Dockerfile is required. The build targets the kind node's architecture, including
 Apple Silicon. Dev Postgres uses a 1Gi persistent volume and deliberately
 public development credentials. kind's default storage provisioner handles it.
 Postgres is exported as an archive containing only the node's platform, which
 also works with Docker's containerd image store.
 
-Kind deploys the Go app and plain Postgres only. It sets
+Kind deploys the Go app, OpenFGA, and separate plain Postgres instances for each. It sets
 `AUTH_MODE=development`: login and role checks are bypassed, and the private
-layout displays “Lokale Entwicklung”. ZITADEL is not deployed into kind.
+layout displays “Lokale Entwicklung”. OpenFGA's dev API uses no authentication
+and is internal to the cluster; its database has a separate 1Gi volume and
+public development credentials. ZITADEL is not deployed into kind.
 Full SSO in the kind Deployment is not configured; see the local OIDC
 instructions below to test the Go app against the production identity provider.
 
@@ -255,6 +261,94 @@ local Go process; they do not change the kind Deployment. To run SSO inside
 kind, its dev ConfigMap would need OIDC settings and its Deployment a local
 session-key Secret reference; those are not part of the default dev overlay.
 
+## OpenFGA connection scaffold
+
+OpenFGA is installed as a future authorization backend. The existing ZITADEL
+`club-member` guard continues to protect private routes, and `/public/` stays
+anonymous. No authorization model, store, relationship tuples or application
+service decorators are installed yet. Missing store/model configuration makes
+`Client.Check` return an error; it never grants access by default.
+
+`internal/openfga` uses standard `net/http` without an additional SDK dependency.
+`cmd/web` constructs one reusable client when `OPENFGA_API_URL` is configured,
+with bounded requests, context cancellation and redirects disabled. Constructing
+the client makes no network calls and does not make web startup or `/readyz`
+depend on OpenFGA while routes do not use it. Database migrations skip OpenFGA
+initialization entirely. A standalone local run may omit all OpenFGA settings.
+
+| Variable | Purpose |
+| --- | --- |
+| `OPENFGA_API_URL` | Internal HTTP(S) API origin; unset disables the connection scaffold |
+| `OPENFGA_API_TOKEN` | Backend API credential; required by the production server, omitted in dev |
+| `OPENFGA_STORE_ID` | Store ULID; configure together with the model ID when introducing policy |
+| `OPENFGA_AUTHORIZATION_MODEL_ID` | Explicit model ULID; no implicit latest-model fallback |
+| `OPENFGA_TIMEOUT` | Request timeout; defaults to `2s`, accepts `1ms` through `30s` |
+
+`Client.Ping(ctx)` makes an authenticated, read-only List Stores request and
+requires no store/model configuration. `Client.Check(ctx, user, relation,
+object)` returns `(false, nil)` for a denial and `(false, err)` for missing
+configuration, invalid requests/responses, failed API authentication or
+unavailable service. Future domain authorization adapters should map verified
+ZITADEL subjects to user IDs and semantic permissions to these checks.
+
+To verify the Go client against the kind API, run this in one terminal:
+
+```sh
+make dev-openfga-forward
+```
+
+In another terminal:
+
+```sh
+OPENFGA_API_URL=http://localhost:8180 go run ./cmd/web -check-openfga
+```
+
+The command exits after verifying API connectivity; it needs no application
+database or ZITADEL configuration. The same port forward can be used by a
+local Go process running with `make run`. Configure its URL explicitly; the
+kind Deployment uses `http://openfga:8080` automatically.
+
+The server image is pinned to
+[OpenFGA v1.21.0](https://github.com/openfga/openfga/releases/tag/v1.21.0).
+A same-image init container runs `openfga migrate` before the API starts.
+One replica with `Recreate` avoids running the old API alongside migrations
+for a new version, at the cost of downtime during upgrades. The ClusterIP
+Service exposes only HTTP; gRPC listens on pod loopback, and the playground
+and metrics listener are disabled. Server readiness checks datastore health;
+liveness checks the HTTP listener.
+
+Production has a dedicated CNPG database `openfga-postgres`, one PostgreSQL
+17.11 instance and 5Gi Longhorn storage. OpenFGA reads the CNPG-generated
+username/password separately and verifies database TLS using the projected
+public CA certificate. The database is protected from Flux pruning; high
+availability and backups are not configured. The API uses a random preshared
+key in `rundt/openfga-api-auth`, sealed strictly for that namespace/name. Only
+the OpenFGA server and the web container receive this key; neither application's
+database migration container needs it. API traffic remains internal HTTP;
+there is no ingress or public hostname.
+
+After publishing the manifests, check production from the host:
+
+```sh
+bash scripts/openfga.sh check default
+```
+
+This reconciles the inventory and `rundt-openfga`, waits for CNPG and the
+Deployment, then verifies datastore health, authenticated API access and
+rejection of anonymous API requests through a temporary loopback port forward.
+It requires `kubectl`, `flux` and Python 3. Credentials are held in memory
+and never printed or written to disk. For a persistent production port forward:
+
+```sh
+bash scripts/openfga.sh forward default
+```
+
+This forwards `localhost:8180`; API calls still require the production key.
+Render the separate production resources with
+`make render OVERLAY=openfga-prod`. See the
+[OpenFGA configuration guide](https://openfga.dev/docs/getting-started/setup-openfga/configure-openfga)
+for migrations, API authentication and health semantics.
+
 ## Production configuration
 
 The prod overlay follows the existing apps in
@@ -289,7 +383,7 @@ on first login. Self-registration is disabled in the bootstrap configuration.
 These bootstrap settings do not update existing accounts or policies when
 edited later; manage those through the console. See the
 [ZITADEL infrastructure guide](config/zitadel/README.md) for secrets, database
-TLS, chart operations and recovery. Both databases have Flux pruning disabled;
+TLS, chart operations and recovery. All three databases have Flux pruning disabled;
 backups and high availability are not configured.
 
 ### Basic Auth retirement
@@ -315,14 +409,16 @@ session key and inactive Basic Auth Secret, in `config/overlays/prod`.
 The infrastructure repository registers the public app repository as Flux source `herbsfest`; the existing OVH
 Kustomization `rundt-herbsfest` reads the central inventory in
 `config/flux/apps.yaml`. It automatically creates `rundt-herbsfest-web` for the
-production web overlay and `rundt-zitadel` for the auth overlay. Each app
-reconciles independently. The ownership chain is:
+production web overlay, `rundt-zitadel` for the auth overlay and `rundt-openfga`
+for the permissions backend. The web child depends on OpenFGA being ready so
+its API Secret exists before web rollout. The ownership chain is:
 
 ```text
 k8s-infra: GitRepository herbsfest (this repository's main branch)
            rundt-herbsfest -> ./config/flux/apps.yaml
                                |- rundt-herbsfest-web -> ./config/overlays/prod
-                               `- rundt-zitadel       -> ./config/overlays/auth-prod
+                               |- rundt-zitadel       -> ./config/overlays/auth-prod
+                               `- rundt-openfga       -> ./config/overlays/openfga-prod
 ```
 
 All these Flux objects live in namespace `flux-system`. The exact parent name
@@ -342,8 +438,8 @@ infrastructure entrypoint change and host reconciliation command.
 Every push to `main` runs `.github/workflows/ci.yml`:
 
 1. Generate templates, run Go tests and vet, check generated files are committed,
-   test the image-digest publisher, and render the dev, web prod, auth prod and
-   central Flux overlays.
+   test the image-digest publisher, and render the dev, web prod, auth prod,
+   OpenFGA prod and central Flux overlays.
 2. Build with ko for `linux/amd64` and push to `artifacts.r-und-t.app/herbsfest`,
    tagged with the source commit SHA.
 3. Commit the published image digest into the production Kustomize overlay.
@@ -392,6 +488,9 @@ bash scripts/check-prod.sh default
 # Reconcile and check ZITADEL's database, Helm release, API/Login UI and TLS.
 bash scripts/zitadel.sh check default
 
+# Reconcile and check OpenFGA's database, Deployment and API authentication.
+bash scripts/openfga.sh check default
+
 # Verify the deployed app's guards and PKCE settings; Basic Auth is already off.
 bash scripts/enable-sso.sh default
 ```
@@ -404,15 +503,16 @@ inventory must have been registered by infra first. For direct Flux commands:
 flux --context default reconcile kustomization rundt-herbsfest -n flux-system --with-source
 flux --context default reconcile kustomization rundt-herbsfest-web -n flux-system
 flux --context default reconcile kustomization rundt-zitadel -n flux-system
+flux --context default reconcile kustomization rundt-openfga -n flux-system
 ```
 
-Both database checks use the fully qualified `clusters.postgresql.cnpg.io`
+All database checks use the fully qualified `clusters.postgresql.cnpg.io`
 resource. Plain `cluster/NAME` can select the OVH operator's
 `clusters.kube.ovh.edixos.io` and report NotFound for a database that exists.
 To inspect the correct resources:
 
 ```sh
-kubectl --context default -n rundt get clusters.postgresql.cnpg.io herbsfest-postgres zitadel-postgres
+kubectl --context default -n rundt get clusters.postgresql.cnpg.io herbsfest-postgres zitadel-postgres openfga-postgres
 ```
 
 To retrieve the initial ZITADEL administrator password privately on the host

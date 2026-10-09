@@ -15,6 +15,7 @@ import (
 	"github.com/tjrasche/HerbsfestOS/internal/auth"
 	"github.com/tjrasche/HerbsfestOS/internal/database"
 	"github.com/tjrasche/HerbsfestOS/internal/feedbacknote"
+	"github.com/tjrasche/HerbsfestOS/internal/openfga"
 	"github.com/tjrasche/HerbsfestOS/internal/ui"
 )
 
@@ -27,7 +28,36 @@ func main() {
 
 func run() error {
 	migrate := flag.Bool("migrate", false, "apply the initial schema and exit")
+	checkOpenFGA := flag.Bool("check-openfga", false, "verify OpenFGA connectivity and API authentication, then exit")
 	flag.Parse()
+	if *migrate && *checkOpenFGA {
+		return errors.New("-migrate and -check-openfga are mutually exclusive")
+	}
+	var fgaClient *openfga.Client
+	// Database migrations require no OpenFGA configuration or API credential.
+	if !*migrate {
+		cfg, err := openfga.ConfigFromEnv(os.Getenv)
+		if err != nil {
+			return err
+		}
+		if cfg.APIURL != "" || *checkOpenFGA {
+			fgaClient, err = openfga.New(cfg)
+			if err != nil {
+				return err
+			}
+			defer fgaClient.Close()
+			if *checkOpenFGA {
+				if err := fgaClient.Ping(context.Background()); err != nil {
+					return err
+				}
+				slog.Info("OpenFGA connectivity verified")
+				return nil
+			}
+			// Retained for future policy wiring; construction does not install models
+			// or make the currently independent routes depend on OpenFGA uptime.
+			slog.Info("OpenFGA client configured", "model_configured", cfg.StoreID != "")
+		}
+	}
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
 		return errors.New("DATABASE_URL is required")

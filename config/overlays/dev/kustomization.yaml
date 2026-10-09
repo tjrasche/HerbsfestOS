@@ -5,11 +5,15 @@ resources:
   - namespace.yaml
   - ../../app
   - ../../postgres
+  - ../../openfga
+  - openfga-postgres.yaml
 configMapGenerator:
   - name: herbsfest-config
     behavior: merge
     literals:
       - AUTH_MODE=development
+      - OPENFGA_API_URL=http://openfga:8080
+      - OPENFGA_TIMEOUT=2s
 # Development credentials only. Keep real credentials out of Git.
 secretGenerator:
   - name: postgres-credentials
@@ -20,3 +24,7 @@ secretGenerator:
   - name: herbsfest-database
     literals:
       - DATABASE_URL=postgres://herbsfest:herbsfest@postgres:5432/herbsfest?sslmode=disable
+  - name: openfga-database
+    literals:
+      - username=openfga
+      - password=openfga

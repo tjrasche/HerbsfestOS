@@ -9,15 +9,17 @@ The ownership chain is:
 ```text
 k8s-infra: rundt-herbsfest -> config/flux/apps.yaml
                              |- rundt-herbsfest-web -> config/overlays/prod
-                             `- rundt-zitadel       -> config/overlays/auth-prod
+                             |- rundt-zitadel       -> config/overlays/auth-prod
+                             `- rundt-openfga       -> config/overlays/openfga-prod
 ```
 
 The infrastructure repository owns the `herbsfest` GitRepository source and
 the parent `rundt-herbsfest` Kustomization. This repository owns the child
-Kustomizations and their application resources. Both children use the same
+Kustomizations and their application resources. All children use the same
 source and retain the existing namespace/operator dependencies. They do not
-depend on their parent, avoiding a readiness cycle. ZITADEL startup does not
-block reconciliation of the festival app.
+depend on their parent, avoiding a readiness cycle. The web child depends on
+`rundt-openfga` so its API credential exists before web rollout. ZITADEL startup
+does not block reconciliation of the festival app.
 
 ## Move from the direct app overlay
 
@@ -44,7 +46,7 @@ when intentional. Within each application, child `prune: true` still removes
 resources deleted from its overlay. Database resources retain their existing
 pruning protection. See [Flux garbage collection](https://fluxcd.io/flux/components/kustomize/kustomizations/#garbage-collection).
 
-Once both repository changes reach Flux, the parent creates both children
+Once both repository changes reach Flux, the parent creates the children
 automatically. To trigger it from the host:
 
 ```sh
@@ -52,14 +54,15 @@ bash scripts/reconcile-gitops.sh YOUR_PRODUCTION_CONTEXT
 ```
 
 This checks the parent path and reconciles it with its Git source. The parent
-applies the inventory without waiting for both apps to become healthy. To
+applies the inventory without waiting for the apps to become healthy. To
 verify the workloads separately:
 
 ```sh
 bash scripts/check-prod.sh YOUR_PRODUCTION_CONTEXT
 bash scripts/zitadel.sh check YOUR_PRODUCTION_CONTEXT
+bash scripts/openfga.sh check YOUR_PRODUCTION_CONTEXT
 ```
 
 No registry credentials or Kubernetes access are needed by CI beyond its
 existing image publishing setup. CI renders this inventory as well as the
-development, web production and auth production overlays.
+development, web production, auth production and OpenFGA production overlays.

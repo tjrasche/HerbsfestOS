@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openfga
+spec:
+  replicas: 1
+  # Stop the old server before the init container applies a new schema.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: openfga
+  template:
+    metadata:
+      labels:
+        app: openfga
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+      - name: migrate
+        image: openfga/openfga:v1.21.0
+        args: ["migrate", "--timeout", "2m"]
+        env:
+        - name: OPENFGA_DATASTORE_ENGINE
+          value: postgres
+        - name: OPENFGA_DATASTORE_URI
+          value: postgres://openfga-postgres:5432/openfga?sslmode=disable
+        - name: OPENFGA_DATASTORE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: openfga-database
+              key: username
+        - name: OPENFGA_DATASTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openfga-database
+              key: password
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            memory: 128Mi
+      containers:
+      - name: openfga
+        image: openfga/openfga:v1.21.0
+        args: ["run"]
+        ports:
+        - name: http
+          containerPort: 8080
+        env:
+        - name: OPENFGA_DATASTORE_ENGINE
+          value: postgres
+        - name: OPENFGA_DATASTORE_URI
+          value: postgres://openfga-postgres:5432/openfga?sslmode=disable
+        - name: OPENFGA_DATASTORE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: openfga-database
+              key: username
+        - name: OPENFGA_DATASTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openfga-database
+              key: password
+        - name: OPENFGA_HTTP_ADDR
+          value: 0.0.0.0:8080
+        # gRPC is required by the HTTP gateway; keep its listener pod-local.
+        - name: OPENFGA_GRPC_ADDR
+          value: 127.0.0.1:8081
+        - name: OPENFGA_PLAYGROUND_ENABLED
+          value: "false"
+        - name: OPENFGA_METRICS_ENABLED
+          value: "false"
+        - name: OPENFGA_AUTHN_METHOD
+          value: none
+        - name: OPENFGA_LOG_FORMAT
+          value: json
+        - name: OPENFGA_DATASTORE_MAX_OPEN_CONNS
+          value: "10"
+        startupProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          periodSeconds: 2
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 3
+        # Datastore health is readiness; a DB outage must not restart the API.
+        livenessProbe:
+          tcpSocket:
+            port: http
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            memory: 256Mi

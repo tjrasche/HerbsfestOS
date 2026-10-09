@@ -7,6 +7,7 @@ KIND ?= kind
 KUBECTL ?= kubectl
 DOCKER ?= docker
 KIND_CLUSTER_NAME ?= herbsfest
+OPENFGA_IMAGE := openfga/openfga:v1.21.0
 
 .PHONY: generate fmt test build run migrate render image resolve
 generate:
@@ -42,7 +43,7 @@ resolve: generate
 	mkdir -p dist
 	$(KUSTOMIZE) build config/overlays/$(OVERLAY) | $(KO) resolve -f - > dist/$(OVERLAY).yaml
 
-.PHONY: kind-up dev-deploy dev dev-forward kind-down
+.PHONY: kind-up dev-deploy dev dev-forward dev-openfga-forward kind-down
 kind-up:
 	@if ! $(KIND) get clusters | grep -Fxq '$(KIND_CLUSTER_NAME)'; then \
 		$(KIND) create cluster --name '$(KIND_CLUSTER_NAME)' --config config/kind/cluster.yaml --wait 120s; \
@@ -55,9 +56,14 @@ dev-deploy: generate
 		$(DOCKER) pull --platform="$$dev_platform" postgres:17.6-alpine; \
 		$(DOCKER) image save --platform="$$dev_platform" --output dist/postgres.tar postgres:17.6-alpine; \
 		$(KIND) load image-archive dist/postgres.tar --name '$(KIND_CLUSTER_NAME)'; \
+		$(DOCKER) pull --platform="$$dev_platform" $(OPENFGA_IMAGE); \
+		$(DOCKER) image save --platform="$$dev_platform" --output dist/openfga.tar $(OPENFGA_IMAGE); \
+		$(KIND) load image-archive dist/openfga.tar --name '$(KIND_CLUSTER_NAME)'; \
 		$(KUSTOMIZE) build config/overlays/dev | KO_DOCKER_REPO=kind.local KIND_CLUSTER_NAME='$(KIND_CLUSTER_NAME)' $(KO) resolve --platform="$$dev_platform" -f - > dist/dev.yaml
 	$(KUBECTL) --context 'kind-$(KIND_CLUSTER_NAME)' apply -f dist/dev.yaml
 	$(KUBECTL) --context 'kind-$(KIND_CLUSTER_NAME)' -n herbsfest-dev rollout status statefulset/postgres --timeout=180s
+	$(KUBECTL) --context 'kind-$(KIND_CLUSTER_NAME)' -n herbsfest-dev rollout status statefulset/openfga-postgres --timeout=180s
+	$(KUBECTL) --context 'kind-$(KIND_CLUSTER_NAME)' -n herbsfest-dev rollout status deployment/openfga --timeout=180s
 	$(KUBECTL) --context 'kind-$(KIND_CLUSTER_NAME)' -n herbsfest-dev rollout status deployment/herbsfest --timeout=180s
 
 dev: kind-up
@@ -65,6 +71,9 @@ dev: kind-up
 
 dev-forward:
 	$(KUBECTL) --context 'kind-$(KIND_CLUSTER_NAME)' -n herbsfest-dev port-forward service/herbsfest 8080:80
+
+dev-openfga-forward:
+	$(KUBECTL) --context 'kind-$(KIND_CLUSTER_NAME)' -n herbsfest-dev port-forward service/openfga 8180:8080
 
 kind-down:
 	$(KIND) delete cluster --name '$(KIND_CLUSTER_NAME)'

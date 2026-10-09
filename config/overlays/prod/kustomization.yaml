@@ -12,6 +12,7 @@ patches:
 - path: database-secret.yaml
 - path: postgres.yaml
 - path: auth.yaml
+- path: openfga.yaml
 images:
 - digest: sha256:e555cfd1c32f77d25dbfc67546aea894b71bbdc91371e217d0a0cb5472008fe0
   name: ko://github.com/tjrasche/HerbsfestOS/cmd/web
@@ -20,6 +21,8 @@ configMapGenerator:
 - behavior: merge
   literals:
   - AUTH_MODE=oidc
+  - OPENFGA_API_URL=http://openfga:8080
+  - OPENFGA_TIMEOUT=2s
   - ZITADEL_ISSUER=https://auth.r-und-t.app
   - APP_BASE_URL=https://herbstfest.r-und-t.app
   - ZITADEL_CLIENT_ID=394051797699788961

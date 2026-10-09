@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openfga
+spec:
+  template:
+    spec:
+      volumes:
+      - name: postgres-ca
+        secret:
+          secretName: openfga-postgres-ca
+          items:
+          - key: ca.crt
+            path: ca.crt
+      initContainers:
+      - name: migrate
+        volumeMounts:
+        - name: postgres-ca
+          mountPath: /postgres-ca
+          readOnly: true
+        env:
+        - name: OPENFGA_DATASTORE_URI
+          value: postgres://openfga-postgres-rw:5432/openfga?sslmode=verify-full&sslrootcert=/postgres-ca/ca.crt
+        - name: OPENFGA_DATASTORE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: openfga-postgres-app
+              key: username
+        - name: OPENFGA_DATASTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openfga-postgres-app
+              key: password
+      containers:
+      - name: openfga
+        volumeMounts:
+        - name: postgres-ca
+          mountPath: /postgres-ca
+          readOnly: true
+        env:
+        - name: OPENFGA_DATASTORE_URI
+          value: postgres://openfga-postgres-rw:5432/openfga?sslmode=verify-full&sslrootcert=/postgres-ca/ca.crt
+        - name: OPENFGA_DATASTORE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: openfga-postgres-app
+              key: username
+        - name: OPENFGA_DATASTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openfga-postgres-app
+              key: password
+        - name: OPENFGA_AUTHN_METHOD
+          value: preshared
+        - name: OPENFGA_AUTHN_PRESHARED_KEYS
+          valueFrom:
+            secretKeyRef:
+              name: openfga-api-auth
+              key: API_TOKEN
