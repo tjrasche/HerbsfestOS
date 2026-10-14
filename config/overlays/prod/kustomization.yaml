@@ -14,7 +14,7 @@ patches:
 - path: auth.yaml
 - path: openfga.yaml
 images:
-- digest: sha256:e555cfd1c32f77d25dbfc67546aea894b71bbdc91371e217d0a0cb5472008fe0
+- digest: sha256:80283bfdf78875162037c01edce769e94fe6567c7b18186bc601052eed074009
   name: ko://github.com/tjrasche/HerbsfestOS/cmd/web
   newName: artifacts.r-und-t.app/herbsfest
 configMapGenerator:
