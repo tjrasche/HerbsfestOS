@@ -14,13 +14,13 @@ patches:
 - path: auth.yaml
 - path: openfga.yaml
 images:
-- digest: sha256:2e1f25af0021ca11576ee8127975d940d768b11c09a49ca1c8b8fe3703260b90
+- digest: sha256:c36d55b1e895463fb2668ceb5f4e278dd5ac7a02b620b890ffc91417dbbc4d91
   name: ko://github.com/tjrasche/HerbsfestOS/cmd/web
   newName: artifacts.r-und-t.app/herbsfest
 configMapGenerator:
-- name: herbsfest-scheduling-setup
-  envs:
+- envs:
   - scheduling-setup.env
+  name: herbsfest-scheduling-setup
 - behavior: merge
   literals:
   - AUTH_MODE=oidc
