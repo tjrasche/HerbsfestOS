@@ -27,17 +27,26 @@ func main() {
 }
 
 func run() error {
+	prepare := flag.Bool("prepare", false, "GitOps preparation: migrate, pin authorization policy, optionally bootstrap organizer, then exit")
 	migrate := flag.Bool("migrate", false, "apply versioned maintenance migrations and exit")
 	bootstrap := flag.Bool("bootstrap-organizer", false, "grant an explicitly identified login during maintenance")
 	checkOpenFGA := flag.Bool("check-openfga", false, "verify OpenFGA connectivity and API authentication, then exit")
 	flag.Parse()
-	if (*migrate && *checkOpenFGA) || (*bootstrap && (*migrate || *checkOpenFGA)) {
-		return errors.New("-migrate and -check-openfga are mutually exclusive")
+	modes := 0
+	for _, enabled := range []bool{*prepare, *migrate, *bootstrap, *checkOpenFGA} {
+		if enabled {
+			modes++
+		}
+	}
+	if modes > 1 {
+		return errors.New("choose only one of -prepare, -migrate, -bootstrap-organizer, or -check-openfga")
 	}
 	var fgaClient *openfga.Client
+	var cfg openfga.Config
+	var err error
 	// Database migrations require no OpenFGA configuration or API credential.
-	if !*migrate && !*bootstrap {
-		cfg, err := openfga.ConfigFromEnv(os.Getenv)
+	if !*prepare && !*migrate && !*bootstrap {
+		cfg, err = openfga.ConfigFromEnv(os.Getenv)
 		if err != nil {
 			return err
 		}
@@ -80,6 +89,44 @@ func run() error {
 	if *bootstrap {
 		return scheduling.Bootstrap(ctx, db, os.Getenv("BOOTSTRAP_ISSUER"), os.Getenv("BOOTSTRAP_SUBJECT"))
 	}
+	if *prepare {
+		issuer, subject := os.Getenv("BOOTSTRAP_ISSUER"), os.Getenv("BOOTSTRAP_SUBJECT")
+		if (issuer == "") != (subject == "") {
+			return errors.New("BOOTSTRAP_ISSUER and BOOTSTRAP_SUBJECT must be supplied together")
+		}
+		if err := scheduling.Migrate(ctx, db, scheduling.LegacyEdition{Label: os.Getenv("LEGACY_EDITION_LABEL"), StartDay: os.Getenv("LEGACY_START_DAY"), EndDay: os.Getenv("LEGACY_END_DAY")}); err != nil {
+			return err
+		}
+		cfg, err := openfga.ConfigFromEnv(os.Getenv)
+		if err != nil {
+			return err
+		}
+		if _, err = openfga.Provision(ctx, db, cfg); err != nil {
+			return err
+		}
+		if subject != "" {
+			if err = scheduling.BootstrapOnce(ctx, db, issuer, subject); err != nil {
+				return err
+			}
+		}
+		slog.Info("GitOps scheduling preparation complete")
+		return nil
+	}
+	if os.Getenv("OPENFGA_MANAGED_MODEL") == "true" {
+		cfg, err = openfga.LoadBinding(ctx, db, cfg)
+		if err != nil {
+			return err
+		}
+		if fgaClient != nil {
+			fgaClient.Close()
+		}
+		fgaClient, err = openfga.New(cfg)
+		if err != nil {
+			return err
+		}
+		defer fgaClient.Close()
+	}
+
 	authConfig, err := auth.ConfigFromEnv(os.Getenv)
 	if err != nil {
 		return err

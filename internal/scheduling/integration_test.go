@@ -449,3 +449,34 @@ func TestWorkerReuseMaskingAndFeedbackIsolation(t *testing.T) {
 		t.Fatal("non-global feedback")
 	}
 }
+
+func TestGitOpsPreparationPinsModelAndPreservesRevocation(t *testing.T) {
+	_, db := setup(t)
+	cfg := openfga.Config{APIURL: os.Getenv("SCHEDULING_TEST_FGA_URL"), Timeout: 3 * time.Second}
+	first, e := openfga.Provision(ctx, db, cfg)
+	must(t, e)
+	second, e := openfga.Provision(ctx, db, cfg)
+	must(t, e)
+	if first.StoreID != second.StoreID || first.AuthorizationModelID != second.AuthorizationModelID {
+		t.Fatal("reconciliation replaced pinned model")
+	}
+	loaded, e := openfga.LoadBinding(ctx, db, cfg)
+	must(t, e)
+	if loaded.StoreID != first.StoreID || loaded.AuthorizationModelID != first.AuthorizationModelID {
+		t.Fatal("web did not load exact preparation pin")
+	}
+	must(t, db.Exec("DELETE FROM global_grants").Error)
+	must(t, s.BootstrapOnce(ctx, db, "test:issuer", "chosen"))
+	if count(t, db, "SELECT count(*) FROM global_grants") != 1 {
+		t.Fatal("initial bootstrap failed")
+	}
+	must(t, db.Exec("DELETE FROM global_grants").Error)
+	must(t, s.BootstrapOnce(ctx, db, "test:issuer", "chosen"))
+	if count(t, db, "SELECT count(*) FROM global_grants") != 0 {
+		t.Fatal("GitOps reconciliation restored revoked grant")
+	}
+	cfg.APIURL = "http://127.0.0.1:1"
+	if _, e = openfga.Provision(ctx, db, cfg); e == nil {
+		t.Fatal("preparation ignored authorization outage")
+	}
+}

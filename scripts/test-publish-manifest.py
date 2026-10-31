@@ -69,8 +69,10 @@ class PublishingTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         rendered = subprocess.check_output(["kustomize", "build", "config/overlays/prod"],
                                            cwd=self.root, text=True)
-        self.assertEqual(rendered.count("image: " + IMAGE), 1)
-        self.assertNotIn("name: migrate", rendered)
+        self.assertEqual(rendered.count("image: " + IMAGE), 2)
+        self.assertIn("name: prepare", rendered)
+        self.assertIn("type: Recreate", rendered)
+        self.assertIn("- -prepare", rendered)
         self.assertIn(["push", "origin", "HEAD:main"], self.calls)
         self.assertIn(IMAGE, (self.root / "summary").read_text())
         commit = next(args for args in self.calls if args[0] == "commit")

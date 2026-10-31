@@ -18,6 +18,9 @@ images:
   name: ko://github.com/tjrasche/HerbsfestOS/cmd/web
   newName: artifacts.r-und-t.app/herbsfest
 configMapGenerator:
+- name: herbsfest-scheduling-setup
+  envs:
+  - scheduling-setup.env
 - behavior: merge
   literals:
   - AUTH_MODE=oidc

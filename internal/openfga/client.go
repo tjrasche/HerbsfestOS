@@ -1,5 +1,4 @@
-// Package openfga provides the connection boundary for future authorization
-// checks. It does not install a model, write grants, or protect application routes.
+// Package openfga provides fail-closed authorization checks and explicit GitOps policy preparation.
 package openfga
 
 import (
@@ -175,7 +174,7 @@ func (c *Client) request(ctx context.Context, method, path string, input, output
 		return transportError(err)
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && !(method == http.MethodPost && resp.StatusCode == http.StatusCreated) {
 		category := ErrInvalidResponse
 		switch {
 		case resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden:

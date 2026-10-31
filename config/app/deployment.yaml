@@ -4,6 +4,8 @@ metadata:
   name: herbsfest
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: herbsfest
@@ -19,6 +21,33 @@ spec:
         runAsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
+      initContainers:
+        - name: prepare
+          image: ko://github.com/tjrasche/HerbsfestOS/cmd/web
+          args: ["-prepare"]
+          envFrom:
+            - configMapRef:
+                name: herbsfest-config
+            - configMapRef:
+                name: herbsfest-scheduling-setup
+                optional: true
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: herbsfest-database
+                  key: DATABASE_URL
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
       containers:
         - name: web
           image: ko://github.com/tjrasche/HerbsfestOS/cmd/web

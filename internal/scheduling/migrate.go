@@ -33,7 +33,7 @@ func Migrate(ctx context.Context, db *gorm.DB, legacy LegacyEdition) error {
 			return err
 		}
 		if done > 0 {
-			return nil
+			return migratePreparation(tx)
 		}
 		var exists bool
 		if err := tx.Raw("SELECT to_regclass('feedback_notes') IS NOT NULL").Scan(&exists).Error; err != nil {
@@ -94,7 +94,10 @@ func Migrate(ctx context.Context, db *gorm.DB, legacy LegacyEdition) error {
 		if err = tx.Exec("ALTER TABLE feedback_notes ALTER COLUMN edition_id SET NOT NULL").Error; err != nil {
 			return err
 		}
-		return tx.Exec("INSERT INTO schema_migrations(version) VALUES(1)").Error
+		if err := tx.Exec("INSERT INTO schema_migrations(version) VALUES(1)").Error; err != nil {
+			return err
+		}
+		return migratePreparation(tx)
 	})
 }
 
@@ -126,4 +129,52 @@ func Bootstrap(ctx context.Context, db *gorm.DB, issuer, subject string) error {
 		}
 		return tx.Exec("UPDATE scheduling_state SET revision=revision+1 WHERE id=1").Error
 	})
+}
+
+// BootstrapOnce records initial setup independently of live grants. Repeated
+// reconciliation must never restore a grant later revoked through the app.
+func BootstrapOnce(ctx context.Context, db *gorm.DB, issuer, subject string) error {
+	if issuer == "" || subject == "" {
+		return errors.New("explicit bootstrap issuer/subject required")
+	}
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec("SELECT revision FROM scheduling_state WHERE id=1 FOR UPDATE").Error; err != nil {
+			return err
+		}
+		var count int64
+		if err := tx.Raw("SELECT count(*) FROM scheduling_bootstrap WHERE id=1").Scan(&count).Error; err != nil {
+			return err
+		}
+		if count > 0 {
+			return nil
+		}
+		var grants int64
+		if err := tx.Raw("SELECT count(*) FROM global_grants").Scan(&grants).Error; err != nil {
+			return err
+		}
+		if grants == 0 {
+			if err := Bootstrap(ctx, tx, issuer, subject); err != nil {
+				return err
+			}
+		}
+		return tx.Exec("INSERT INTO scheduling_bootstrap(id,issuer,subject) VALUES(1,?,?)", issuer, subject).Error
+	})
+}
+
+func migratePreparation(tx *gorm.DB) error {
+	var count int64
+	if err := tx.Raw("SELECT count(*) FROM schema_migrations WHERE version=2").Scan(&count).Error; err != nil {
+		return err
+	}
+	if count > 0 {
+		return nil
+	}
+	sql, err := Files.ReadFile("migrations/002.sql")
+	if err != nil {
+		return err
+	}
+	if err = tx.Exec(string(sql)).Error; err != nil {
+		return err
+	}
+	return tx.Exec("INSERT INTO schema_migrations(version) VALUES(2)").Error
 }

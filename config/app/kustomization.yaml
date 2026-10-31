@@ -7,3 +7,4 @@ configMapGenerator:
   - name: herbsfest-config
     literals:
       - HTTP_ADDR=:8080
+      - OPENFGA_MANAGED_MODEL=true

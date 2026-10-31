@@ -5,6 +5,14 @@ metadata:
 spec:
   template:
     spec:
+      initContainers:
+      - name: prepare
+        env:
+        - name: OPENFGA_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: openfga-api-auth
+              key: API_TOKEN
       containers:
       - name: web
         env:

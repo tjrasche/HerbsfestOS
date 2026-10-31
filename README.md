@@ -627,25 +627,53 @@ Integration tests isolate each case in a new PostgreSQL schema and fresh in-memo
 
 For this SSH host, tools were installed without sudo under `/tmp/herbstfest-tools`; Go is `/tmp/herbstfest-tools/go/bin/go`, PostgreSQL binaries are under `/tmp/herbstfest-tools/pg/usr/lib/postgresql/18/bin`, and `LD_LIBRARY_PATH=/tmp/herbstfest-tools/pg/usr/lib/x86_64-linux-gnu` is required for PostgreSQL client tools. Existing disposable OpenFGA is `/tmp/wayfinder-validation/openfga`; browser Python is `/tmp/wayfinder-validation/browser-env/bin/python`. The local database user is `tjark`. These temporary paths are session conveniences, not deployment dependencies.
 
-### Maintenance cutover (not executed)
+### GitOps deployment and initial setup
 
-The deployment no longer automatically runs migrations in an init container. Stop traffic and writers, take a backup, and test restoration before using the explicit versioned migration command:
+CI publishes one image digest for the web and `prepare` init containers. Flux
+reconciles the Deployment with `Recreate`: the previous web pod stops before
+schema migration, and the new web process starts only after preparation succeeds.
+No workstation Kubernetes access or manual in-cluster commands are required.
 
-```sh
-# Explicit operator-supplied values; never derive these from legacy timestamps.
-LEGACY_EDITION_LABEL='<chosen label>' LEGACY_START_DAY='<YYYY-MM-DD>' \
-LEGACY_END_DAY='<YYYY-MM-DD>' go run ./cmd/web -migrate
-BOOTSTRAP_ISSUER='<validated issuer>' BOOTSTRAP_SUBJECT='<chosen subject>' \
-go run ./cmd/web -bootstrap-organizer
-```
+The init container runs `web -prepare`. It applies the versioned transactional
+migration, provisions the compiled OpenFGA policy in a dedicated empty store,
+and records exact immutable store/model IDs plus the compiled model hash in
+PostgreSQL. Repeated reconciliation verifies and reuses that committed pin;
+normal web startup only reads it (`OPENFGA_MANAGED_MODEL=true`). It never selects
+an implicit latest model. A changed policy gets its own binding. Failed network
+outcomes may leave an unreferenced store, but never publish a partial binding.
+Persisted grant tuples in the contextual-only store are rejected during preparation.
 
-`DATABASE_URL` must be provided through the environment's existing secret mechanism. Do not print it. Legacy input is required only when unscoped feedback rows exist. Migration DDL/backfill/invariants/version marking commit together; missing inputs and failures roll back. A rerun does not reassign scoped notes. Migration and bootstrap are independent of OpenFGA. Never downgrade to the old unscoped feedback binary after scoped writes; recover using the tested backup before new writes or a forward fix afterward.
+The containers use the existing CNPG and OpenFGA Secret references. No cluster
+credentials or API tokens are copied into Git, CI, or this host. GitOps has no
+Kubernetes API write permissions in the application pod.
 
-Install `internal/scheduling/authorization-model.json` into a **new empty** production FGA store and pin its store/model IDs. Do not persist live grant tuples in that store. Configure `OPENFGA_API_URL`, `OPENFGA_STORE_ID`, and `OPENFGA_AUTHORIZATION_MODEL_ID` through deployment configuration. The local-model helper intentionally refuses non-loopback targets. Global schedule visibility requires a separate explicit team grant for edits. The last global grant and activated edition readiness are protected in-app.
+Set initial non-secret inputs in
+`config/overlays/prod/scheduling-setup.env`, then commit and push:
 
-Configure hosted ZITADEL email/social registration separately, with automatic email/name account linking disabled and authenticated existing-account proof for manual provider linking. The application binds callback continuation to the initiating browser/state. No live provider settings were changed. Verify positive/negative permissions before reopening traffic. Permission service failures return retryable unavailable responses without protected data.
+- If unscoped legacy feedback exists, supply the explicitly selected
+  `LEGACY_EDITION_LABEL`, `LEGACY_START_DAY`, and `LEGACY_END_DAY`. Empty databases
+  do not need them. Missing required legacy inputs stop preparation before writes;
+  no dates or production rows are guessed, deleted, or reassigned on reruns.
+- Set `BOOTSTRAP_ISSUER` and `BOOTSTRAP_SUBJECT` together to identify the initial
+  organizer from validated OIDC identity. Neither email nor provider display names
+  establish ownership. Empty bootstrap inputs grant nobody access. The bootstrap
+  is recorded once, so later grant revocation survives reconciliation.
 
-Operator-only unlink/replacement, edition/stand deletion, and other ownership maintenance must pause writers or first acquire `SELECT revision FROM scheduling_state WHERE id=1 FOR UPDATE`, perform changes, increment `revision`, and commit together. Application transactions acquire this revision lock before any resource lock. Grant/link/membership/activation actions use the exclusive lock; protected reads and feedback writes hold a shared lock until completion. Do not cache allow results or worker bindings in login sessions.
+Kustomize hashes the setup ConfigMap, so changing these inputs rolls the pod
+and reruns preparation. Missing/invalid inputs or an unavailable authorization
+engine keep the new web pod stopped. Check GitOps status/logs through the existing
+operations workflow. The command-line `-migrate` and `-bootstrap-organizer` entrypoints
+remain available for deliberate maintenance; they are not prerequisites for GitOps.
+
+For a deployment with meaningful data, test backup/restore and retain the maintenance
+window before migrating. Never downgrade to the old unscoped feedback binary after
+scoped writes; recover before new writes or use a forward fix. Hosted ZITADEL
+registration/provider settings remain independent of application deployment.
+
+Operator-only ownership maintenance must acquire
+`SELECT revision FROM scheduling_state WHERE id=1 FOR UPDATE`, perform changes,
+increment `revision`, and commit together. Application transactions acquire this
+revision lock before resource locks. Never cache grants or worker bindings in sessions.
 
 ### Verification and release boundary
 
