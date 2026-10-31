@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -41,7 +40,7 @@ func setup(t *testing.T) (*s.Store, *gorm.DB) {
 		t.Fatal(e)
 	}
 	t.Cleanup(func() { p.Close() })
-	must(t, s.Migrate(ctx, scoped, s.LegacyEdition{}))
+	must(t, s.Migrate(ctx, scoped))
 	must(t, s.Bootstrap(ctx, scoped, admin.Issuer, admin.Subject))
 	post := func(path string, v any) map[string]any {
 		b, _ := json.Marshal(v)
@@ -184,45 +183,61 @@ func TestApplicationPermissionsLinkingAndTransitions(t *testing.T) {
 	_ = edition
 	_ = db
 }
-func TestMigrationFailureRollbackAndRerun(t *testing.T) {
-	app, db := setup(t)
-	_ = app
-	// A separate schema simulates a pre-MVP database with exact legacy values.
-	schema := "legacy_" + strings.ToLower(s.ID())
+func TestMigrationResetRollbackAndRerun(t *testing.T) {
+	_, db := setup(t)
+	schema := "reset_" + strings.ToLower(s.ID())
 	must(t, db.Exec("CREATE SCHEMA "+schema).Error)
 	defer db.Exec("DROP SCHEMA " + schema + " CASCADE")
 	must(t, db.Transaction(func(tx *gorm.DB) error {
 		if e := tx.Exec("SET LOCAL search_path TO " + schema).Error; e != nil {
 			return e
 		}
-		return tx.Exec("CREATE TABLE feedback_notes(id bigserial PRIMARY KEY,title text NOT NULL,created_at timestamptz); INSERT INTO feedback_notes(id,title,created_at) VALUES(42,'Unverändert','2020-01-02T03:04:05Z')").Error
+		return tx.Exec("CREATE TABLE feedback_notes(id bigserial PRIMARY KEY,title text NOT NULL,created_at timestamptz); INSERT INTO feedback_notes(id,title,created_at) VALUES(42,'Disposable development note','2020-01-02T03:04:05Z')").Error
 	}))
-	run := func(in s.LegacyEdition) error {
+	rollback := errors.New("force rollback after migration")
+	run := func(abort bool) error {
 		return db.Transaction(func(tx *gorm.DB) error {
 			if e := tx.Exec("SET LOCAL search_path TO " + schema).Error; e != nil {
 				return e
 			}
-			return s.Migrate(ctx, tx, in)
+			if e := s.Migrate(ctx, tx); e != nil {
+				return e
+			}
+			if abort {
+				return rollback
+			}
+			return nil
 		})
 	}
-	if e := run(s.LegacyEdition{}); e == nil {
-		t.Fatal("missing input accepted")
+	if e := run(true); !errors.Is(e, rollback) {
+		t.Fatal("expected forced rollback", e)
 	}
-	must(t, db.Transaction(func(tx *gorm.DB) error {
-		tx.Exec("SET LOCAL search_path TO " + schema)
-		var exists bool
-		tx.Raw("SELECT to_regclass('schema_migrations') IS NOT NULL").Scan(&exists)
-		if exists {
-			return fmt.Errorf("DDL survived rollback")
-		}
-		return nil
-	}))
-	must(t, run(s.LegacyEdition{Label: "Explicit legacy", StartDay: "2020-09-10", EndDay: "2020-09-12"}))
-	must(t, run(s.LegacyEdition{}))
-	if count(t, db, "SELECT count(*) FROM "+schema+".feedback_notes WHERE id=42 AND title='Unverändert' AND created_at='2020-01-02T03:04:05Z' AND edition_id IS NOT NULL") != 1 {
-		t.Fatal("backfill changed legacy data")
+	if count(t, db, "SELECT count(*) FROM "+schema+".feedback_notes WHERE id=42") != 1 {
+		t.Fatal("rollback lost original feedback")
+	}
+	var exists bool
+	must(t, db.Raw("SELECT to_regclass(?) IS NOT NULL", schema+".schema_migrations").Scan(&exists).Error)
+	if exists {
+		t.Fatal("migration marker survived rollback")
+	}
+	must(t, run(false))
+	if count(t, db, "SELECT count(*) FROM "+schema+".feedback_notes") != 0 {
+		t.Fatal("unscoped development notes were not discarded")
+	}
+	if count(t, db, "SELECT count(*) FROM "+schema+".editions") != 0 {
+		t.Fatal("migration invented an edition")
+	}
+	must(t, db.Exec("INSERT INTO "+schema+".editions(id,label,start_day,end_day) VALUES('test-edition','Test edition','2027-09-10','2027-09-12')").Error)
+	must(t, db.Exec("INSERT INTO "+schema+".feedback_notes(id,title,created_at,edition_id) VALUES(43,'Keep scoped note','2027-09-10T09:00:00Z','test-edition')").Error)
+	must(t, run(false))
+	if count(t, db, "SELECT count(*) FROM "+schema+".feedback_notes WHERE id=43 AND title='Keep scoped note' AND edition_id='test-edition'") != 1 {
+		t.Fatal("rerun lost edition-scoped feedback")
+	}
+	if count(t, db, "SELECT count(*) FROM "+schema+".schema_migrations") != 2 {
+		t.Fatal("migration versions duplicated")
 	}
 }
+
 func TestHTTPGuestPrivacyAndOutage(t *testing.T) {
 	app, _ := setup(t)
 	_, part, _ := baseline(t, app)

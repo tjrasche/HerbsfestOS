@@ -14,13 +14,12 @@ import (
 //go:embed migrations/*.sql authorization-model.json
 var Files embed.FS
 
-type LegacyEdition struct{ Label, StartDay, EndDay string }
-
 func ID() string { return rand.Text() }
 
-// Migrate runs only at the explicit maintenance entrypoint. All DDL and backfill
-// are in a single transaction; advisory locking also serializes empty databases.
-func Migrate(ctx context.Context, db *gorm.DB, legacy LegacyEdition) error {
+// Migrate runs at deployment preparation. The initial scheduling migration
+// discards disposable, unscoped development feedback. Versioned/scoped data is
+// preserved on every rerun. All changes commit or roll back together.
+func Migrate(ctx context.Context, db *gorm.DB) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Exec("SELECT pg_advisory_xact_lock(71420931)").Error; err != nil {
 			return err
@@ -44,13 +43,6 @@ func Migrate(ctx context.Context, db *gorm.DB, legacy LegacyEdition) error {
 				return err
 			}
 		}
-		var count int64
-		if err := tx.Raw("SELECT count(*) FROM feedback_notes").Scan(&count).Error; err != nil {
-			return err
-		}
-		if count > 0 && !validDates(legacy.Label, legacy.StartDay, legacy.EndDay) {
-			return errors.New("legacy feedback requires explicit LEGACY_EDITION_LABEL, LEGACY_START_DAY, LEGACY_END_DAY")
-		}
 		sql, err := Files.ReadFile("migrations/001.sql")
 		if err != nil {
 			return err
@@ -61,36 +53,12 @@ func Migrate(ctx context.Context, db *gorm.DB, legacy LegacyEdition) error {
 		if err = tx.Exec("ALTER TABLE feedback_notes ADD COLUMN edition_id text REFERENCES editions(id)").Error; err != nil {
 			return err
 		}
-		if count > 0 {
-			// Snapshot exact values to validate the backfill before enforcing NOT NULL.
-			if err = tx.Exec("CREATE TEMP TABLE legacy_note_snapshot ON COMMIT DROP AS SELECT id,title,created_at FROM feedback_notes").Error; err != nil {
-				return err
-			}
-			edition := ID()
-			var existing Edition
-			if err = tx.Raw("SELECT * FROM editions WHERE label=?", legacy.Label).Scan(&existing).Error; err != nil {
-				return err
-			}
-			if existing.ID != "" {
-				if existing.StartDay.Format("2006-01-02") != legacy.StartDay || existing.EndDay.Format("2006-01-02") != legacy.EndDay {
-					return errors.New("legacy target dates conflict with existing edition")
-				}
-				edition = existing.ID
-			} else if err = tx.Exec("INSERT INTO editions(id,label,start_day,end_day) VALUES(?,?,?::date,?::date)", edition, legacy.Label, legacy.StartDay, legacy.EndDay).Error; err != nil {
-				return err
-			}
-
-			if err = tx.Exec("UPDATE feedback_notes SET edition_id=? WHERE edition_id IS NULL", edition).Error; err != nil {
-				return err
-			}
-			var differences int64
-			if err = tx.Raw("SELECT count(*) FROM ((SELECT id,title,created_at FROM feedback_notes EXCEPT SELECT * FROM legacy_note_snapshot) UNION ALL (SELECT * FROM legacy_note_snapshot EXCEPT SELECT id,title,created_at FROM feedback_notes)) d").Scan(&differences).Error; err != nil {
-				return err
-			}
-			if differences != 0 {
-				return errors.New("legacy note invariant failed")
-			}
+		// Explicitly authorized development reset. Delete only unscoped notes;
+		// the migration version gate above prevents this on later deployments.
+		if err = tx.Exec("DELETE FROM feedback_notes WHERE edition_id IS NULL").Error; err != nil {
+			return err
 		}
+
 		if err = tx.Exec("ALTER TABLE feedback_notes ALTER COLUMN edition_id SET NOT NULL").Error; err != nil {
 			return err
 		}

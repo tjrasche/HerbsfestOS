@@ -83,7 +83,7 @@ func run() error {
 	if *migrate {
 		migrationCtx, cancel := context.WithTimeout(ctx, time.Minute)
 		defer cancel()
-		return scheduling.Migrate(migrationCtx, db, scheduling.LegacyEdition{Label: os.Getenv("LEGACY_EDITION_LABEL"), StartDay: os.Getenv("LEGACY_START_DAY"), EndDay: os.Getenv("LEGACY_END_DAY")})
+		return scheduling.Migrate(migrationCtx, db)
 	}
 
 	if *bootstrap {
@@ -94,7 +94,7 @@ func run() error {
 		if (issuer == "") != (subject == "") {
 			return errors.New("BOOTSTRAP_ISSUER and BOOTSTRAP_SUBJECT must be supplied together")
 		}
-		if err := scheduling.Migrate(ctx, db, scheduling.LegacyEdition{Label: os.Getenv("LEGACY_EDITION_LABEL"), StartDay: os.Getenv("LEGACY_START_DAY"), EndDay: os.Getenv("LEGACY_END_DAY")}); err != nil {
+		if err := scheduling.Migrate(ctx, db); err != nil {
 			return err
 		}
 		cfg, err := openfga.ConfigFromEnv(os.Getenv)

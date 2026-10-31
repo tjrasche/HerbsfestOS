@@ -651,17 +651,19 @@ Kubernetes API write permissions in the application pod.
 Set initial non-secret inputs in
 `config/overlays/prod/scheduling-setup.env`, then commit and push:
 
-- If unscoped legacy feedback exists, supply the explicitly selected
-  `LEGACY_EDITION_LABEL`, `LEGACY_START_DAY`, and `LEGACY_END_DAY`. Empty databases
-  do not need them. Missing required legacy inputs stop preparation before writes;
-  no dates or production rows are guessed, deleted, or reassigned on reruns.
+The initial scheduling migration discards old, unscoped development feedback
+notes, as explicitly approved for this development deployment. It creates no
+placeholder edition and requires no legacy-edition inputs. Deletion and schema
+changes are transactional. Once version 1 is recorded, later deployments leave
+all edition-scoped notes and scheduling data intact.
+
 - Set `BOOTSTRAP_ISSUER` and `BOOTSTRAP_SUBJECT` together to identify the initial
   organizer from validated OIDC identity. Neither email nor provider display names
   establish ownership. Empty bootstrap inputs grant nobody access. The bootstrap
   is recorded once, so later grant revocation survives reconciliation.
 
 Kustomize hashes the setup ConfigMap, so changing these inputs rolls the pod
-and reruns preparation. Missing/invalid inputs or an unavailable authorization
+and reruns preparation. Invalid bootstrap inputs or an unavailable authorization
 engine keep the new web pod stopped. Check GitOps status/logs through the existing
 operations workflow. The command-line `-migrate` and `-bootstrap-organizer` entrypoints
 remain available for deliberate maintenance; they are not prerequisites for GitOps.

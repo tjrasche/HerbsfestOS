@@ -34,7 +34,7 @@ func run() error {
 		return e
 	}
 	defer p.Close()
-	if e = s.Migrate(context.Background(), db, s.LegacyEdition{}); e != nil {
+	if e = s.Migrate(context.Background(), db); e != nil {
 		return e
 	}
 	if e = s.Bootstrap(context.Background(), db, "urn:herbstfest:local", "developer"); e != nil {
