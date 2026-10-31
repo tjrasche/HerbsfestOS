@@ -630,8 +630,9 @@ For this SSH host, tools were installed without sudo under `/tmp/herbstfest-tool
 ### GitOps deployment and initial setup
 
 CI publishes one image digest for the web and `prepare` init containers. Flux
-reconciles the Deployment with `Recreate`: the previous web pod stops before
-schema migration, and the new web process starts only after preparation succeeds.
+reconciles the Deployment using Kubernetes' default rolling-update strategy.
+The new web process starts after preparation succeeds; the old pod may briefly
+return errors while migrations run. This tradeoff is accepted during development.
 No workstation Kubernetes access or manual in-cluster commands are required.
 
 The init container runs `web -prepare`. It applies the versioned transactional
