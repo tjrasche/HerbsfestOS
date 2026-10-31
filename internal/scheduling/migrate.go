@@ -1,0 +1,129 @@
+package scheduling
+
+import (
+	"context"
+	"crypto/rand"
+	"embed"
+	"errors"
+	"strings"
+	"time"
+
+	"gorm.io/gorm"
+)
+
+//go:embed migrations/*.sql authorization-model.json
+var Files embed.FS
+
+type LegacyEdition struct{ Label, StartDay, EndDay string }
+
+func ID() string { return rand.Text() }
+
+// Migrate runs only at the explicit maintenance entrypoint. All DDL and backfill
+// are in a single transaction; advisory locking also serializes empty databases.
+func Migrate(ctx context.Context, db *gorm.DB, legacy LegacyEdition) error {
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec("SELECT pg_advisory_xact_lock(71420931)").Error; err != nil {
+			return err
+		}
+		if err := tx.Exec("CREATE TABLE IF NOT EXISTS schema_migrations(version integer PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())").Error; err != nil {
+			return err
+		}
+		var done int64
+		if err := tx.Raw("SELECT count(*) FROM schema_migrations WHERE version=1").Scan(&done).Error; err != nil {
+			return err
+		}
+		if done > 0 {
+			return nil
+		}
+		var exists bool
+		if err := tx.Raw("SELECT to_regclass('feedback_notes') IS NOT NULL").Scan(&exists).Error; err != nil {
+			return err
+		}
+		if !exists {
+			if err := tx.Exec("CREATE TABLE feedback_notes(id bigserial PRIMARY KEY,title varchar(200) NOT NULL,created_at timestamptz)").Error; err != nil {
+				return err
+			}
+		}
+		var count int64
+		if err := tx.Raw("SELECT count(*) FROM feedback_notes").Scan(&count).Error; err != nil {
+			return err
+		}
+		if count > 0 && !validDates(legacy.Label, legacy.StartDay, legacy.EndDay) {
+			return errors.New("legacy feedback requires explicit LEGACY_EDITION_LABEL, LEGACY_START_DAY, LEGACY_END_DAY")
+		}
+		sql, err := Files.ReadFile("migrations/001.sql")
+		if err != nil {
+			return err
+		}
+		if err = tx.Exec(string(sql)).Error; err != nil {
+			return err
+		}
+		if err = tx.Exec("ALTER TABLE feedback_notes ADD COLUMN edition_id text REFERENCES editions(id)").Error; err != nil {
+			return err
+		}
+		if count > 0 {
+			// Snapshot exact values to validate the backfill before enforcing NOT NULL.
+			if err = tx.Exec("CREATE TEMP TABLE legacy_note_snapshot ON COMMIT DROP AS SELECT id,title,created_at FROM feedback_notes").Error; err != nil {
+				return err
+			}
+			edition := ID()
+			var existing Edition
+			if err = tx.Raw("SELECT * FROM editions WHERE label=?", legacy.Label).Scan(&existing).Error; err != nil {
+				return err
+			}
+			if existing.ID != "" {
+				if existing.StartDay.Format("2006-01-02") != legacy.StartDay || existing.EndDay.Format("2006-01-02") != legacy.EndDay {
+					return errors.New("legacy target dates conflict with existing edition")
+				}
+				edition = existing.ID
+			} else if err = tx.Exec("INSERT INTO editions(id,label,start_day,end_day) VALUES(?,?,?::date,?::date)", edition, legacy.Label, legacy.StartDay, legacy.EndDay).Error; err != nil {
+				return err
+			}
+
+			if err = tx.Exec("UPDATE feedback_notes SET edition_id=? WHERE edition_id IS NULL", edition).Error; err != nil {
+				return err
+			}
+			var differences int64
+			if err = tx.Raw("SELECT count(*) FROM ((SELECT id,title,created_at FROM feedback_notes EXCEPT SELECT * FROM legacy_note_snapshot) UNION ALL (SELECT * FROM legacy_note_snapshot EXCEPT SELECT id,title,created_at FROM feedback_notes)) d").Scan(&differences).Error; err != nil {
+				return err
+			}
+			if differences != 0 {
+				return errors.New("legacy note invariant failed")
+			}
+		}
+		if err = tx.Exec("ALTER TABLE feedback_notes ALTER COLUMN edition_id SET NOT NULL").Error; err != nil {
+			return err
+		}
+		return tx.Exec("INSERT INTO schema_migrations(version) VALUES(1)").Error
+	})
+}
+
+func validDates(label, start, end string) bool {
+	a, e := time.Parse("2006-01-02", start)
+	b, f := time.Parse("2006-01-02", end)
+	return strings.TrimSpace(label) != "" && len(label) <= 80 && e == nil && f == nil && !b.Before(a)
+}
+
+// Bootstrap is deliberately separate from migration and never infers a role
+// from an identity-provider claim. It is an operator-only maintenance command.
+func Bootstrap(ctx context.Context, db *gorm.DB, issuer, subject string) error {
+	if issuer == "" || subject == "" {
+		return errors.New("explicit BOOTSTRAP_ISSUER and BOOTSTRAP_SUBJECT required")
+	}
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec("SELECT revision FROM scheduling_state WHERE id=1 FOR UPDATE").Error; err != nil {
+			return err
+		}
+		id := ID()
+		if err := tx.Exec("INSERT INTO accounts(id,issuer,subject) VALUES(?,?,?) ON CONFLICT(issuer,subject) DO NOTHING", id, issuer, subject).Error; err != nil {
+			return err
+		}
+		if err := tx.Raw("SELECT id FROM accounts WHERE issuer=? AND subject=?", issuer, subject).Scan(&id).Error; err != nil {
+			return err
+		}
+		if err := tx.Exec("INSERT INTO global_grants(account_id) VALUES(?) ON CONFLICT DO NOTHING", id).Error; err != nil {
+			return err
+		}
+		return tx.Exec("UPDATE scheduling_state SET revision=revision+1 WHERE id=1").Error
+	})
+}

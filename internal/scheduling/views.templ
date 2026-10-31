@@ -1,0 +1,623 @@
+package scheduling
+
+import (
+	"github.com/tjrasche/HerbsfestOS/internal/auth"
+	"github.com/tjrasche/HerbsfestOS/internal/ui"
+	"time"
+)
+
+templ Hidden(name, value string) {
+	<input type="hidden" name={ name } value={ value }/>
+}
+
+templ Submit(label string) {
+	<button class="button button--primary" type="submit">{ label }</button>
+}
+
+templ Field(name, label, value string) {
+	<label>{ label }<input name={ name } value={ value } required maxlength="120"/></label>
+}
+
+templ Action(action, id, label string) {
+	<form method="post" action="/actions">
+		@Hidden("action", action)@Hidden("id", id)@Submit(label)
+	</form>
+}
+
+templ Selection(v View) {
+	if v.Global {
+		<form method="post" action="/edition-selection" class="schedule-toolbar">
+			<label>
+				Ausgabe ansehen
+				<select name="edition">
+					<option value="">Aktueller Ausgabe folgen</option>
+					for _,e := range v.Editions {
+						<option value={ e.ID } selected?={ v.Selected == e.ID && v.Selected != v.Current }>{ e.Label }</option>
+					}
+				</select>
+			</label>
+			@Submit("Auswählen")
+		</form>
+	}
+}
+
+templ SchedulePage(v View, message string) {
+	@ui.Layout("Dienstplanung · HerbstfestOS", "schedule") {
+		@ui.PageHeader("Gemeinsam anpacken", "Unsere Dienstplanung", "Anfragen werden von der Standorganisation geprüft. Bestätigte Dienste stehen im Plan.") {
+		}
+		if message!="" {
+			<p role="status">{ message }</p>
+		}
+		@Selection(v)
+		if len(v.Schedules)==0 {
+			<section class="card schedule-card"><h2>Planung noch nicht verfügbar</h2><p>Für diesen Zugang ist noch kein Dienstplan freigegeben. Bitte kontaktiere die Organisation.</p></section>
+		}
+		for _,p := range v.Schedules {
+			@ScheduleSection(v, p)
+		}
+		<section id="mine" class="card schedule-card">
+			<h2>Meine Anfragen</h2>
+			for _,r := range v.OwnRequests {
+				<article class="request-line">
+					<div>
+						<strong>{ r.Title }</strong>
+						<p>{ r.Edition+" · "+r.Time }</p>
+						<p>
+							{ status(r.Status) }
+						</p>
+						if r.Stale {
+							<p class="schedule-warning">Dienstzeiten wurden geändert. Bitte mit der Organisation abstimmen.</p>
+						}
+					</div>
+					if r.CanWithdraw {
+						@Action("withdraw", r.ID, "Zurückziehen")
+					}
+				</article>
+			}
+			if len(v.OwnRequests)==0 {
+				<p>Noch keine eigenen Anfragen.</p>
+			}
+			if v.OwnWorker!=nil {
+				<a
+					href={ safe("/workers/" + v.WorkerID) }
+				>Meine Angaben und Notizen</a>
+			}
+		</section>
+	}
+}
+
+templ ScheduleSection(v View, p Schedule) {
+	<section class="schedule-section" id={ p.ID }>
+		<div class="schedule-heading">
+			<div><p class="section-kicker">{ p.Edition.Label }</p><h2>{ p.Name }</h2></div>
+			<a
+				class="button button--secondary"
+				href={ safe("/print/" + p.ID) }
+			>Druckansicht</a>
+		</div>
+		if !p.Enabled {
+			<p class="schedule-warning">Teilnahme deaktiviert. Dieser Plan ist nur für die Gesamtorganisation lesbar.</p>
+		}
+		if v.Global && !p.CanEdit && p.Enabled {
+			<form method="post" action="/actions">
+				@Hidden("action", "team-add")@Hidden("participation_id", p.ID)@Hidden("account_id", v.AccountID)
+				<p>Zum Bearbeiten ist eine ausdrückliche Teamzuordnung erforderlich.</p>
+				@Submit("Mich zum Standteam hinzufügen")
+			</form>
+		}
+		<div class="timeline" aria-label="Zeitachse nach Tagen und Dienstbeginn">
+			for _,sh := range p.Shifts {
+				@ShiftCard(v, p, sh)
+			}
+		</div>
+		if p.CanEdit {
+			<details class="card schedule-card">
+				<summary>Dienst anlegen</summary>
+				@ShiftForm(p.ID, Shift{})
+			</details>
+			<form method="post" action="/actions" class="schedule-toolbar">
+				@Hidden("action", "signup-link")@Hidden("participation_id", p.ID)@Submit("Anmeldelink für diesen Stand erstellen / ersetzen")
+			</form>
+		}
+		if p.CanManageMembers {
+			<details class="card schedule-card">
+				<summary>Helfer und dauerhafte Standzugehörigkeit</summary>
+				<p>Ähnliche Namen können verschiedene Personen sein. Bitte vor dem Anlegen <a href="/directory">im Verzeichnis suchen</a>.</p>
+				<form method="post" action="/actions" class="schedule-form">
+					@Hidden("action", "member-add")@Hidden("stand_id", p.StandID)
+					@Field("first_name", "Vorname", "")@Field("last_name", "Nachname", "")@Submit("Neue Person zum Stand hinzufügen")
+				</form>
+				for _,m := range p.Members {
+					<div class="request-line">
+						<a
+							href={ safe("/workers/" + m.ID) }
+						>{ m.Name }</a>
+						<form method="post" action="/actions">
+							@Hidden("action", "member-remove")@Hidden("stand_id", p.StandID)@Hidden("worker_id", m.ID)@Submit("Zugehörigkeit entfernen")
+						</form>
+					</div>
+				}
+			</details>
+		}
+	</section>
+}
+
+templ ShiftCard(v View, p Schedule, sh ShiftView) {
+	<article
+		class={ "card", "schedule-card",templ.KV("shift-cancelled",sh.Cancelled) }
+	>
+		<p class="section-kicker">
+			{ sh.StartsAt.In(Berlin).Format("02.01.2006") }
+		</p>
+		<h3>{ sh.Title }</h3>
+		<p>
+			<time
+				datetime={ iso(sh.StartsAt) }
+			>
+				{ sh.Time() }
+			</time>
+		</p>
+		<p>
+			<strong>
+				{ n(len(sh.Roster))+" / "+n(sh.Capacity) }
+			</strong> bestätigt
+		</p>
+		if sh.Cancelled {
+			<p>Abgesagt</p>
+		}
+		if sh.Outside {
+			<p class="schedule-warning">Außerhalb des korrigierten Ausgabefensters. Zeiten bleiben erhalten.</p>
+		}
+		if sh.Overlap {
+			<p class="schedule-warning">Mindestens eine bestätigte Einteilung überschneidet sich. Bitte abstimmen.</p>
+		}
+		<ul class="roster-names">
+			for _,person := range sh.Roster {
+				<li>{ person.Name }</li>
+			}
+		</ul>
+		if p.CanEdit {
+			for _,r := range sh.Pending {
+				<div class="request-line">
+					<div>
+						<a
+							href={ safe("/workers/" + r.WorkerID) }
+						>{ r.Name }</a>
+						<p>Offene Anfrage</p>
+						if r.Stale {
+							<p class="schedule-warning">Für frühere Dienstzeiten angefragt.</p>
+						}
+					</div>
+					@Action("approve", r.ID, "Bestätigen")@Action("decline", r.ID, "Ablehnen")
+					<form method="post" action="/actions">@Hidden("action", "connection-link")@Hidden("worker_id", r.WorkerID)@Submit("Privater Kontolink")</form>
+				</div>
+			}
+			if !sh.Cancelled {
+				<details>
+					<summary>Dienst bearbeiten / Einteilung</summary>
+					@ShiftForm(p.ID, sh.Shift)
+					<form method="post" action="/actions" class="schedule-form">
+						@Hidden("action", "assign")@Hidden("id", sh.ID)
+						<label>
+							Helfer aus dem Stand
+							<select name="worker_id" required>
+								for _,m := range p.Members {
+									<option value={ m.ID }>{ m.Name }</option>
+								}
+							</select>
+						</label>
+						@Submit("Direkt einteilen")
+					</form>
+					<p>Weitere Helfer zuerst über die Suche zum Stand hinzufügen.</p>
+					for _,m := range sh.Roster {
+						<form method="post" action="/actions">
+							@Hidden("action", "unassign")@Hidden("id", sh.ID)@Hidden("worker_id", m.ID)@Submit(m.Name + ": Einteilung entfernen")
+						</form>
+					}
+					<form method="post" action="/actions">
+						@Hidden("action", "signup-link")@Hidden("participation_id", p.ID)@Hidden("id", sh.ID)@Submit("Anmeldelink für diesen Dienst erstellen / ersetzen")
+					</form>
+					<form method="post" action="/actions">
+						@Hidden("action", "shift-cancel")@Hidden("id", sh.ID)<label><input type="checkbox" name="confirm" value="true" required/>Absage bestätigen: Einteilungen enden, offene Anfragen werden geschlossen. Bitte Helfer selbst informieren.</label>
+						@Submit("Dienst absagen")
+					</form>
+				</details>
+			}
+		}
+		if v.OwnWorker!=nil && p.EditionID==v.Current && p.Enabled && !sh.Cancelled {
+			<form method="post" action="/requests">
+				@Hidden("key", freshKey())@Hidden("first_name", v.OwnWorker.FirstName)@Hidden("last_name", v.OwnWorker.LastName)@Hidden("shift", sh.ID)@Submit("Diesen Dienst anfragen")
+			</form>
+		}
+	</article>
+}
+
+templ ShiftForm(part string, sh Shift) {
+	<form method="post" action="/actions" class="schedule-form">
+		@Hidden("action", "shift-save")@Hidden("id", sh.ID)@Hidden("participation_id", part)@Hidden("version", n(sh.Version))
+		@Field("title", "Dienstbezeichnung", sh.Title)
+		<label>Beginn (Berliner Ortszeit)<input type="datetime-local" name="start" value={ localInput(sh.StartsAt) } required/></label><label>Zeitzone Beginn<select name="start_offset"><option value="+02:00" selected?={ summer(sh.StartsAt) }>Sommerzeit (MESZ)</option><option value="+01:00" selected?={ !summer(sh.StartsAt) }>Normalzeit (MEZ)</option></select></label>
+		<label>Ende (Berliner Ortszeit)<input type="datetime-local" name="end" value={ localInput(sh.EndsAt) } required/></label><label>Zeitzone Ende<select name="end_offset"><option value="+02:00" selected?={ summer(sh.EndsAt) }>Sommerzeit (MESZ)</option><option value="+01:00" selected?={ !summer(sh.EndsAt) }>Normalzeit (MEZ)</option></select></label>
+		<label>
+			Plätze<input
+	type="number"
+	name="capacity"
+	value={ n(max(sh.Capacity, 1)) }
+	min="1"
+	required
+/>
+		</label>
+		if sh.ID!="" {
+			<label><input type="checkbox" name="confirm" value="true"/>Zeitänderung trotz vorhandener Einteilungen bestätigen. Helfer selbst informieren; offene Anfragen werden markiert.</label>
+		}
+		@Submit("Dienst speichern")
+	</form>
+}
+
+templ AdminPage(v View) {
+	@ui.Layout("Organisation · HerbstfestOS", "schedule") {
+		<h1>Gesamtorganisation</h1>
+		@Selection(v)
+		<section class="card schedule-card">
+			<h2>Ausgaben</h2>
+			<details>
+				<summary>Neue Ausgabe</summary>
+				<form method="post" action="/actions" class="schedule-form">
+					@Hidden("action", "edition-save")@Field("label", "Ausgabenbezeichnung", "")<label>Erster Festtag<input type="date" name="start_day" required/></label><label>Letzter Festtag<input type="date" name="end_day" required/></label>
+					<label>
+						Aktive Stände und Teams übernehmen aus
+						<select name="source_id">
+							<option value="">Aktuelle Ausgabe (falls vorhanden)</option>
+							for _,e := range v.Editions {
+								<option value={ e.ID }>{ e.Label }</option>
+							}
+						</select>
+					</label>
+					<p>Der Dienstplan startet leer. Helferzugehörigkeiten bleiben erhalten.</p>
+					@Submit("Ausgabe erstellen")
+				</form>
+			</details>
+			for _,e := range v.Editions {
+				<details>
+					<summary>{ e.Label }</summary>
+					<form method="post" action="/actions" class="schedule-form">
+						@Hidden("action", "edition-save")@Hidden("id", e.ID)@Field("label", "Bezeichnung", e.Label)
+						<label>
+							Erster Festtag<input
+	type="date"
+	name="start_day"
+	value={ date(e.StartDay) }
+	required
+/>
+						</label>
+						<label>
+							Letzter Festtag<input
+	type="date"
+	name="end_day"
+	value={ date(e.EndDay) }
+	required
+/>
+						</label>
+						<p>Bestehende Dienste werden bei Datumskorrekturen beibehalten und gegebenenfalls markiert.</p>
+						@Submit("Ausgabe korrigieren")
+					</form>
+					<form method="post" action="/actions">
+						@Hidden("action", "activate")@Hidden("id", e.ID)<label><input type="checkbox" name="confirm" value="true" required/>Als aktuelle Ausgabe für alle bestätigen</label>
+						@Submit("Aktivieren")
+					</form>
+				</details>
+			}
+		</section>
+		<section class="card schedule-card">
+			<h2>Stände und Teilnahme</h2>
+			<form method="post" action="/actions" class="schedule-form">
+				@Hidden("action", "stand-save")@Field("name", "Neuer Stand", "")@Submit("Stand erstellen")
+			</form>
+			for _,s := range v.Stands {
+				<details>
+					<summary>{ s.Name }</summary>
+					<form method="post" action="/actions">
+						@Hidden("action", "stand-save")@Hidden("id", s.ID)@Field("name", "Gemeinsamer Standname", s.Name)@Submit("Umbenennen")
+					</form>
+				</details>
+			}
+			<form method="post" action="/actions" class="schedule-form">
+				@Hidden("action", "participation")@Hidden("enabled", "true")
+				<label>
+					Ausgabe
+					<select name="edition_id" required>
+						for _,e := range v.Editions {
+							<option value={ e.ID } selected?={ v.Selected == e.ID }>{ e.Label }</option>
+						}
+					</select>
+				</label>
+				<label>
+					Stand
+					<select name="stand_id" required>
+						for _,s := range v.Stands {
+							<option value={ s.ID }>{ s.Name }</option>
+						}
+					</select>
+				</label>
+				@Submit("Stand teilnehmen lassen")
+			</form>
+			for _,p := range v.Schedules {
+				<details>
+					<summary>{ p.Name+" · "+p.Edition.Label }</summary>
+					<form method="post" action="/actions">
+						@Hidden("action", "participation")@Hidden("id", p.ID)@Hidden("enabled", boolString(!p.Enabled))@Submit(toggleLabel(p.Enabled))
+					</form>
+					<h3>Standteam</h3>
+					for _,person := range p.Team {
+						<form method="post" action="/actions">
+							@Hidden("action", "team-remove")@Hidden("participation_id", p.ID)@Hidden("account_id", person.ID)<span>{ person.Name }</span>
+							@Submit("Teamzuordnung entfernen")
+						</form>
+					}
+					<form method="post" action="/actions">
+						@Hidden("action", "team-add")@Hidden("participation_id", p.ID)
+						<label>
+							Konto
+							<select name="account_id" required>
+								for _,a := range v.Accounts {
+									<option value={ a.ID }>{ a.Name }</option>
+								}
+							</select>
+						</label>
+						@Submit("Zum Team hinzufügen")
+					</form>
+					<form method="post" action="/actions">
+						@Hidden("action", "organizer-invite")@Hidden("scope", "team")@Hidden("participation_id", p.ID)@Submit("Private Teameinladung erstellen")
+					</form>
+				</details>
+			}
+		</section>
+		<section class="card schedule-card">
+			<h2>Gesamtorganisation und private Einladungen</h2>
+			for _,a := range v.Globals {
+				<form method="post" action="/actions">
+					@Hidden("action", "global-remove")@Hidden("account_id", a.ID)<span>{ a.Name }</span>
+					@Submit("Globalen Zugriff entfernen")
+				</form>
+			}
+			<form method="post" action="/actions">
+				@Hidden("action", "organizer-invite")@Hidden("scope", "global")@Submit("Globale Einladung erstellen")
+			</form>
+			<p>Einladungen werden manuell geteilt, gelten sieben Tage und werden erst bei bestätigter Einlösung verbraucht.</p>
+			<form method="post" action="/actions">
+				@Hidden("action", "capability-revoke")@Field("token", "Einladungs-/Anmeldetoken widerrufen", "")@Submit("Widerrufen")
+			</form>
+		</section>
+		<section class="card schedule-card">
+			<h2>Doppelte Helfer zusammenführen</h2>
+			<p>Vorher beide Datensätze im Verzeichnis prüfen. Verschiedene verknüpfte Konten blockieren die Zusammenführung.</p>
+			<form method="post" action="/actions" class="schedule-form">
+				@Hidden("action", "worker-merge")<label>Beibehaltene Person<select name="id" required>
+for _,w := range v.AllWorkers {
+<option value={ w.ID }>{ w.Name }</option>
+}
+</select></label><label>Zusammenzuführende Person<select name="other_worker_id" required>
+for _,w := range v.AllWorkers {
+<option value={ w.ID }>{ w.Name }</option>
+}
+</select></label>@Field("first_name", "Resultierender Vorname", "")@Field("last_name", "Resultierender Nachname", "")<label>Kontakt-E-Mail<input name="email" type="email"/></label><label>Telefon<input name="phone"/></label><label>Gemeinsame Notizen<textarea name="notes"></textarea></label><label><input name="confirm" type="checkbox" value="true" required/>Resultierende Angaben und Zusammenführung geprüft</label>
+				@Submit("Zusammenführen")
+			</form>
+		</section>
+	}
+}
+
+templ DirectoryPage(v View, rows []DirectoryResult, query string) {
+	@ui.Layout("Helfer suchen · HerbstfestOS", "schedule") {
+		<h1>Helfer suchen</h1>
+		<p>Gleiche Namen oder Kontakte beweisen keine Identität. Nicht zugehörige Kontakte sind maskiert.</p>
+		<form method="get" action="/directory" class="schedule-form">
+			<label>Name oder exakter Kontakt<input name="q" value={ query } minlength="2"/></label>
+			@Submit("Suchen")
+		</form>
+		for _,row := range rows {
+			<article class="card schedule-card">
+				<h2>
+					{ row.Name() }
+				</h2>
+				<p>{ row.Email+" · "+row.Phone }</p>
+
+				if row.Full {
+					<a
+						href={ safe("/workers/" + row.ID) }
+					>Angaben und Notizen</a>
+				}
+				<form method="post" action="/actions">@Hidden("action","assign")@Hidden("worker_id",row.ID)
+<label>Direkt einem Dienst zuteilen<select name="id" required>
+for _,p := range v.Schedules {
+if p.CanEdit {
+for _,sh := range p.Shifts {
+if !sh.Cancelled {
+<option value={ sh.ID }>{ p.Name+" · "+sh.Title+" · "+sh.Time() }</option>
+}
+}
+}
+}
+</select></label>@Submit("Einteilen")</form><form method="post" action="/actions">
+					@Hidden("action", "member-add")@Hidden("worker_id", row.ID)
+					<label>
+						Zum Stand hinzufügen
+						<select name="stand_id" required>
+							for _,p := range v.Schedules {
+								if p.CanManageMembers {
+									<option value={ p.StandID }>{ p.Name }</option>
+								}
+							}
+						</select>
+					</label>
+					@Submit("Zugehörigkeit herstellen")
+				</form>
+			</article>
+		}
+	}
+}
+
+templ WorkerPage(v View, w Worker) {
+	@ui.Layout("Helferangaben · HerbstfestOS", "schedule") {
+		<h1>
+			{ w.Name() }
+		</h1>
+		<p>Angaben werden mit allen berechtigten Standteams geteilt. Notizen sind auch für diese Person sichtbar.</p>
+		<form method="post" action="/actions" class="card schedule-card schedule-form">
+			@Hidden("action", "worker-save")@Hidden("id", w.ID)@Field("first_name", "Vorname", w.FirstName)@Field("last_name", "Nachname", w.LastName)<label>Kontakt-E-Mail<input name="email" type="email" value={ w.Email } maxlength="320"/></label><label>Telefon<input name="phone" value={ w.Phone } maxlength="80"/></label><label>Notizen<textarea name="notes" maxlength="20000" readonly?={ !notesEditable(v,w.ID) }>{ w.Notes }</textarea></label>
+			@Submit("Angaben speichern")
+		</form>
+		if w.AccountID==nil {
+			<form method="post" action="/actions">
+				@Hidden("action", "connection-link")@Hidden("worker_id", w.ID)@Submit("Privaten Kontoverbindungslink erstellen / ersetzen")
+			</form>
+		}
+	}
+}
+
+templ SignupPage(v SignupView, in SignupInput, message string, now time.Time) {
+	@ui.Layout("Zum Helfen anmelden · HerbstfestOS", "signup") {
+		<div class="signup-panel">
+			<p class="section-kicker">{ v.Edition+" · "+v.Name }</p>
+			<h1>Gemeinsam wird’s ein Fest.</h1>
+			<p>Nur Vor- und Nachname sind nötig. Jede Anfrage wird von der Organisation bestätigt.</p>
+			if message!="" {
+				<p class="notice schedule-warning" role="alert">{ message }</p>
+			}
+			<form
+				method="post"
+				class="schedule-form"
+				action={ safe("/register/" + in.Token) }
+			>
+				@Hidden("key", in.Key)@Field("first_name", "Vorname", in.FirstName)@Field("last_name", "Nachname", in.LastName)
+				<fieldset>
+					<legend>Deine Dienste</legend>
+					for _,sh := range v.Shifts {
+						<label class="signup-shift">
+							<input
+								type="checkbox"
+								name="shift"
+								value={ sh.ID }
+								checked?={ contains(in.ShiftIDs, sh.ID) }
+								disabled?={ sh.Cancelled || sh.Free <= 0 || !now.Before(sh.StartsAt) }
+							/>
+							<span>
+								<strong>{ sh.Title }</strong>
+								<br/>
+								{ sh.Time() }
+								<br/>
+								{ n(sh.Free)+" freie Plätze" }
+								if sh.Cancelled || !now.Before(sh.StartsAt) {
+									<span>· Keine neuen Anfragen</span>
+								}
+							</span>
+						</label>
+					}
+				</fieldset>
+				@Submit("Alle ausgewählten Dienste anfragen")
+			</form>
+			<p>Ein Konto ist optional. Ohne Konto erreichst du die Organisation für Änderungen und Rückfragen.</p>
+		</div>
+	}
+}
+
+templ SubmittedPage(token string) {
+	@ui.Layout("Anfragen gespeichert · HerbstfestOS", "signup") {
+		<div class="signup-panel">
+			<h1>Deine Anfragen sind gespeichert.</h1>
+			<p>Sie warten auf Bestätigung durch die Standorganisation. Noch ist kein Platz zugesagt.</p>
+			if token!="" {
+				<h2>Optional: Konto verbinden</h2>
+				<p>Damit kannst du später deine Anfragen ansehen und offene Anfragen zurückziehen. Die gespeicherten Anfragen bleiben auch ohne Konto erhalten.</p><a
+	class="button button--primary"
+	href={ safe("/proof/" + token) }
+>Anmelden oder Konto erstellen</a>
+			}
+			<p>Ohne Konto: Bitte wende dich für Änderungen an die Standorganisation.</p>
+		</div>
+	}
+}
+
+templ ProofPage(kind, token string) {
+	@ui.Layout("Private Verbindung · HerbstfestOS", "signup") {
+		<div class="signup-panel">
+			<h1>Private Einladung bestätigen</h1>
+			<p>Dieser Link ist privat, einmalig und sieben Tage gültig. Öffnen allein löst ihn nicht ein.</p>
+			if auth.CurrentUser(ctx).Subject=="" {
+				<a
+					class="button button--primary"
+					href={ safe(loginPath(token)) }
+				>Bei ZITADEL anmelden / registrieren</a>
+			}
+			<form
+				method="post"
+				action={ safe("/proof/" + token) }
+			>
+				@Hidden("kind", kind)@Submit(proofLabel(kind))
+			</form>
+		</div>
+	}
+}
+
+templ LinkPage(path string) {
+	@ui.Layout("Link erstellt · HerbstfestOS", "schedule") {
+		<h1>Link erstellt</h1>
+		<p>Bitte kopieren und persönlich teilen. Es wurde keine Nachricht versandt.</p>
+		<p>
+			<a
+				class="copy-link"
+				href={ safe(path) }
+			>{ path }</a>
+		</p><a href="/">Zur Dienstplanung</a>
+	}
+}
+
+templ FeedbackPage(v View) {
+	@ui.Layout("Feedback · HerbstfestOS", "feedback") {
+		<h1>Feedback zur ausgewählten Ausgabe</h1>
+		@Selection(v)
+		if v.Selected!="" {
+			<form method="post" action="/feedback-notes" class="schedule-form">
+				@Field("title", "Notiz", "")@Submit("Feedback speichern")
+			</form>
+		}
+		for _,note := range v.Notes {
+			<article class="card schedule-card">
+				<p>{ note.Title }</p>
+				<time>
+					{ note.CreatedAt.In(Berlin).Format("02.01.2006 15:04") }
+				</time>
+			</article>
+		}
+	}
+}
+
+templ PrintPage(p Schedule, now time.Time) {
+	<!DOCTYPE html>
+	<html lang="de">
+		<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Dienstplan · Ringinger Herbstfest</title><link rel="stylesheet" href="/static/style.css"/></head>
+		<body class="print-roster">
+			<h1>{ "Ringinger Herbstfest · "+p.Edition.Label }</h1>
+			<h2>{ p.Name }</h2>
+			<p>
+				{ "Druckstand: "+now.In(Berlin).Format("02.01.2006 15:04 MST") }
+			</p>
+			<p class="no-print">Mit der Druckfunktion des Browsers drucken. <a href="/">Zurück</a></p>
+			for _,sh := range p.Shifts {
+				if !sh.Cancelled {
+					<section>
+						<h3>{ sh.Title }</h3>
+						<p>
+							{ sh.Time() }
+						</p>
+						<ul>
+							for _,person := range sh.Roster {
+								<li>{ person.Name }</li>
+							}
+						</ul>
+					</section>
+				}
+			}
+		</body>
+	</html>
+}

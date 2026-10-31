@@ -13,13 +13,42 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17.6-alpine
+        env:
+          POSTGRES_USER: scheduling
+          POSTGRES_PASSWORD: scheduling-local-ci
+          POSTGRES_DB: scheduling_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scheduling -d scheduling_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      SCHEDULING_TEST_DATABASE_URL: postgres://scheduling:scheduling-local-ci@127.0.0.1:5432/scheduling_test?sslmode=disable
+      SCHEDULING_TEST_FGA_URL: http://127.0.0.1:8180
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
           cache-dependency-path: go.sum
+      - name: Start disposable authorization engine
+        run: |
+          docker run -d --name scheduling-fga -p 127.0.0.1:8180:8080 \
+            openfga/openfga:v1.21.0 run --datastore-engine=memory \
+            --playground-enabled=false --metrics-enabled=false
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8180/healthz > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          docker logs scheduling-fga
+          exit 1
       - run: make test
+      - name: Check application races
+        run: go test -race ./...
+
       - name: Check generated templates are committed
         run: git diff --exit-code -- internal
       - name: Check production publishing and manifests

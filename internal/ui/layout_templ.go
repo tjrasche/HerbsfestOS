@@ -44,16 +44,46 @@ func Layout(title, activePage string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta name=\"theme-color\" content=\"#0f4787\"><link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/brand/mascot.svg\"><link rel=\"preload\" href=\"/static/brand/source-sans-3-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin><link rel=\"stylesheet\" href=\"/static/style.css\"><script src=\"/static/htmx.min.js\" defer></script><script src=\"/static/app.js\" defer></script></head><body><a class=\"skip-link\" href=\"#main\">Zum Inhalt springen</a><div class=\"app-shell\"><aside class=\"sidebar\" aria-label=\"Arbeitsbereich\"><a class=\"brand\" href=\"/\" aria-label=\"Ringinger Herbstfest · Startseite\"><span class=\"brand__mark\"><img src=\"/static/brand/mascot.svg\" width=\"48\" height=\"48\" alt=\"\"></span> <span class=\"brand__name\">Ringinger<strong>Herbstfest<span class=\"brand__period\">.</span></strong></span></a><div class=\"workspace-label\"><span aria-hidden=\"true\"></span>Unser Orga-Workspace</div><nav class=\"navigation\" aria-label=\"Hauptnavigation\"><p class=\"navigation__label\">Gemeinsam organisieren</p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta name=\"theme-color\" content=\"#0f4787\"><link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/brand/mascot.svg\"><link rel=\"preload\" href=\"/static/brand/source-sans-3-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin><link rel=\"stylesheet\" href=\"/static/style.css\"><script src=\"/static/htmx.min.js\" defer></script><script src=\"/static/app.js\" defer></script></head><body><a class=\"skip-link\" href=\"#main\">Zum Inhalt springen</a><div class=\"app-shell\"><aside class=\"sidebar\" aria-label=\"Arbeitsbereich\"><a class=\"brand\" href=\"/\" aria-label=\"Ringinger Herbstfest · Startseite\"><span class=\"brand__mark\"><img src=\"/static/brand/mascot.svg\" width=\"48\" height=\"48\" alt=\"\"></span> <span class=\"brand__name\">Ringinger<strong>Herbstfest<span class=\"brand__period\">.</span></strong></span></a><div class=\"workspace-label\"><span aria-hidden=\"true\"></span>Unser Orga-Workspace</div><nav class=\"navigation\" aria-label=\"Hauptnavigation\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 = []any{"nav-link", templ.KV("nav-link--active", activePage == "feedback")}
+		if navigation(ctx).Private {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<p class=\"navigation__label\">Gemeinsam organisieren</p><a class=\"nav-link\" href=\"/\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = Icon(IconFeedback).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<span>Dienstplanung</span></a> <a class=\"nav-link\" href=\"/#mine\">Meine Anfragen</a> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if navigation(ctx).Organizer {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<a class=\"nav-link\" href=\"/directory\">Helfer suchen</a>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if navigation(ctx).Global {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<a class=\"nav-link\" href=\"/admin\">Organisation</a><a class=\"nav-link\" href=\"/feedback-notes\">Feedback</a> ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+		}
+		var templ_7745c5c3_Var3 = []any{"nav-link", templ.KV("nav-link--active", activePage == "design-system")}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var3...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<a class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<a class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -66,63 +96,20 @@ func Layout(title, activePage string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" href=\"/\" aria-current=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" href=\"/design-system\" aria-current=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(activePageValue(activePage == "feedback"))
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(activePageValue(activePage == "design-system"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/layout.templ`, Line: 31, Col: 151}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/layout.templ`, Line: 43, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = Icon(IconFeedback).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<span>Feedback</span><span class=\"nav-link__indicator\" aria-hidden=\"true\"></span></a> ")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var6 = []any{"nav-link", templ.KV("nav-link--active", activePage == "design-system")}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var6...)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<a class=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(templ.CSSClasses(templ_7745c5c3_Var6).String())
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/layout.templ`, Line: 1, Col: 0}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" href=\"/design-system\" aria-current=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(activePageValue(activePage == "design-system"))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/layout.templ`, Line: 34, Col: 174}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -130,7 +117,7 @@ func Layout(title, activePage string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<span>Designsystem</span><span class=\"nav-link__indicator\" aria-hidden=\"true\"></span></a></nav><div class=\"sidebar__bottom\"><div class=\"sidebar__message\"><span class=\"sidebar__motif\" aria-hidden=\"true\"></span><p>Ein Fest, das verbindet.</p><span>Ein Team, das es möglich macht.</span></div><a class=\"sidebar__website\" href=\"https://ringinger-herbstfest.de/\" target=\"_blank\" rel=\"noopener noreferrer\">Unsere Fest-Website ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<span>Designsystem</span><span class=\"nav-link__indicator\" aria-hidden=\"true\"></span></a></nav><div class=\"sidebar__bottom\"><div class=\"sidebar__message\"><span class=\"sidebar__motif\" aria-hidden=\"true\"></span><p>Ein Fest, das verbindet.</p><span>Ein Team, das es möglich macht.</span></div><a class=\"sidebar__website\" href=\"https://ringinger-herbstfest.de/\" target=\"_blank\" rel=\"noopener noreferrer\">Unsere Fest-Website ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -138,48 +125,48 @@ func Layout(title, activePage string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<span class=\"sr-only\">(öffnet in einem neuen Tab)</span></a></div></aside><div class=\"workspace\"><header class=\"topbar\"><div class=\"breadcrumb\"><span>Organisation</span><span class=\"breadcrumb__separator\" aria-hidden=\"true\">/</span><strong>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<span class=\"sr-only\">(öffnet in einem neuen Tab)</span></a></div></aside><div class=\"workspace\"><header class=\"topbar\"><div class=\"breadcrumb\"><span>Organisation</span><span class=\"breadcrumb__separator\" aria-hidden=\"true\">/</span><strong>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(sectionTitle(activePage))
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(sectionTitle(activePage))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/layout.templ`, Line: 45, Col: 152}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/layout.templ`, Line: 55, Col: 152}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</strong></div><div class=\"topbar__session\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</strong></div><div class=\"topbar__session\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if auth.CurrentUser(ctx).Subject != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<span class=\"topbar__user\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<span class=\"topbar__user\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(auth.CurrentUser(ctx).DisplayName())
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(auth.CurrentUser(ctx).DisplayName())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/layout.templ`, Line: 48, Col: 72}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/layout.templ`, Line: 59, Col: 64}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span><form method=\"post\" action=\"/auth/logout\"><button class=\"button button--secondary\" type=\"submit\">Abmelden</button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</span><form method=\"post\" action=\"/auth/logout\"><button class=\"button button--secondary\" type=\"submit\">Abmelden</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else if auth.CurrentUser(ctx).Development {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<span class=\"topbar__user\">Lokale Entwicklung</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<span class=\"topbar__user\">Lokale Entwicklung</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<a class=\"topbar__link\" href=\"https://ringinger-herbstfest.de/\" target=\"_blank\" rel=\"noopener noreferrer\"><span>Ringinger Herbstfest</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<a class=\"topbar__link\" href=\"https://ringinger-herbstfest.de/\" target=\"_blank\" rel=\"noopener noreferrer\"><span>Ringinger Herbstfest</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -187,12 +174,12 @@ func Layout(title, activePage string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<span class=\"sr-only\">(öffnet in einem neuen Tab)</span></a>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<span class=\"sr-only\">(öffnet in einem neuen Tab)</span></a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div></header><main id=\"main\" class=\"main-content\" tabindex=\"-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div></header><main id=\"main\" class=\"main-content\" tabindex=\"-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -200,7 +187,7 @@ func Layout(title, activePage string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</main><footer class=\"workspace-footer\"><div class=\"workspace-footer__signature\"><strong>HerbstfestOS</strong><span>Mit Herz organisiert.</span></div><a class=\"hosting-credit\" href=\"https://rasche-thalhofer.cloud/\" target=\"_blank\" rel=\"noopener noreferrer\"><span class=\"hosting-credit__logo\"><img src=\"/static/brand/rasche-thalhofer.svg\" width=\"30\" height=\"31\" alt=\"\" loading=\"lazy\"></span> <span class=\"hosting-credit__copy\"><span class=\"hosting-credit__thanks\">Mit freundlicher Unterstützung durch</span> <span class=\"hosting-credit__company\">Rasche &amp; Thalhofer <span>UG (haftungsbeschränkt)</span></span> <span class=\"hosting-credit__gift\">Cloud geschenkt, damit ihr feiern könnt. ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</main><footer class=\"workspace-footer\"><div class=\"workspace-footer__signature\"><strong>HerbstfestOS</strong><span>Mit Herz organisiert.</span></div><a class=\"hosting-credit\" href=\"https://rasche-thalhofer.cloud/\" target=\"_blank\" rel=\"noopener noreferrer\"><span class=\"hosting-credit__logo\"><img src=\"/static/brand/rasche-thalhofer.svg\" width=\"30\" height=\"31\" alt=\"\" loading=\"lazy\"></span> <span class=\"hosting-credit__copy\"><span class=\"hosting-credit__thanks\">Mit freundlicher Unterstützung durch</span> <span class=\"hosting-credit__company\">Rasche &amp; Thalhofer <span>UG (haftungsbeschränkt)</span></span> <span class=\"hosting-credit__gift\">Cloud geschenkt, damit ihr feiern könnt. ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -208,7 +195,7 @@ func Layout(title, activePage string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</span></span> <span class=\"sr-only\">(öffnet in einem neuen Tab)</span></a></footer></div></div><div class=\"sr-only\" id=\"app-status\" role=\"status\" aria-live=\"polite\"></div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</span></span> <span class=\"sr-only\">(öffnet in einem neuen Tab)</span></a></footer></div></div><div class=\"sr-only\" id=\"app-status\" role=\"status\" aria-live=\"polite\"></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

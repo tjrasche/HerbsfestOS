@@ -14,6 +14,7 @@ func newMux(protected http.Handler) *http.ServeMux {
 	// Public handlers register paths relative to /public, independently of auth.
 	mux.Handle("/public/", http.StripPrefix("/public", public))
 	mux.Handle("GET /static/", ui.Assets())
+	ui.Register(mux)
 	mux.Handle("/", protected)
 	return mux
 }

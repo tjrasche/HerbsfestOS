@@ -1,0 +1,663 @@
+{
+  "schema_version": "1.1",
+  "type_definitions": [
+    {
+      "type": "principal"
+    },
+    {
+      "type": "festival",
+      "relations": {
+        "global": {
+          "this": {}
+        },
+        "manage_catalog": {
+          "computedUserset": {
+            "relation": "global"
+          }
+        },
+        "manage_teams": {
+          "computedUserset": {
+            "relation": "global"
+          }
+        },
+        "manage_global_grants": {
+          "computedUserset": {
+            "relation": "global"
+          }
+        },
+        "select_edition": {
+          "computedUserset": {
+            "relation": "global"
+          }
+        },
+        "activate_edition": {
+          "computedUserset": {
+            "relation": "global"
+          }
+        },
+        "view_feedback": {
+          "computedUserset": {
+            "relation": "global"
+          }
+        },
+        "create_feedback": {
+          "computedUserset": {
+            "relation": "global"
+          }
+        },
+        "issue_organizer_invite": {
+          "computedUserset": {
+            "relation": "global"
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "global": {
+            "directly_related_user_types": [
+              {
+                "type": "principal"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stand",
+      "relations": {
+        "festival": {
+          "this": {}
+        },
+        "member": {
+          "this": {}
+        },
+        "participation": {
+          "this": {}
+        },
+        "global": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "festival"
+            },
+            "computedUserset": {
+              "relation": "global"
+            }
+          }
+        },
+        "current_team": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "participation"
+            },
+            "computedUserset": {
+              "relation": "current_team"
+            }
+          }
+        },
+        "manage_members": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "global"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "current_team"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "festival": {
+            "directly_related_user_types": [
+              {
+                "type": "festival"
+              }
+            ]
+          },
+          "member": {
+            "directly_related_user_types": [
+              {
+                "type": "principal"
+              }
+            ]
+          },
+          "participation": {
+            "directly_related_user_types": [
+              {
+                "type": "participation"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "participation",
+      "relations": {
+        "festival": {
+          "this": {}
+        },
+        "stand": {
+          "this": {}
+        },
+        "team": {
+          "this": {}
+        },
+        "current": {
+          "this": {}
+        },
+        "enabled": {
+          "this": {}
+        },
+        "global": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "festival"
+            },
+            "computedUserset": {
+              "relation": "global"
+            }
+          }
+        },
+        "member": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "stand"
+            },
+            "computedUserset": {
+              "relation": "member"
+            }
+          }
+        },
+        "current_team": {
+          "intersection": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "team"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "current"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "enabled"
+                }
+              }
+            ]
+          }
+        },
+        "view_schedule": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "global"
+                }
+              },
+              {
+                "intersection": {
+                  "child": [
+                    {
+                      "union": {
+                        "child": [
+                          {
+                            "computedUserset": {
+                              "relation": "team"
+                            }
+                          },
+                          {
+                            "computedUserset": {
+                              "relation": "member"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "computedUserset": {
+                        "relation": "current"
+                      }
+                    },
+                    {
+                      "computedUserset": {
+                        "relation": "enabled"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "edit_schedule": {
+          "intersection": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "team"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "enabled"
+                }
+              },
+              {
+                "union": {
+                  "child": [
+                    {
+                      "computedUserset": {
+                        "relation": "current"
+                      }
+                    },
+                    {
+                      "computedUserset": {
+                        "relation": "global"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "festival": {
+            "directly_related_user_types": [
+              {
+                "type": "festival"
+              }
+            ]
+          },
+          "stand": {
+            "directly_related_user_types": [
+              {
+                "type": "stand"
+              }
+            ]
+          },
+          "team": {
+            "directly_related_user_types": [
+              {
+                "type": "principal"
+              }
+            ]
+          },
+          "current": {
+            "directly_related_user_types": [
+              {
+                "type": "principal",
+                "wildcard": {}
+              }
+            ]
+          },
+          "enabled": {
+            "directly_related_user_types": [
+              {
+                "type": "principal",
+                "wildcard": {}
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "shift",
+      "relations": {
+        "participation": {
+          "this": {}
+        },
+        "signup": {
+          "this": {}
+        },
+        "current": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "participation"
+            },
+            "computedUserset": {
+              "relation": "current"
+            }
+          }
+        },
+        "enabled": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "participation"
+            },
+            "computedUserset": {
+              "relation": "enabled"
+            }
+          }
+        },
+        "current_team": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "participation"
+            },
+            "computedUserset": {
+              "relation": "current_team"
+            }
+          }
+        },
+        "view_schedule": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "participation"
+            },
+            "computedUserset": {
+              "relation": "view_schedule"
+            }
+          }
+        },
+        "edit_schedule": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "participation"
+            },
+            "computedUserset": {
+              "relation": "edit_schedule"
+            }
+          }
+        },
+        "view_signup": {
+          "intersection": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "signup"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "current"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "enabled"
+                }
+              }
+            ]
+          }
+        },
+        "request_place": {
+          "intersection": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "signup"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "current"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "enabled"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "participation": {
+            "directly_related_user_types": [
+              {
+                "type": "participation"
+              }
+            ]
+          },
+          "signup": {
+            "directly_related_user_types": [
+              {
+                "type": "principal"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "worker",
+      "relations": {
+        "festival": {
+          "this": {}
+        },
+        "owner": {
+          "this": {}
+        },
+        "member_stand": {
+          "this": {}
+        },
+        "manage": {
+          "union": {
+            "child": [
+              {
+                "tupleToUserset": {
+                  "tupleset": {
+                    "relation": "festival"
+                  },
+                  "computedUserset": {
+                    "relation": "global"
+                  }
+                }
+              },
+              {
+                "tupleToUserset": {
+                  "tupleset": {
+                    "relation": "member_stand"
+                  },
+                  "computedUserset": {
+                    "relation": "current_team"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "view_details": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "owner"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "manage"
+                }
+              }
+            ]
+          }
+        },
+        "edit_contacts": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "owner"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "manage"
+                }
+              }
+            ]
+          }
+        },
+        "edit_notes": {
+          "computedUserset": {
+            "relation": "manage"
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "festival": {
+            "directly_related_user_types": [
+              {
+                "type": "festival"
+              }
+            ]
+          },
+          "owner": {
+            "directly_related_user_types": [
+              {
+                "type": "principal"
+              }
+            ]
+          },
+          "member_stand": {
+            "directly_related_user_types": [
+              {
+                "type": "stand"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "request",
+      "relations": {
+        "festival": {
+          "this": {}
+        },
+        "worker": {
+          "this": {}
+        },
+        "shift": {
+          "this": {}
+        },
+        "own": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "worker"
+            },
+            "computedUserset": {
+              "relation": "owner"
+            }
+          }
+        },
+        "view": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "own"
+                }
+              },
+              {
+                "tupleToUserset": {
+                  "tupleset": {
+                    "relation": "festival"
+                  },
+                  "computedUserset": {
+                    "relation": "global"
+                  }
+                }
+              },
+              {
+                "tupleToUserset": {
+                  "tupleset": {
+                    "relation": "shift"
+                  },
+                  "computedUserset": {
+                    "relation": "current_team"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "withdraw": {
+          "intersection": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "own"
+                }
+              },
+              {
+                "tupleToUserset": {
+                  "tupleset": {
+                    "relation": "shift"
+                  },
+                  "computedUserset": {
+                    "relation": "current"
+                  }
+                }
+              },
+              {
+                "tupleToUserset": {
+                  "tupleset": {
+                    "relation": "shift"
+                  },
+                  "computedUserset": {
+                    "relation": "enabled"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "approve": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "shift"
+            },
+            "computedUserset": {
+              "relation": "edit_schedule"
+            }
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "festival": {
+            "directly_related_user_types": [
+              {
+                "type": "festival"
+              }
+            ]
+          },
+          "worker": {
+            "directly_related_user_types": [
+              {
+                "type": "worker"
+              }
+            ]
+          },
+          "shift": {
+            "directly_related_user_types": [
+              {
+                "type": "shift"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

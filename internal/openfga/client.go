@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/tjrasche/HerbsfestOS/internal/scheduling"
 	"io"
 	"net/http"
 	"net/url"
@@ -205,4 +206,26 @@ func transportError(err error) error {
 		return fmt.Errorf("%w: %w", ErrUnavailable, context.Canceled)
 	}
 	return ErrUnavailable
+}
+
+// CheckContext accepts only facts constructed by the application from its locked
+// database snapshot. Stored grants must never coexist with this contextual model.
+func (c *Client) CheckContext(ctx context.Context, user, relation, object string, facts []scheduling.Tuple) (bool, error) {
+	if c == nil || c.config.StoreID == "" || c.config.AuthorizationModelID == "" {
+		return false, ErrModelNotConfigured
+	}
+	if len(facts) > 100 {
+		return false, ErrInvalidRequest
+	}
+	input := map[string]any{"tuple_key": map[string]string{"user": user, "relation": relation, "object": object}, "authorization_model_id": c.config.AuthorizationModelID, "consistency": "HIGHER_CONSISTENCY", "contextual_tuples": map[string]any{"tuple_keys": facts}}
+	var response struct {
+		Allowed *bool `json:"allowed"`
+	}
+	if err := c.request(ctx, http.MethodPost, "/stores/"+c.config.StoreID+"/check", input, &response); err != nil {
+		return false, err
+	}
+	if response.Allowed == nil {
+		return false, ErrInvalidResponse
+	}
+	return *response.Allowed, nil
 }

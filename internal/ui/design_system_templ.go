@@ -53,7 +53,7 @@ func DesignSystem() templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = ButtonLink("Zum Feedback", "/", IconArrowRight, "secondary").Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = ButtonLink("Zur Fest-Website", "https://ringinger-herbstfest.de/", IconArrowRight, "secondary").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -253,7 +253,7 @@ func DesignSystem() templ.Component {
 						}()
 					}
 					ctx = templ.InitializeContext(ctx)
-					templ_7745c5c3_Err = ButtonLink("Feedback festhalten", "/#title", IconPlus, "secondary").Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = ButtonLink("Beispielfeld", "#fields", IconPlus, "secondary").Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

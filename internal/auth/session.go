@@ -13,6 +13,7 @@ import (
 const maxSessionCookieSize = 3500
 
 type User struct {
+	Issuer      string `json:"iss"`
 	Subject     string `json:"sub"`
 	Name        string `json:"name,omitempty"`
 	Email       string `json:"email,omitempty"`
@@ -38,7 +39,6 @@ func CurrentUser(ctx context.Context) User {
 
 type session struct {
 	User
-	Member    bool   `json:"member"`
 	ExpiresAt int64  `json:"exp"`
 	IDToken   string `json:"id_token"`
 }

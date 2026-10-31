@@ -21,7 +21,7 @@ func TestPublicRouteGroupBypassesAuth(t *testing.T) {
 		{http.MethodGet, "/public/design-system", "", http.StatusNotFound, false},
 		{http.MethodPost, "/public/feedback-notes", "", http.StatusNotFound, false},
 		{http.MethodGet, "/", "/auth/login", http.StatusSeeOther, true},
-		{http.MethodGet, "/design-system", "/auth/login", http.StatusSeeOther, true},
+		{http.MethodGet, "/design-system", "", http.StatusOK, false},
 		{http.MethodPost, "/feedback-notes", "/auth/login", http.StatusSeeOther, true},
 		{http.MethodGet, "/publicity", "/auth/login", http.StatusSeeOther, true},
 	} {

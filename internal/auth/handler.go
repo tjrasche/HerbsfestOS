@@ -7,6 +7,8 @@ import (
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -102,7 +104,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 func (h *Handler) Protect(next, denied http.Handler) http.Handler {
 	return noStore(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if h.config.Mode == "development" {
-			user := User{Name: "Lokale Entwicklung", Development: true}
+			user := User{Issuer: "urn:herbstfest:local", Subject: "developer", Name: "Lokale Entwicklung", Development: true}
 			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), userContextKey{}, user)))
 			return
 		}
@@ -117,17 +119,6 @@ func (h *Handler) Protect(next, denied http.Handler) http.Handler {
 			return
 		}
 		r = r.WithContext(context.WithValue(r.Context(), userContextKey{}, session.User))
-		if !session.Member {
-			if r.Header.Get("HX-Request") == "true" {
-				w.Header().Set("HX-Redirect", "/")
-			}
-			if denied != nil {
-				denied.ServeHTTP(w, r)
-			} else {
-				http.Error(w, "Für diesen Arbeitsbereich brauchst du die HerbstfestOS-Rolle club-member.", http.StatusForbidden)
-			}
-			return
-		}
 		next.ServeHTTP(w, r)
 	}))
 }
@@ -138,6 +129,7 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	state := rand.Text()
+	h.saveContinuation(w, r, state)
 	rp.AuthURLHandler(func() string { return state }, h.party, rp.WithURLParam("nonce", state))(w, r)
 }
 
@@ -155,8 +147,8 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) authenticated(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], _ string, _ rp.RelyingParty, info *oidc.UserInfo) {
 	expires := min(tokens.IDTokenClaims.GetExpiration().Unix(), time.Now().Add(time.Hour).Unix())
 	value := session{
-		User:   User{Subject: info.Subject, Name: bounded(info.Name), Email: bounded(info.Email)},
-		Member: hasMemberRole(info, h.config.ProjectID), ExpiresAt: expires, IDToken: tokens.IDToken,
+		User:      User{Issuer: h.config.Issuer, Subject: info.Subject, Name: bounded(info.Name), Email: bounded(info.Email)},
+		ExpiresAt: expires, IDToken: tokens.IDToken,
 	}
 	if expires <= time.Now().Unix() {
 		http.Error(w, "Anmeldung ist bereits abgelaufen.", http.StatusUnauthorized)
@@ -167,7 +159,7 @@ func (h *Handler) authenticated(w http.ResponseWriter, r *http.Request, tokens *
 		http.Error(w, "Anmeldung konnte nicht gespeichert werden.", http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, h.continuation(w, r), http.StatusSeeOther)
 }
 
 func hasMemberRole(info *oidc.UserInfo, projectID string) bool {
@@ -224,4 +216,54 @@ func noStore(next http.Handler) http.Handler {
 		w.Header().Set("Cache-Control", "private, no-store")
 		next.ServeHTTP(w, r)
 	})
+}
+
+// Optional authenticates without requiring a login, for reusable public signup.
+func (h *Handler) Optional(next http.Handler) http.Handler {
+	return noStore(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if h.config.Mode == "development" {
+			next.ServeHTTP(w, r)
+			return
+		}
+		if value, err := h.sessions.read(r); err == nil {
+			r = r.WithContext(context.WithValue(r.Context(), userContextKey{}, value.User))
+		}
+		next.ServeHTTP(w, r)
+	}))
+}
+
+type continuation struct {
+	State, Path string
+	Expires     int64
+}
+
+func (h *Handler) saveContinuation(w http.ResponseWriter, r *http.Request, state string) {
+	path := r.URL.Query().Get("next")
+	u, err := url.Parse(path)
+	if err != nil || u.IsAbs() || u.Host != "" || !strings.HasPrefix(path, "/") || strings.HasPrefix(path, "//") || len(path) > 500 {
+		path = "/"
+	}
+	data, _ := json.Marshal(continuation{state, path, time.Now().Add(5 * time.Minute).Unix()})
+	value := base64.RawURLEncoding.EncodeToString(h.sessions.aead.Seal(nil, nil, data, append(h.sessions.binding, []byte("return")...)))
+	http.SetCookie(w, &http.Cookie{Name: "herbstfest_return", Value: value, Path: "/auth", HttpOnly: true, Secure: h.sessions.secure, SameSite: http.SameSiteLaxMode, MaxAge: 300})
+}
+func (h *Handler) continuation(w http.ResponseWriter, r *http.Request) string {
+	cookie, err := r.Cookie("herbstfest_return")
+	if err != nil {
+		return "/"
+	}
+	http.SetCookie(w, &http.Cookie{Name: "herbstfest_return", Path: "/auth", MaxAge: -1, HttpOnly: true, Secure: h.sessions.secure, SameSite: http.SameSiteLaxMode})
+	data, err := base64.RawURLEncoding.DecodeString(cookie.Value)
+	if err != nil {
+		return "/"
+	}
+	plain, err := h.sessions.aead.Open(nil, nil, data, append(h.sessions.binding, []byte("return")...))
+	if err != nil {
+		return "/"
+	}
+	var c continuation
+	if json.Unmarshal(plain, &c) != nil || c.Expires < time.Now().Unix() || c.State != r.URL.Query().Get("state") {
+		return "/"
+	}
+	return c.Path
 }

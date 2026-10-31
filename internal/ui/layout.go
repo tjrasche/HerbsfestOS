@@ -14,5 +14,8 @@ func sectionTitle(page string) string {
 	if page == "design-system" {
 		return "Designsystem"
 	}
-	return "Feedback"
+	if page == "feedback" {
+		return "Feedback"
+	}
+	return "Dienstplanung"
 }

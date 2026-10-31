@@ -14,8 +14,8 @@ import (
 
 	"github.com/tjrasche/HerbsfestOS/internal/auth"
 	"github.com/tjrasche/HerbsfestOS/internal/database"
-	"github.com/tjrasche/HerbsfestOS/internal/feedbacknote"
 	"github.com/tjrasche/HerbsfestOS/internal/openfga"
+	"github.com/tjrasche/HerbsfestOS/internal/scheduling"
 	"github.com/tjrasche/HerbsfestOS/internal/ui"
 )
 
@@ -27,15 +27,16 @@ func main() {
 }
 
 func run() error {
-	migrate := flag.Bool("migrate", false, "apply the initial schema and exit")
+	migrate := flag.Bool("migrate", false, "apply versioned maintenance migrations and exit")
+	bootstrap := flag.Bool("bootstrap-organizer", false, "grant an explicitly identified login during maintenance")
 	checkOpenFGA := flag.Bool("check-openfga", false, "verify OpenFGA connectivity and API authentication, then exit")
 	flag.Parse()
-	if *migrate && *checkOpenFGA {
+	if (*migrate && *checkOpenFGA) || (*bootstrap && (*migrate || *checkOpenFGA)) {
 		return errors.New("-migrate and -check-openfga are mutually exclusive")
 	}
 	var fgaClient *openfga.Client
 	// Database migrations require no OpenFGA configuration or API credential.
-	if !*migrate {
+	if !*migrate && !*bootstrap {
 		cfg, err := openfga.ConfigFromEnv(os.Getenv)
 		if err != nil {
 			return err
@@ -53,8 +54,7 @@ func run() error {
 				slog.Info("OpenFGA connectivity verified")
 				return nil
 			}
-			// Retained for future policy wiring; construction does not install models
-			// or make the currently independent routes depend on OpenFGA uptime.
+			// Model installation is an explicit operator step.
 			slog.Info("OpenFGA client configured", "model_configured", cfg.StoreID != "")
 		}
 	}
@@ -74,9 +74,12 @@ func run() error {
 	if *migrate {
 		migrationCtx, cancel := context.WithTimeout(ctx, time.Minute)
 		defer cancel()
-		return db.WithContext(migrationCtx).AutoMigrate(&feedbacknote.FeedbackNote{})
+		return scheduling.Migrate(migrationCtx, db, scheduling.LegacyEdition{Label: os.Getenv("LEGACY_EDITION_LABEL"), StartDay: os.Getenv("LEGACY_START_DAY"), EndDay: os.Getenv("LEGACY_END_DAY")})
 	}
 
+	if *bootstrap {
+		return scheduling.Bootstrap(ctx, db, os.Getenv("BOOTSTRAP_ISSUER"), os.Getenv("BOOTSTRAP_SUBJECT"))
+	}
 	authConfig, err := auth.ConfigFromEnv(os.Getenv)
 	if err != nil {
 		return err
@@ -89,9 +92,8 @@ func run() error {
 		slog.Warn("authentication bypass enabled for local development")
 	}
 	private := http.NewServeMux()
-	feedbacknote.NewHandler(feedbacknote.NewService(feedbacknote.NewRepository(db))).Register(private)
-	ui.Register(private)
 	mux := newMux(authHandler.Protect(private, ui.AccessDenied()))
+	scheduling.NewHandler(scheduling.New(db, fgaClient)).Register(private, mux, authHandler.Optional)
 	authHandler.Register(mux)
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -101,6 +103,11 @@ func run() error {
 		defer cancel()
 		if err := pool.PingContext(ctx); err != nil {
 			http.Error(w, "Database unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		var version int
+		if err := db.WithContext(ctx).Raw("SELECT count(*) FROM schema_migrations WHERE version=1").Scan(&version).Error; err != nil || version != 1 {
+			http.Error(w, "Schema migration required", http.StatusServiceUnavailable)
 			return
 		}
 		w.WriteHeader(http.StatusOK)

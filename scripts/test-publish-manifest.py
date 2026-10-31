@@ -64,12 +64,13 @@ class PublishingTests(unittest.TestCase):
         self.calls = json.loads(self.state.read_text())["calls"]
         return result
 
-    def test_current_revision_updates_both_container_images(self):
+    def test_current_revision_updates_application_image(self):
         result = self.run_publish()
         self.assertEqual(result.returncode, 0, result.stderr)
         rendered = subprocess.check_output(["kustomize", "build", "config/overlays/prod"],
                                            cwd=self.root, text=True)
-        self.assertEqual(rendered.count("image: " + IMAGE), 2)
+        self.assertEqual(rendered.count("image: " + IMAGE), 1)
+        self.assertNotIn("name: migrate", rendered)
         self.assertIn(["push", "origin", "HEAD:main"], self.calls)
         self.assertIn(IMAGE, (self.root / "summary").read_text())
         commit = next(args for args in self.calls if args[0] == "commit")

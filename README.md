@@ -581,3 +581,76 @@ making destructive schema changes or scaling concurrent schema-changing rolls.
 - [ZITADEL application console setup](docs/zitadel-app-setup.txt)
 - [ZITADEL Kubernetes operations and bootstrap secrets](config/zitadel/README.md)
 - [Flux application inventory and ownership](config/flux/README.md)
+
+## Volunteer scheduling MVP
+
+Scheduling now owns `/`, `/admin`, `/directory`, `/workers/{id}`, `/print/{participation}`, and edition-scoped `/feedback-notes`. Public names-only signup is `/register/{token}`. Private account connections and organizer invitation acceptance use `/proof/{token}`. The existing shell and German branding remain. PostgreSQL is authoritative for identities, grants, memberships and lifecycle gates; a pinned OpenFGA model checks contextual facts from the locked transaction. No identity-provider display field or browser edition selection grants access.
+
+### Disposable local rehearsal
+
+Requirements: Go 1.26+, PostgreSQL (tested here with 18.6), OpenFGA v1.21.0, and Python Playwright/Chromium for browser checks. Bind development services to loopback. Use **new disposable databases**; these commands are not a production cutover.
+
+```sh
+# Start your disposable PostgreSQL on 127.0.0.1:55432 first.
+createdb -h 127.0.0.1 -p 55432 scheduling_rehearsal
+createdb -h 127.0.0.1 -p 55432 scheduling_test
+openfga run --datastore-engine=memory --http-addr=127.0.0.1:58180 \
+  --grpc-addr=127.0.0.1:58181 --playground-enabled=false --metrics-enabled=false
+```
+
+In another terminal, from the repository root:
+
+```sh
+python3 scripts/local-scheduling-model.py > /tmp/herbstfest-model.env
+. /tmp/herbstfest-model.env
+export DATABASE_URL='postgres://localhost:55432/scheduling_rehearsal?sslmode=disable'
+# Add your local database username to that URL if necessary.
+go run ./cmd/rehearsal
+# Loads only the approved synthetic 10-stand / 250-worker / 150-shift fixture.
+# Refuses a non-loopback target, a database without the _rehearsal suffix,
+# or a target already containing editions.
+go tool templ generate
+AUTH_MODE=development HTTP_ADDR=127.0.0.1:58080 go run ./cmd/web
+```
+
+Open `http://127.0.0.1:58080/`. The rehearsal explicitly grants the synthetic local identity `urn:herbstfest:local` / `developer` global and team access. Signup is `http://127.0.0.1:58080/register/synthetic-rehearsal-registration-only`. Development authentication still goes through database/OpenFGA permission checks. Guest signup stays anonymous in this mode. Optional hosted login requires a separately configured development ZITADEL client; the rehearsal does not contact or modify the live provider.
+
+```sh
+SCHEDULING_TEST_DATABASE_URL='postgres://localhost:55432/scheduling_test?sslmode=disable' \
+SCHEDULING_TEST_FGA_URL=http://127.0.0.1:58180 go test ./...
+go vet ./...
+# With Playwright/Chromium installed in your selected Python environment:
+python3 scripts/test-scheduling-browser.py
+```
+
+Integration tests isolate each case in a new PostgreSQL schema and fresh in-memory FGA store, then drop the schemas. Never point the integration suite at production. Without both test environment variables, database integration tests explicitly skip. Browser artifacts go to `/tmp/herbstfest-browser` by default. The browser test submits synthetic requests and requires the local rehearsal application.
+
+For this SSH host, tools were installed without sudo under `/tmp/herbstfest-tools`; Go is `/tmp/herbstfest-tools/go/bin/go`, PostgreSQL binaries are under `/tmp/herbstfest-tools/pg/usr/lib/postgresql/18/bin`, and `LD_LIBRARY_PATH=/tmp/herbstfest-tools/pg/usr/lib/x86_64-linux-gnu` is required for PostgreSQL client tools. Existing disposable OpenFGA is `/tmp/wayfinder-validation/openfga`; browser Python is `/tmp/wayfinder-validation/browser-env/bin/python`. The local database user is `tjark`. These temporary paths are session conveniences, not deployment dependencies.
+
+### Maintenance cutover (not executed)
+
+The deployment no longer automatically runs migrations in an init container. Stop traffic and writers, take a backup, and test restoration before using the explicit versioned migration command:
+
+```sh
+# Explicit operator-supplied values; never derive these from legacy timestamps.
+LEGACY_EDITION_LABEL='<chosen label>' LEGACY_START_DAY='<YYYY-MM-DD>' \
+LEGACY_END_DAY='<YYYY-MM-DD>' go run ./cmd/web -migrate
+BOOTSTRAP_ISSUER='<validated issuer>' BOOTSTRAP_SUBJECT='<chosen subject>' \
+go run ./cmd/web -bootstrap-organizer
+```
+
+`DATABASE_URL` must be provided through the environment's existing secret mechanism. Do not print it. Legacy input is required only when unscoped feedback rows exist. Migration DDL/backfill/invariants/version marking commit together; missing inputs and failures roll back. A rerun does not reassign scoped notes. Migration and bootstrap are independent of OpenFGA. Never downgrade to the old unscoped feedback binary after scoped writes; recover using the tested backup before new writes or a forward fix afterward.
+
+Install `internal/scheduling/authorization-model.json` into a **new empty** production FGA store and pin its store/model IDs. Do not persist live grant tuples in that store. Configure `OPENFGA_API_URL`, `OPENFGA_STORE_ID`, and `OPENFGA_AUTHORIZATION_MODEL_ID` through deployment configuration. The local-model helper intentionally refuses non-loopback targets. Global schedule visibility requires a separate explicit team grant for edits. The last global grant and activated edition readiness are protected in-app.
+
+Configure hosted ZITADEL email/social registration separately, with automatic email/name account linking disabled and authenticated existing-account proof for manual provider linking. The application binds callback continuation to the initiating browser/state. No live provider settings were changed. Verify positive/negative permissions before reopening traffic. Permission service failures return retryable unavailable responses without protected data.
+
+Operator-only unlink/replacement, edition/stand deletion, and other ownership maintenance must pause writers or first acquire `SELECT revision FROM scheduling_state WHERE id=1 FOR UPDATE`, perform changes, increment `revision`, and commit together. Application transactions acquire this revision lock before any resource lock. Grant/link/membership/activation actions use the exclusive lock; protected reads and feedback writes hold a shared lock until completion. Do not cache allow results or worker bindings in login sessions.
+
+### Verification and release boundary
+
+Application integration coverage includes competing approvals, atomic batch failure, duplicate prevention/retries, fresh submission reuse, one-to-one link conflicts/replacement/expiry, concurrent invitation redemption, archived own requests, next-request operator unlink/team revocation, authorization snapshots racing with revocation, edition copies/date corrections, cancellation/membership preservation, feedback isolation, transactional migration failure/rollback/rerun, and authorization outages. Unit checks cover the Berlin calendar window; existing OIDC nonce/state/PKCE tests remain. Browser checks exercise the 150-shift desktop shell, names-only phone submission, privacy of public pages, lack of horizontal overflow, and confirmed-roster print output. These are automated implementation checks, not live-user acceptance.
+
+The future human one-stand pilot has **not** occurred. Before broader invitations, perform the approved pilot with a few workers: signup, optional hosted account connection, approval, printed delivery, revocation, and organizer feedback. Organizers communicate assignment changes manually. There is no automatic scheduling, bulk roster import, or assignment email/SMS delivery.
+
+Session verification (2026-10-29): `go test ./...` passed with both integration environment variables set; `go vet ./...` and `git diff --check` passed. Chromium passed desktop 10-stand/150-shift rendering, 390px signup submission, print-PDF output and public-navigation privacy without JavaScript errors. Screenshots were visually inspected. A custom-format PostgreSQL backup was restored into another disposable database and counts checked (10 stands, 150 shifts, 252 workers after two synthetic browser/API submissions). Go's `-race` instrumentation was attempted but unavailable because this host has no C compiler; the database concurrency tests themselves ran successfully. No live pilot, deployment, commit, push, production migration, invitation delivery, or live IdP change occurred.

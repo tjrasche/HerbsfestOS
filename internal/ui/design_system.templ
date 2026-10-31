@@ -3,7 +3,7 @@ package ui
 templ DesignSystem() {
 	@Layout("Designsystem · HerbstfestOS", "design-system") {
 		@PageHeader("Unser visueller Baukasten", "Ein Fest. Ein gemeinsamer Look.", "Die vertrauten Farben und das Maskottchen unseres Herbstfests. Eine klare, moderne Grundlage für alles, was wir hier gemeinsam gestalten.") {
-			@ButtonLink("Zum Feedback", "/", IconArrowRight, "secondary")
+			@ButtonLink("Zur Fest-Website", "https://ringinger-herbstfest.de/", IconArrowRight, "secondary")
 		}
 		<div class="design-system">
 			<section id="brand" class="design-section" aria-labelledby="colors-title">
@@ -50,7 +50,7 @@ templ DesignSystem() {
 					@Card("Hinweise & leere Zustände", "Die nächste sinnvolle Aktion ist immer sichtbar.") {
 						@Notice("Gut zu wissen", "Eine gemeinsame Gestaltung macht neue Bereiche sofort vertraut.", "info")
 						@EmptyState("Hier ist Platz für gute Ideen.", "Ein leerer Zustand erklärt, was hier entstehen kann.") {
-							@ButtonLink("Feedback festhalten", "/#title", IconPlus, "secondary")
+							@ButtonLink("Beispielfeld", "#fields", IconPlus, "secondary")
 						}
 					}
 				</div>

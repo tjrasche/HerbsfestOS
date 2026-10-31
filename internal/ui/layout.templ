@@ -3,7 +3,7 @@ package ui
 import "github.com/tjrasche/HerbsfestOS/internal/auth"
 
 templ Layout(title, activePage string) {
-	<!DOCTYPE html>
+<!DOCTYPE html>
 	<html lang="de">
 		<head>
 			<meta charset="utf-8"/>
@@ -27,11 +27,21 @@ templ Layout(title, activePage string) {
 					</a>
 					<div class="workspace-label"><span aria-hidden="true"></span>Unser Orga-Workspace</div>
 					<nav class="navigation" aria-label="Hauptnavigation">
-						<p class="navigation__label">Gemeinsam organisieren</p>
-						<a class={ "nav-link", templ.KV("nav-link--active", activePage == "feedback") } href="/" aria-current={ activePageValue(activePage == "feedback") }>
-							@Icon(IconFeedback)<span>Feedback</span><span class="nav-link__indicator" aria-hidden="true"></span>
-						</a>
-						<a class={ "nav-link", templ.KV("nav-link--active", activePage == "design-system") } href="/design-system" aria-current={ activePageValue(activePage == "design-system") }>
+                        if navigation(ctx).Private {
+<p class="navigation__label">Gemeinsam organisieren</p>
+                            <a class="nav-link" href="/">
+@Icon(IconFeedback)<span>Dienstplanung</span></a>
+                            <a class="nav-link" href="/#mine">Meine Anfragen</a>
+                            if navigation(ctx).Organizer {
+<a class="nav-link" href="/directory">Helfer suchen</a>
+}
+                            if navigation(ctx).Global {
+<a class="nav-link" href="/admin">Organisation</a><a class="nav-link" href="/feedback-notes">Feedback</a>
+}
+                        }
+						<a class={ "nav-link", templ.KV("nav-link--active", activePage == "design-system")
+} href="/design-system" aria-current={ activePageValue(activePage == "design-system")
+}>
 							@Icon(IconPalette)<span>Designsystem</span><span class="nav-link__indicator" aria-hidden="true"></span>
 						</a>
 					</nav>
@@ -42,16 +52,19 @@ templ Layout(title, activePage string) {
 				</aside>
 				<div class="workspace">
 					<header class="topbar">
-						<div class="breadcrumb"><span>Organisation</span><span class="breadcrumb__separator" aria-hidden="true">/</span><strong>{ sectionTitle(activePage) }</strong></div>
+						<div class="breadcrumb"><span>Organisation</span><span class="breadcrumb__separator" aria-hidden="true">/</span><strong>{ sectionTitle(activePage)
+}</strong></div>
 						<div class="topbar__session">
 							if auth.CurrentUser(ctx).Subject != "" {
-								<span class="topbar__user">{ auth.CurrentUser(ctx).DisplayName() }</span>
+<span class="topbar__user">{ auth.CurrentUser(ctx).DisplayName()
+}</span>
 								<form method="post" action="/auth/logout"><button class="button button--secondary" type="submit">Abmelden</button></form>
-							} else if auth.CurrentUser(ctx).Development {
-								<span class="topbar__user">Lokale Entwicklung</span>
-							} else {
-								<a class="topbar__link" href="https://ringinger-herbstfest.de/" target="_blank" rel="noopener noreferrer"><span>Ringinger Herbstfest</span>@Icon(IconExternal)<span class="sr-only">(öffnet in einem neuen Tab)</span></a>
-							}
+} else if auth.CurrentUser(ctx).Development {
+<span class="topbar__user">Lokale Entwicklung</span>
+} else {
+<a class="topbar__link" href="https://ringinger-herbstfest.de/" target="_blank" rel="noopener noreferrer"><span>Ringinger Herbstfest</span>
+@Icon(IconExternal)<span class="sr-only">(öffnet in einem neuen Tab)</span></a>
+}
 						</div>
 					</header>
 					<main id="main" class="main-content" tabindex="-1">{ children... }

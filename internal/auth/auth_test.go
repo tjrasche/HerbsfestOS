@@ -74,7 +74,7 @@ func TestSessionRejectsTamperingExpiryAndDifferentClient(t *testing.T) {
 		t.Fatal(err)
 	}
 	store := sessions{aead: aead, cookieName: "__Host-test", binding: []byte("client-one"), secure: true}
-	value := session{User: User{Subject: "user-one"}, Member: true, ExpiresAt: time.Now().Add(time.Hour).Unix(), IDToken: "test-token"}
+	value := session{User: User{Subject: "user-one"}, ExpiresAt: time.Now().Add(time.Hour).Unix(), IDToken: "test-token"}
 	w := httptest.NewRecorder()
 	if err := store.write(w, value); err != nil {
 		t.Fatal(err)
@@ -85,7 +85,7 @@ func TestSessionRejectsTamperingExpiryAndDifferentClient(t *testing.T) {
 	}
 	r := httptest.NewRequest(http.MethodGet, "https://app.example/", nil)
 	r.AddCookie(cookie)
-	if got, err := store.read(r); err != nil || got.Subject != "user-one" || !got.Member {
+	if got, err := store.read(r); err != nil || got.Subject != "user-one" {
 		t.Fatalf("valid session failed: %+v, %v", got, err)
 	}
 	altered := store
@@ -344,12 +344,6 @@ func TestOIDCLoginAndAccess(t *testing.T) {
 			r.AddCookie(sessionCookie)
 			response := httptest.NewRecorder()
 			app.ServeHTTP(response, r)
-			if code != "member" {
-				if response.Code != http.StatusForbidden || strings.Contains(response.Body.String(), "private festival data") {
-					t.Fatalf("user without project role accessed app: %d", response.Code)
-				}
-				return
-			}
 			if response.Code != http.StatusOK || response.Body.String() != "private festival data" {
 				t.Fatalf("member failed to access app: %d, %s", response.Code, response.Body)
 			}
@@ -383,7 +377,7 @@ func TestDevelopmentBypassIsExplicit(t *testing.T) {
 	}
 	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := CurrentUser(r.Context())
-		if !user.Development || user.Subject != "" {
+		if !user.Development || user.Subject != "developer" || user.Issuer != "urn:herbstfest:local" {
 			t.Fatal("local development must be visibly distinct from a verified identity")
 		}
 		w.WriteHeader(http.StatusNoContent)
