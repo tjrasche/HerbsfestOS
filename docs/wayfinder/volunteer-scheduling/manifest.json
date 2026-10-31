@@ -1,0 +1,117 @@
+{
+  "repository": "tjrasche/HerbsfestOS",
+  "packet": "volunteer-scheduling-openfga-v1",
+  "map": {
+    "key": "map",
+    "title": "Define volunteer scheduling, editions, and OpenFGA authorization",
+    "label": "wayfinder:map",
+    "body_file": "map.md"
+  },
+  "tickets": [
+    {
+      "key": "research",
+      "title": "Research identity and OpenFGA integration options",
+      "label": "wayfinder:research",
+      "body_file": "research.md",
+      "blocked_by": [],
+      "related": [
+        "authorization",
+        "workers"
+      ]
+    },
+    {
+      "key": "workers",
+      "title": "Define worker profiles and invitation linking",
+      "label": "wayfinder:grilling",
+      "body_file": "workers.md",
+      "blocked_by": [
+        "research"
+      ],
+      "related": [
+        "authorization",
+        "editions"
+      ]
+    },
+    {
+      "key": "shifts",
+      "title": "Define shifts and assignment rules",
+      "label": "wayfinder:grilling",
+      "body_file": "shifts.md",
+      "blocked_by": [],
+      "related": [
+        "authorization",
+        "prototype"
+      ]
+    },
+    {
+      "key": "editions",
+      "title": "Define edition and stand lifecycle",
+      "label": "wayfinder:grilling",
+      "body_file": "editions.md",
+      "blocked_by": [],
+      "related": [
+        "authorization",
+        "migration"
+      ]
+    },
+    {
+      "key": "authorization",
+      "title": "Define and validate OpenFGA authorization",
+      "label": "wayfinder:grilling",
+      "body_file": "authorization.md",
+      "blocked_by": [
+        "workers",
+        "shifts",
+        "editions"
+      ],
+      "related": [
+        "migration",
+        "prototype"
+      ]
+    },
+    {
+      "key": "migration",
+      "title": "Define edition migration and existing-route access",
+      "label": "wayfinder:grilling",
+      "body_file": "migration.md",
+      "blocked_by": [
+        "authorization"
+      ],
+      "related": [
+        "editions"
+      ]
+    },
+    {
+      "key": "prototype",
+      "title": "Prototype organizer and volunteer scheduling",
+      "label": "wayfinder:prototype",
+      "body_file": "prototype.md",
+      "blocked_by": [
+        "authorization"
+      ],
+      "related": [
+        "workers",
+        "shifts",
+        "editions"
+      ]
+    },
+    {
+      "key": "acceptance",
+      "title": "Agree MVP acceptance and first-use plan",
+      "label": "wayfinder:grilling",
+      "body_file": "acceptance.md",
+      "blocked_by": [
+        "migration",
+        "prototype"
+      ],
+      "related": [
+        "research",
+        "workers",
+        "shifts",
+        "editions",
+        "authorization"
+      ]
+    }
+  ],
+  "research_branch": "research/identity-openfga-integration"
+}

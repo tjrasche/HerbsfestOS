@@ -1,0 +1,4494 @@
+{
+  "prototype_only": true,
+  "edition": {
+    "year": "2027-rehearsal",
+    "start_day": "2027-09-10",
+    "end_day": "2027-09-12"
+  },
+  "stands": [
+    {
+      "id": "stand-00",
+      "name": "Beispielstand 1",
+      "enabled": true,
+      "organizers": [
+        "organizer-00"
+      ]
+    },
+    {
+      "id": "stand-01",
+      "name": "Beispielstand 2",
+      "enabled": true,
+      "organizers": [
+        "organizer-01"
+      ]
+    },
+    {
+      "id": "stand-02",
+      "name": "Beispielstand 3",
+      "enabled": true,
+      "organizers": [
+        "organizer-02"
+      ]
+    },
+    {
+      "id": "stand-03",
+      "name": "Beispielstand 4",
+      "enabled": true,
+      "organizers": [
+        "organizer-03"
+      ]
+    },
+    {
+      "id": "stand-04",
+      "name": "Beispielstand 5",
+      "enabled": true,
+      "organizers": [
+        "organizer-04"
+      ]
+    },
+    {
+      "id": "stand-05",
+      "name": "Beispielstand 6",
+      "enabled": true,
+      "organizers": [
+        "organizer-05"
+      ]
+    },
+    {
+      "id": "stand-06",
+      "name": "Beispielstand 7",
+      "enabled": true,
+      "organizers": [
+        "organizer-06"
+      ]
+    },
+    {
+      "id": "stand-07",
+      "name": "Beispielstand 8",
+      "enabled": true,
+      "organizers": [
+        "organizer-07"
+      ]
+    },
+    {
+      "id": "stand-08",
+      "name": "Beispielstand 9",
+      "enabled": true,
+      "organizers": [
+        "organizer-08"
+      ]
+    },
+    {
+      "id": "stand-09",
+      "name": "Beispielstand 10",
+      "enabled": true,
+      "organizers": [
+        "organizer-09"
+      ]
+    }
+  ],
+  "workers": [
+    {
+      "id": "worker-000",
+      "first_name": "Beispiel 1",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-001",
+      "first_name": "Beispiel 2",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-002",
+      "first_name": "Beispiel 3",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-003",
+      "first_name": "Beispiel 4",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-004",
+      "first_name": "Beispiel 5",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-005",
+      "first_name": "Beispiel 6",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-006",
+      "first_name": "Beispiel 7",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-007",
+      "first_name": "Beispiel 8",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-008",
+      "first_name": "Beispiel 9",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-009",
+      "first_name": "Beispiel 10",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-010",
+      "first_name": "Beispiel 11",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-011",
+      "first_name": "Beispiel 12",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-012",
+      "first_name": "Beispiel 13",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-013",
+      "first_name": "Beispiel 14",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-014",
+      "first_name": "Beispiel 15",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-015",
+      "first_name": "Beispiel 16",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-016",
+      "first_name": "Beispiel 17",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-017",
+      "first_name": "Beispiel 18",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-018",
+      "first_name": "Beispiel 19",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-019",
+      "first_name": "Beispiel 20",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-020",
+      "first_name": "Beispiel 21",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-021",
+      "first_name": "Beispiel 22",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-022",
+      "first_name": "Beispiel 23",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-023",
+      "first_name": "Beispiel 24",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-024",
+      "first_name": "Beispiel 25",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-00"
+      ]
+    },
+    {
+      "id": "worker-025",
+      "first_name": "Beispiel 26",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-026",
+      "first_name": "Beispiel 27",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-027",
+      "first_name": "Beispiel 28",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-028",
+      "first_name": "Beispiel 29",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-029",
+      "first_name": "Beispiel 30",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-030",
+      "first_name": "Beispiel 31",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-031",
+      "first_name": "Beispiel 32",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-032",
+      "first_name": "Beispiel 33",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-033",
+      "first_name": "Beispiel 34",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-034",
+      "first_name": "Beispiel 35",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-035",
+      "first_name": "Beispiel 36",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-036",
+      "first_name": "Beispiel 37",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-037",
+      "first_name": "Beispiel 38",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-038",
+      "first_name": "Beispiel 39",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-039",
+      "first_name": "Beispiel 40",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-040",
+      "first_name": "Beispiel 41",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-041",
+      "first_name": "Beispiel 42",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-042",
+      "first_name": "Beispiel 43",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-043",
+      "first_name": "Beispiel 44",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-044",
+      "first_name": "Beispiel 45",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-045",
+      "first_name": "Beispiel 46",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-046",
+      "first_name": "Beispiel 47",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-047",
+      "first_name": "Beispiel 48",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-048",
+      "first_name": "Beispiel 49",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-049",
+      "first_name": "Beispiel 50",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-01"
+      ]
+    },
+    {
+      "id": "worker-050",
+      "first_name": "Beispiel 51",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-051",
+      "first_name": "Beispiel 52",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-052",
+      "first_name": "Beispiel 53",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-053",
+      "first_name": "Beispiel 54",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-054",
+      "first_name": "Beispiel 55",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-055",
+      "first_name": "Beispiel 56",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-056",
+      "first_name": "Beispiel 57",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-057",
+      "first_name": "Beispiel 58",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-058",
+      "first_name": "Beispiel 59",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-059",
+      "first_name": "Beispiel 60",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-060",
+      "first_name": "Beispiel 61",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-061",
+      "first_name": "Beispiel 62",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-062",
+      "first_name": "Beispiel 63",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-063",
+      "first_name": "Beispiel 64",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-064",
+      "first_name": "Beispiel 65",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-065",
+      "first_name": "Beispiel 66",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-066",
+      "first_name": "Beispiel 67",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-067",
+      "first_name": "Beispiel 68",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-068",
+      "first_name": "Beispiel 69",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-069",
+      "first_name": "Beispiel 70",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-070",
+      "first_name": "Beispiel 71",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-071",
+      "first_name": "Beispiel 72",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-072",
+      "first_name": "Beispiel 73",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-073",
+      "first_name": "Beispiel 74",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-074",
+      "first_name": "Beispiel 75",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-02"
+      ]
+    },
+    {
+      "id": "worker-075",
+      "first_name": "Beispiel 76",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-076",
+      "first_name": "Beispiel 77",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-077",
+      "first_name": "Beispiel 78",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-078",
+      "first_name": "Beispiel 79",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-079",
+      "first_name": "Beispiel 80",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-080",
+      "first_name": "Beispiel 81",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-081",
+      "first_name": "Beispiel 82",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-082",
+      "first_name": "Beispiel 83",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-083",
+      "first_name": "Beispiel 84",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-084",
+      "first_name": "Beispiel 85",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-085",
+      "first_name": "Beispiel 86",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-086",
+      "first_name": "Beispiel 87",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-087",
+      "first_name": "Beispiel 88",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-088",
+      "first_name": "Beispiel 89",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-089",
+      "first_name": "Beispiel 90",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-090",
+      "first_name": "Beispiel 91",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-091",
+      "first_name": "Beispiel 92",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-092",
+      "first_name": "Beispiel 93",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-093",
+      "first_name": "Beispiel 94",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-094",
+      "first_name": "Beispiel 95",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-095",
+      "first_name": "Beispiel 96",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-096",
+      "first_name": "Beispiel 97",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-097",
+      "first_name": "Beispiel 98",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-098",
+      "first_name": "Beispiel 99",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-099",
+      "first_name": "Beispiel 100",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-03"
+      ]
+    },
+    {
+      "id": "worker-100",
+      "first_name": "Beispiel 101",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-101",
+      "first_name": "Beispiel 102",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-102",
+      "first_name": "Beispiel 103",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-103",
+      "first_name": "Beispiel 104",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-104",
+      "first_name": "Beispiel 105",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-105",
+      "first_name": "Beispiel 106",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-106",
+      "first_name": "Beispiel 107",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-107",
+      "first_name": "Beispiel 108",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-108",
+      "first_name": "Beispiel 109",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-109",
+      "first_name": "Beispiel 110",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-110",
+      "first_name": "Beispiel 111",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-111",
+      "first_name": "Beispiel 112",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-112",
+      "first_name": "Beispiel 113",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-113",
+      "first_name": "Beispiel 114",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-114",
+      "first_name": "Beispiel 115",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-115",
+      "first_name": "Beispiel 116",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-116",
+      "first_name": "Beispiel 117",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-117",
+      "first_name": "Beispiel 118",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-118",
+      "first_name": "Beispiel 119",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-119",
+      "first_name": "Beispiel 120",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-120",
+      "first_name": "Beispiel 121",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-121",
+      "first_name": "Beispiel 122",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-122",
+      "first_name": "Beispiel 123",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-123",
+      "first_name": "Beispiel 124",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-124",
+      "first_name": "Beispiel 125",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-04"
+      ]
+    },
+    {
+      "id": "worker-125",
+      "first_name": "Beispiel 126",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-126",
+      "first_name": "Beispiel 127",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-127",
+      "first_name": "Beispiel 128",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-128",
+      "first_name": "Beispiel 129",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-129",
+      "first_name": "Beispiel 130",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-130",
+      "first_name": "Beispiel 131",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-131",
+      "first_name": "Beispiel 132",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-132",
+      "first_name": "Beispiel 133",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-133",
+      "first_name": "Beispiel 134",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-134",
+      "first_name": "Beispiel 135",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-135",
+      "first_name": "Beispiel 136",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-136",
+      "first_name": "Beispiel 137",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-137",
+      "first_name": "Beispiel 138",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-138",
+      "first_name": "Beispiel 139",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-139",
+      "first_name": "Beispiel 140",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-140",
+      "first_name": "Beispiel 141",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-141",
+      "first_name": "Beispiel 142",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-142",
+      "first_name": "Beispiel 143",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-143",
+      "first_name": "Beispiel 144",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-144",
+      "first_name": "Beispiel 145",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-145",
+      "first_name": "Beispiel 146",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-146",
+      "first_name": "Beispiel 147",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-147",
+      "first_name": "Beispiel 148",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-148",
+      "first_name": "Beispiel 149",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-149",
+      "first_name": "Beispiel 150",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-05"
+      ]
+    },
+    {
+      "id": "worker-150",
+      "first_name": "Beispiel 151",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-151",
+      "first_name": "Beispiel 152",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-152",
+      "first_name": "Beispiel 153",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-153",
+      "first_name": "Beispiel 154",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-154",
+      "first_name": "Beispiel 155",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-155",
+      "first_name": "Beispiel 156",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-156",
+      "first_name": "Beispiel 157",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-157",
+      "first_name": "Beispiel 158",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-158",
+      "first_name": "Beispiel 159",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-159",
+      "first_name": "Beispiel 160",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-160",
+      "first_name": "Beispiel 161",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-161",
+      "first_name": "Beispiel 162",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-162",
+      "first_name": "Beispiel 163",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-163",
+      "first_name": "Beispiel 164",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-164",
+      "first_name": "Beispiel 165",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-165",
+      "first_name": "Beispiel 166",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-166",
+      "first_name": "Beispiel 167",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-167",
+      "first_name": "Beispiel 168",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-168",
+      "first_name": "Beispiel 169",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-169",
+      "first_name": "Beispiel 170",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-170",
+      "first_name": "Beispiel 171",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-171",
+      "first_name": "Beispiel 172",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-172",
+      "first_name": "Beispiel 173",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-173",
+      "first_name": "Beispiel 174",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-174",
+      "first_name": "Beispiel 175",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-06"
+      ]
+    },
+    {
+      "id": "worker-175",
+      "first_name": "Beispiel 176",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-176",
+      "first_name": "Beispiel 177",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-177",
+      "first_name": "Beispiel 178",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-178",
+      "first_name": "Beispiel 179",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-179",
+      "first_name": "Beispiel 180",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-180",
+      "first_name": "Beispiel 181",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-181",
+      "first_name": "Beispiel 182",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-182",
+      "first_name": "Beispiel 183",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-183",
+      "first_name": "Beispiel 184",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-184",
+      "first_name": "Beispiel 185",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-185",
+      "first_name": "Beispiel 186",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-186",
+      "first_name": "Beispiel 187",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-187",
+      "first_name": "Beispiel 188",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-188",
+      "first_name": "Beispiel 189",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-189",
+      "first_name": "Beispiel 190",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-190",
+      "first_name": "Beispiel 191",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-191",
+      "first_name": "Beispiel 192",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-192",
+      "first_name": "Beispiel 193",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-193",
+      "first_name": "Beispiel 194",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-194",
+      "first_name": "Beispiel 195",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-195",
+      "first_name": "Beispiel 196",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-196",
+      "first_name": "Beispiel 197",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-197",
+      "first_name": "Beispiel 198",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-198",
+      "first_name": "Beispiel 199",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-199",
+      "first_name": "Beispiel 200",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-07"
+      ]
+    },
+    {
+      "id": "worker-200",
+      "first_name": "Beispiel 201",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-201",
+      "first_name": "Beispiel 202",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-202",
+      "first_name": "Beispiel 203",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-203",
+      "first_name": "Beispiel 204",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-204",
+      "first_name": "Beispiel 205",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-205",
+      "first_name": "Beispiel 206",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-206",
+      "first_name": "Beispiel 207",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-207",
+      "first_name": "Beispiel 208",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-208",
+      "first_name": "Beispiel 209",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-209",
+      "first_name": "Beispiel 210",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-210",
+      "first_name": "Beispiel 211",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-211",
+      "first_name": "Beispiel 212",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-212",
+      "first_name": "Beispiel 213",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-213",
+      "first_name": "Beispiel 214",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-214",
+      "first_name": "Beispiel 215",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-215",
+      "first_name": "Beispiel 216",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-216",
+      "first_name": "Beispiel 217",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-217",
+      "first_name": "Beispiel 218",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-218",
+      "first_name": "Beispiel 219",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-219",
+      "first_name": "Beispiel 220",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-220",
+      "first_name": "Beispiel 221",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-221",
+      "first_name": "Beispiel 222",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-222",
+      "first_name": "Beispiel 223",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-223",
+      "first_name": "Beispiel 224",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-224",
+      "first_name": "Beispiel 225",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-08"
+      ]
+    },
+    {
+      "id": "worker-225",
+      "first_name": "Beispiel 226",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-226",
+      "first_name": "Beispiel 227",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-227",
+      "first_name": "Beispiel 228",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-228",
+      "first_name": "Beispiel 229",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-229",
+      "first_name": "Beispiel 230",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-230",
+      "first_name": "Beispiel 231",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-231",
+      "first_name": "Beispiel 232",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-232",
+      "first_name": "Beispiel 233",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-233",
+      "first_name": "Beispiel 234",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-234",
+      "first_name": "Beispiel 235",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-235",
+      "first_name": "Beispiel 236",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-236",
+      "first_name": "Beispiel 237",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-237",
+      "first_name": "Beispiel 238",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-238",
+      "first_name": "Beispiel 239",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-239",
+      "first_name": "Beispiel 240",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-240",
+      "first_name": "Beispiel 241",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-241",
+      "first_name": "Beispiel 242",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-242",
+      "first_name": "Beispiel 243",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-243",
+      "first_name": "Beispiel 244",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-244",
+      "first_name": "Beispiel 245",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-245",
+      "first_name": "Beispiel 246",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-246",
+      "first_name": "Beispiel 247",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-247",
+      "first_name": "Beispiel 248",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-248",
+      "first_name": "Beispiel 249",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    },
+    {
+      "id": "worker-249",
+      "first_name": "Beispiel 250",
+      "last_name": "Testperson",
+      "member_stands": [
+        "stand-09"
+      ]
+    }
+  ],
+  "shifts": [
+    {
+      "id": "shift-00-00",
+      "stand": "stand-00",
+      "start_local": "2027-09-10T09:00:00",
+      "end_local": "2027-09-10T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-000",
+        "worker-001",
+        "worker-002"
+      ],
+      "pending_workers": [
+        "worker-003"
+      ]
+    },
+    {
+      "id": "shift-00-01",
+      "stand": "stand-00",
+      "start_local": "2027-09-10T11:00:00",
+      "end_local": "2027-09-10T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-005",
+        "worker-006",
+        "worker-007"
+      ],
+      "pending_workers": [
+        "worker-008"
+      ]
+    },
+    {
+      "id": "shift-00-02",
+      "stand": "stand-00",
+      "start_local": "2027-09-10T13:00:00",
+      "end_local": "2027-09-10T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-010",
+        "worker-011",
+        "worker-012"
+      ],
+      "pending_workers": [
+        "worker-013"
+      ]
+    },
+    {
+      "id": "shift-00-03",
+      "stand": "stand-00",
+      "start_local": "2027-09-10T15:00:00",
+      "end_local": "2027-09-10T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-015",
+        "worker-016",
+        "worker-017"
+      ],
+      "pending_workers": [
+        "worker-018"
+      ]
+    },
+    {
+      "id": "shift-00-04",
+      "stand": "stand-00",
+      "start_local": "2027-09-10T17:00:00",
+      "end_local": "2027-09-10T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-020",
+        "worker-021",
+        "worker-022"
+      ],
+      "pending_workers": [
+        "worker-023"
+      ]
+    },
+    {
+      "id": "shift-00-05",
+      "stand": "stand-00",
+      "start_local": "2027-09-11T09:00:00",
+      "end_local": "2027-09-11T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-000",
+        "worker-001",
+        "worker-002"
+      ],
+      "pending_workers": [
+        "worker-003"
+      ]
+    },
+    {
+      "id": "shift-00-06",
+      "stand": "stand-00",
+      "start_local": "2027-09-11T11:00:00",
+      "end_local": "2027-09-11T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-005",
+        "worker-006",
+        "worker-007"
+      ],
+      "pending_workers": [
+        "worker-008"
+      ]
+    },
+    {
+      "id": "shift-00-07",
+      "stand": "stand-00",
+      "start_local": "2027-09-11T13:00:00",
+      "end_local": "2027-09-11T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-010",
+        "worker-011",
+        "worker-012"
+      ],
+      "pending_workers": [
+        "worker-013"
+      ]
+    },
+    {
+      "id": "shift-00-08",
+      "stand": "stand-00",
+      "start_local": "2027-09-11T15:00:00",
+      "end_local": "2027-09-11T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-015",
+        "worker-016",
+        "worker-017"
+      ],
+      "pending_workers": [
+        "worker-018"
+      ]
+    },
+    {
+      "id": "shift-00-09",
+      "stand": "stand-00",
+      "start_local": "2027-09-11T17:00:00",
+      "end_local": "2027-09-11T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-020",
+        "worker-021",
+        "worker-022"
+      ],
+      "pending_workers": [
+        "worker-023"
+      ]
+    },
+    {
+      "id": "shift-00-10",
+      "stand": "stand-00",
+      "start_local": "2027-09-12T09:00:00",
+      "end_local": "2027-09-12T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-000",
+        "worker-001",
+        "worker-002"
+      ],
+      "pending_workers": [
+        "worker-003"
+      ]
+    },
+    {
+      "id": "shift-00-11",
+      "stand": "stand-00",
+      "start_local": "2027-09-12T11:00:00",
+      "end_local": "2027-09-12T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-005",
+        "worker-006",
+        "worker-007"
+      ],
+      "pending_workers": [
+        "worker-008"
+      ]
+    },
+    {
+      "id": "shift-00-12",
+      "stand": "stand-00",
+      "start_local": "2027-09-12T13:00:00",
+      "end_local": "2027-09-12T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-010",
+        "worker-011",
+        "worker-012"
+      ],
+      "pending_workers": [
+        "worker-013"
+      ]
+    },
+    {
+      "id": "shift-00-13",
+      "stand": "stand-00",
+      "start_local": "2027-09-12T15:00:00",
+      "end_local": "2027-09-12T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-015",
+        "worker-016",
+        "worker-017"
+      ],
+      "pending_workers": [
+        "worker-018"
+      ]
+    },
+    {
+      "id": "shift-00-14",
+      "stand": "stand-00",
+      "start_local": "2027-09-12T17:00:00",
+      "end_local": "2027-09-12T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-020",
+        "worker-021",
+        "worker-022"
+      ],
+      "pending_workers": [
+        "worker-023"
+      ]
+    },
+    {
+      "id": "shift-01-00",
+      "stand": "stand-01",
+      "start_local": "2027-09-10T09:00:00",
+      "end_local": "2027-09-10T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-025",
+        "worker-026",
+        "worker-027"
+      ],
+      "pending_workers": [
+        "worker-028"
+      ]
+    },
+    {
+      "id": "shift-01-01",
+      "stand": "stand-01",
+      "start_local": "2027-09-10T11:00:00",
+      "end_local": "2027-09-10T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-030",
+        "worker-031",
+        "worker-032"
+      ],
+      "pending_workers": [
+        "worker-033"
+      ]
+    },
+    {
+      "id": "shift-01-02",
+      "stand": "stand-01",
+      "start_local": "2027-09-10T13:00:00",
+      "end_local": "2027-09-10T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-035",
+        "worker-036",
+        "worker-037"
+      ],
+      "pending_workers": [
+        "worker-038"
+      ]
+    },
+    {
+      "id": "shift-01-03",
+      "stand": "stand-01",
+      "start_local": "2027-09-10T15:00:00",
+      "end_local": "2027-09-10T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-040",
+        "worker-041",
+        "worker-042"
+      ],
+      "pending_workers": [
+        "worker-043"
+      ]
+    },
+    {
+      "id": "shift-01-04",
+      "stand": "stand-01",
+      "start_local": "2027-09-10T17:00:00",
+      "end_local": "2027-09-10T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-045",
+        "worker-046",
+        "worker-047"
+      ],
+      "pending_workers": [
+        "worker-048"
+      ]
+    },
+    {
+      "id": "shift-01-05",
+      "stand": "stand-01",
+      "start_local": "2027-09-11T09:00:00",
+      "end_local": "2027-09-11T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-025",
+        "worker-026",
+        "worker-027"
+      ],
+      "pending_workers": [
+        "worker-028"
+      ]
+    },
+    {
+      "id": "shift-01-06",
+      "stand": "stand-01",
+      "start_local": "2027-09-11T11:00:00",
+      "end_local": "2027-09-11T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-030",
+        "worker-031",
+        "worker-032"
+      ],
+      "pending_workers": [
+        "worker-033"
+      ]
+    },
+    {
+      "id": "shift-01-07",
+      "stand": "stand-01",
+      "start_local": "2027-09-11T13:00:00",
+      "end_local": "2027-09-11T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-035",
+        "worker-036",
+        "worker-037"
+      ],
+      "pending_workers": [
+        "worker-038"
+      ]
+    },
+    {
+      "id": "shift-01-08",
+      "stand": "stand-01",
+      "start_local": "2027-09-11T15:00:00",
+      "end_local": "2027-09-11T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-040",
+        "worker-041",
+        "worker-042"
+      ],
+      "pending_workers": [
+        "worker-043"
+      ]
+    },
+    {
+      "id": "shift-01-09",
+      "stand": "stand-01",
+      "start_local": "2027-09-11T17:00:00",
+      "end_local": "2027-09-11T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-045",
+        "worker-046",
+        "worker-047"
+      ],
+      "pending_workers": [
+        "worker-048"
+      ]
+    },
+    {
+      "id": "shift-01-10",
+      "stand": "stand-01",
+      "start_local": "2027-09-12T09:00:00",
+      "end_local": "2027-09-12T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-025",
+        "worker-026",
+        "worker-027"
+      ],
+      "pending_workers": [
+        "worker-028"
+      ]
+    },
+    {
+      "id": "shift-01-11",
+      "stand": "stand-01",
+      "start_local": "2027-09-12T11:00:00",
+      "end_local": "2027-09-12T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-030",
+        "worker-031",
+        "worker-032"
+      ],
+      "pending_workers": [
+        "worker-033"
+      ]
+    },
+    {
+      "id": "shift-01-12",
+      "stand": "stand-01",
+      "start_local": "2027-09-12T13:00:00",
+      "end_local": "2027-09-12T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-035",
+        "worker-036",
+        "worker-037"
+      ],
+      "pending_workers": [
+        "worker-038"
+      ]
+    },
+    {
+      "id": "shift-01-13",
+      "stand": "stand-01",
+      "start_local": "2027-09-12T15:00:00",
+      "end_local": "2027-09-12T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-040",
+        "worker-041",
+        "worker-042"
+      ],
+      "pending_workers": [
+        "worker-043"
+      ]
+    },
+    {
+      "id": "shift-01-14",
+      "stand": "stand-01",
+      "start_local": "2027-09-12T17:00:00",
+      "end_local": "2027-09-12T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-045",
+        "worker-046",
+        "worker-047"
+      ],
+      "pending_workers": [
+        "worker-048"
+      ]
+    },
+    {
+      "id": "shift-02-00",
+      "stand": "stand-02",
+      "start_local": "2027-09-10T09:00:00",
+      "end_local": "2027-09-10T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-050",
+        "worker-051",
+        "worker-052"
+      ],
+      "pending_workers": [
+        "worker-053"
+      ]
+    },
+    {
+      "id": "shift-02-01",
+      "stand": "stand-02",
+      "start_local": "2027-09-10T11:00:00",
+      "end_local": "2027-09-10T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-055",
+        "worker-056",
+        "worker-057"
+      ],
+      "pending_workers": [
+        "worker-058"
+      ]
+    },
+    {
+      "id": "shift-02-02",
+      "stand": "stand-02",
+      "start_local": "2027-09-10T13:00:00",
+      "end_local": "2027-09-10T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-060",
+        "worker-061",
+        "worker-062"
+      ],
+      "pending_workers": [
+        "worker-063"
+      ]
+    },
+    {
+      "id": "shift-02-03",
+      "stand": "stand-02",
+      "start_local": "2027-09-10T15:00:00",
+      "end_local": "2027-09-10T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-065",
+        "worker-066",
+        "worker-067"
+      ],
+      "pending_workers": [
+        "worker-068"
+      ]
+    },
+    {
+      "id": "shift-02-04",
+      "stand": "stand-02",
+      "start_local": "2027-09-10T17:00:00",
+      "end_local": "2027-09-10T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-070",
+        "worker-071",
+        "worker-072"
+      ],
+      "pending_workers": [
+        "worker-073"
+      ]
+    },
+    {
+      "id": "shift-02-05",
+      "stand": "stand-02",
+      "start_local": "2027-09-11T09:00:00",
+      "end_local": "2027-09-11T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-050",
+        "worker-051",
+        "worker-052"
+      ],
+      "pending_workers": [
+        "worker-053"
+      ]
+    },
+    {
+      "id": "shift-02-06",
+      "stand": "stand-02",
+      "start_local": "2027-09-11T11:00:00",
+      "end_local": "2027-09-11T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-055",
+        "worker-056",
+        "worker-057"
+      ],
+      "pending_workers": [
+        "worker-058"
+      ]
+    },
+    {
+      "id": "shift-02-07",
+      "stand": "stand-02",
+      "start_local": "2027-09-11T13:00:00",
+      "end_local": "2027-09-11T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-060",
+        "worker-061",
+        "worker-062"
+      ],
+      "pending_workers": [
+        "worker-063"
+      ]
+    },
+    {
+      "id": "shift-02-08",
+      "stand": "stand-02",
+      "start_local": "2027-09-11T15:00:00",
+      "end_local": "2027-09-11T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-065",
+        "worker-066",
+        "worker-067"
+      ],
+      "pending_workers": [
+        "worker-068"
+      ]
+    },
+    {
+      "id": "shift-02-09",
+      "stand": "stand-02",
+      "start_local": "2027-09-11T17:00:00",
+      "end_local": "2027-09-11T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-070",
+        "worker-071",
+        "worker-072"
+      ],
+      "pending_workers": [
+        "worker-073"
+      ]
+    },
+    {
+      "id": "shift-02-10",
+      "stand": "stand-02",
+      "start_local": "2027-09-12T09:00:00",
+      "end_local": "2027-09-12T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-050",
+        "worker-051",
+        "worker-052"
+      ],
+      "pending_workers": [
+        "worker-053"
+      ]
+    },
+    {
+      "id": "shift-02-11",
+      "stand": "stand-02",
+      "start_local": "2027-09-12T11:00:00",
+      "end_local": "2027-09-12T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-055",
+        "worker-056",
+        "worker-057"
+      ],
+      "pending_workers": [
+        "worker-058"
+      ]
+    },
+    {
+      "id": "shift-02-12",
+      "stand": "stand-02",
+      "start_local": "2027-09-12T13:00:00",
+      "end_local": "2027-09-12T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-060",
+        "worker-061",
+        "worker-062"
+      ],
+      "pending_workers": [
+        "worker-063"
+      ]
+    },
+    {
+      "id": "shift-02-13",
+      "stand": "stand-02",
+      "start_local": "2027-09-12T15:00:00",
+      "end_local": "2027-09-12T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-065",
+        "worker-066",
+        "worker-067"
+      ],
+      "pending_workers": [
+        "worker-068"
+      ]
+    },
+    {
+      "id": "shift-02-14",
+      "stand": "stand-02",
+      "start_local": "2027-09-12T17:00:00",
+      "end_local": "2027-09-12T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-070",
+        "worker-071",
+        "worker-072"
+      ],
+      "pending_workers": [
+        "worker-073"
+      ]
+    },
+    {
+      "id": "shift-03-00",
+      "stand": "stand-03",
+      "start_local": "2027-09-10T09:00:00",
+      "end_local": "2027-09-10T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-075",
+        "worker-076",
+        "worker-077"
+      ],
+      "pending_workers": [
+        "worker-078"
+      ]
+    },
+    {
+      "id": "shift-03-01",
+      "stand": "stand-03",
+      "start_local": "2027-09-10T11:00:00",
+      "end_local": "2027-09-10T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-080",
+        "worker-081",
+        "worker-082"
+      ],
+      "pending_workers": [
+        "worker-083"
+      ]
+    },
+    {
+      "id": "shift-03-02",
+      "stand": "stand-03",
+      "start_local": "2027-09-10T13:00:00",
+      "end_local": "2027-09-10T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-085",
+        "worker-086",
+        "worker-087"
+      ],
+      "pending_workers": [
+        "worker-088"
+      ]
+    },
+    {
+      "id": "shift-03-03",
+      "stand": "stand-03",
+      "start_local": "2027-09-10T15:00:00",
+      "end_local": "2027-09-10T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-090",
+        "worker-091",
+        "worker-092"
+      ],
+      "pending_workers": [
+        "worker-093"
+      ]
+    },
+    {
+      "id": "shift-03-04",
+      "stand": "stand-03",
+      "start_local": "2027-09-10T17:00:00",
+      "end_local": "2027-09-10T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-095",
+        "worker-096",
+        "worker-097"
+      ],
+      "pending_workers": [
+        "worker-098"
+      ]
+    },
+    {
+      "id": "shift-03-05",
+      "stand": "stand-03",
+      "start_local": "2027-09-11T09:00:00",
+      "end_local": "2027-09-11T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-075",
+        "worker-076",
+        "worker-077"
+      ],
+      "pending_workers": [
+        "worker-078"
+      ]
+    },
+    {
+      "id": "shift-03-06",
+      "stand": "stand-03",
+      "start_local": "2027-09-11T11:00:00",
+      "end_local": "2027-09-11T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-080",
+        "worker-081",
+        "worker-082"
+      ],
+      "pending_workers": [
+        "worker-083"
+      ]
+    },
+    {
+      "id": "shift-03-07",
+      "stand": "stand-03",
+      "start_local": "2027-09-11T13:00:00",
+      "end_local": "2027-09-11T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-085",
+        "worker-086",
+        "worker-087"
+      ],
+      "pending_workers": [
+        "worker-088"
+      ]
+    },
+    {
+      "id": "shift-03-08",
+      "stand": "stand-03",
+      "start_local": "2027-09-11T15:00:00",
+      "end_local": "2027-09-11T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-090",
+        "worker-091",
+        "worker-092"
+      ],
+      "pending_workers": [
+        "worker-093"
+      ]
+    },
+    {
+      "id": "shift-03-09",
+      "stand": "stand-03",
+      "start_local": "2027-09-11T17:00:00",
+      "end_local": "2027-09-11T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-095",
+        "worker-096",
+        "worker-097"
+      ],
+      "pending_workers": [
+        "worker-098"
+      ]
+    },
+    {
+      "id": "shift-03-10",
+      "stand": "stand-03",
+      "start_local": "2027-09-12T09:00:00",
+      "end_local": "2027-09-12T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-075",
+        "worker-076",
+        "worker-077"
+      ],
+      "pending_workers": [
+        "worker-078"
+      ]
+    },
+    {
+      "id": "shift-03-11",
+      "stand": "stand-03",
+      "start_local": "2027-09-12T11:00:00",
+      "end_local": "2027-09-12T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-080",
+        "worker-081",
+        "worker-082"
+      ],
+      "pending_workers": [
+        "worker-083"
+      ]
+    },
+    {
+      "id": "shift-03-12",
+      "stand": "stand-03",
+      "start_local": "2027-09-12T13:00:00",
+      "end_local": "2027-09-12T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-085",
+        "worker-086",
+        "worker-087"
+      ],
+      "pending_workers": [
+        "worker-088"
+      ]
+    },
+    {
+      "id": "shift-03-13",
+      "stand": "stand-03",
+      "start_local": "2027-09-12T15:00:00",
+      "end_local": "2027-09-12T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-090",
+        "worker-091",
+        "worker-092"
+      ],
+      "pending_workers": [
+        "worker-093"
+      ]
+    },
+    {
+      "id": "shift-03-14",
+      "stand": "stand-03",
+      "start_local": "2027-09-12T17:00:00",
+      "end_local": "2027-09-12T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-095",
+        "worker-096",
+        "worker-097"
+      ],
+      "pending_workers": [
+        "worker-098"
+      ]
+    },
+    {
+      "id": "shift-04-00",
+      "stand": "stand-04",
+      "start_local": "2027-09-10T09:00:00",
+      "end_local": "2027-09-10T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-100",
+        "worker-101",
+        "worker-102"
+      ],
+      "pending_workers": [
+        "worker-103"
+      ]
+    },
+    {
+      "id": "shift-04-01",
+      "stand": "stand-04",
+      "start_local": "2027-09-10T11:00:00",
+      "end_local": "2027-09-10T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-105",
+        "worker-106",
+        "worker-107"
+      ],
+      "pending_workers": [
+        "worker-108"
+      ]
+    },
+    {
+      "id": "shift-04-02",
+      "stand": "stand-04",
+      "start_local": "2027-09-10T13:00:00",
+      "end_local": "2027-09-10T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-110",
+        "worker-111",
+        "worker-112"
+      ],
+      "pending_workers": [
+        "worker-113"
+      ]
+    },
+    {
+      "id": "shift-04-03",
+      "stand": "stand-04",
+      "start_local": "2027-09-10T15:00:00",
+      "end_local": "2027-09-10T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-115",
+        "worker-116",
+        "worker-117"
+      ],
+      "pending_workers": [
+        "worker-118"
+      ]
+    },
+    {
+      "id": "shift-04-04",
+      "stand": "stand-04",
+      "start_local": "2027-09-10T17:00:00",
+      "end_local": "2027-09-10T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-120",
+        "worker-121",
+        "worker-122"
+      ],
+      "pending_workers": [
+        "worker-123"
+      ]
+    },
+    {
+      "id": "shift-04-05",
+      "stand": "stand-04",
+      "start_local": "2027-09-11T09:00:00",
+      "end_local": "2027-09-11T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-100",
+        "worker-101",
+        "worker-102"
+      ],
+      "pending_workers": [
+        "worker-103"
+      ]
+    },
+    {
+      "id": "shift-04-06",
+      "stand": "stand-04",
+      "start_local": "2027-09-11T11:00:00",
+      "end_local": "2027-09-11T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-105",
+        "worker-106",
+        "worker-107"
+      ],
+      "pending_workers": [
+        "worker-108"
+      ]
+    },
+    {
+      "id": "shift-04-07",
+      "stand": "stand-04",
+      "start_local": "2027-09-11T13:00:00",
+      "end_local": "2027-09-11T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-110",
+        "worker-111",
+        "worker-112"
+      ],
+      "pending_workers": [
+        "worker-113"
+      ]
+    },
+    {
+      "id": "shift-04-08",
+      "stand": "stand-04",
+      "start_local": "2027-09-11T15:00:00",
+      "end_local": "2027-09-11T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-115",
+        "worker-116",
+        "worker-117"
+      ],
+      "pending_workers": [
+        "worker-118"
+      ]
+    },
+    {
+      "id": "shift-04-09",
+      "stand": "stand-04",
+      "start_local": "2027-09-11T17:00:00",
+      "end_local": "2027-09-11T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-120",
+        "worker-121",
+        "worker-122"
+      ],
+      "pending_workers": [
+        "worker-123"
+      ]
+    },
+    {
+      "id": "shift-04-10",
+      "stand": "stand-04",
+      "start_local": "2027-09-12T09:00:00",
+      "end_local": "2027-09-12T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-100",
+        "worker-101",
+        "worker-102"
+      ],
+      "pending_workers": [
+        "worker-103"
+      ]
+    },
+    {
+      "id": "shift-04-11",
+      "stand": "stand-04",
+      "start_local": "2027-09-12T11:00:00",
+      "end_local": "2027-09-12T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-105",
+        "worker-106",
+        "worker-107"
+      ],
+      "pending_workers": [
+        "worker-108"
+      ]
+    },
+    {
+      "id": "shift-04-12",
+      "stand": "stand-04",
+      "start_local": "2027-09-12T13:00:00",
+      "end_local": "2027-09-12T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-110",
+        "worker-111",
+        "worker-112"
+      ],
+      "pending_workers": [
+        "worker-113"
+      ]
+    },
+    {
+      "id": "shift-04-13",
+      "stand": "stand-04",
+      "start_local": "2027-09-12T15:00:00",
+      "end_local": "2027-09-12T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-115",
+        "worker-116",
+        "worker-117"
+      ],
+      "pending_workers": [
+        "worker-118"
+      ]
+    },
+    {
+      "id": "shift-04-14",
+      "stand": "stand-04",
+      "start_local": "2027-09-12T17:00:00",
+      "end_local": "2027-09-12T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-120",
+        "worker-121",
+        "worker-122"
+      ],
+      "pending_workers": [
+        "worker-123"
+      ]
+    },
+    {
+      "id": "shift-05-00",
+      "stand": "stand-05",
+      "start_local": "2027-09-10T09:00:00",
+      "end_local": "2027-09-10T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-125",
+        "worker-126",
+        "worker-127"
+      ],
+      "pending_workers": [
+        "worker-128"
+      ]
+    },
+    {
+      "id": "shift-05-01",
+      "stand": "stand-05",
+      "start_local": "2027-09-10T11:00:00",
+      "end_local": "2027-09-10T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-130",
+        "worker-131",
+        "worker-132"
+      ],
+      "pending_workers": [
+        "worker-133"
+      ]
+    },
+    {
+      "id": "shift-05-02",
+      "stand": "stand-05",
+      "start_local": "2027-09-10T13:00:00",
+      "end_local": "2027-09-10T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-135",
+        "worker-136",
+        "worker-137"
+      ],
+      "pending_workers": [
+        "worker-138"
+      ]
+    },
+    {
+      "id": "shift-05-03",
+      "stand": "stand-05",
+      "start_local": "2027-09-10T15:00:00",
+      "end_local": "2027-09-10T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-140",
+        "worker-141",
+        "worker-142"
+      ],
+      "pending_workers": [
+        "worker-143"
+      ]
+    },
+    {
+      "id": "shift-05-04",
+      "stand": "stand-05",
+      "start_local": "2027-09-10T17:00:00",
+      "end_local": "2027-09-10T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-145",
+        "worker-146",
+        "worker-147"
+      ],
+      "pending_workers": [
+        "worker-148"
+      ]
+    },
+    {
+      "id": "shift-05-05",
+      "stand": "stand-05",
+      "start_local": "2027-09-11T09:00:00",
+      "end_local": "2027-09-11T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-125",
+        "worker-126",
+        "worker-127"
+      ],
+      "pending_workers": [
+        "worker-128"
+      ]
+    },
+    {
+      "id": "shift-05-06",
+      "stand": "stand-05",
+      "start_local": "2027-09-11T11:00:00",
+      "end_local": "2027-09-11T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-130",
+        "worker-131",
+        "worker-132"
+      ],
+      "pending_workers": [
+        "worker-133"
+      ]
+    },
+    {
+      "id": "shift-05-07",
+      "stand": "stand-05",
+      "start_local": "2027-09-11T13:00:00",
+      "end_local": "2027-09-11T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-135",
+        "worker-136",
+        "worker-137"
+      ],
+      "pending_workers": [
+        "worker-138"
+      ]
+    },
+    {
+      "id": "shift-05-08",
+      "stand": "stand-05",
+      "start_local": "2027-09-11T15:00:00",
+      "end_local": "2027-09-11T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-140",
+        "worker-141",
+        "worker-142"
+      ],
+      "pending_workers": [
+        "worker-143"
+      ]
+    },
+    {
+      "id": "shift-05-09",
+      "stand": "stand-05",
+      "start_local": "2027-09-11T17:00:00",
+      "end_local": "2027-09-11T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-145",
+        "worker-146",
+        "worker-147"
+      ],
+      "pending_workers": [
+        "worker-148"
+      ]
+    },
+    {
+      "id": "shift-05-10",
+      "stand": "stand-05",
+      "start_local": "2027-09-12T09:00:00",
+      "end_local": "2027-09-12T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-125",
+        "worker-126",
+        "worker-127"
+      ],
+      "pending_workers": [
+        "worker-128"
+      ]
+    },
+    {
+      "id": "shift-05-11",
+      "stand": "stand-05",
+      "start_local": "2027-09-12T11:00:00",
+      "end_local": "2027-09-12T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-130",
+        "worker-131",
+        "worker-132"
+      ],
+      "pending_workers": [
+        "worker-133"
+      ]
+    },
+    {
+      "id": "shift-05-12",
+      "stand": "stand-05",
+      "start_local": "2027-09-12T13:00:00",
+      "end_local": "2027-09-12T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-135",
+        "worker-136",
+        "worker-137"
+      ],
+      "pending_workers": [
+        "worker-138"
+      ]
+    },
+    {
+      "id": "shift-05-13",
+      "stand": "stand-05",
+      "start_local": "2027-09-12T15:00:00",
+      "end_local": "2027-09-12T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-140",
+        "worker-141",
+        "worker-142"
+      ],
+      "pending_workers": [
+        "worker-143"
+      ]
+    },
+    {
+      "id": "shift-05-14",
+      "stand": "stand-05",
+      "start_local": "2027-09-12T17:00:00",
+      "end_local": "2027-09-12T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-145",
+        "worker-146",
+        "worker-147"
+      ],
+      "pending_workers": [
+        "worker-148"
+      ]
+    },
+    {
+      "id": "shift-06-00",
+      "stand": "stand-06",
+      "start_local": "2027-09-10T09:00:00",
+      "end_local": "2027-09-10T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-150",
+        "worker-151",
+        "worker-152"
+      ],
+      "pending_workers": [
+        "worker-153"
+      ]
+    },
+    {
+      "id": "shift-06-01",
+      "stand": "stand-06",
+      "start_local": "2027-09-10T11:00:00",
+      "end_local": "2027-09-10T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-155",
+        "worker-156",
+        "worker-157"
+      ],
+      "pending_workers": [
+        "worker-158"
+      ]
+    },
+    {
+      "id": "shift-06-02",
+      "stand": "stand-06",
+      "start_local": "2027-09-10T13:00:00",
+      "end_local": "2027-09-10T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-160",
+        "worker-161",
+        "worker-162"
+      ],
+      "pending_workers": [
+        "worker-163"
+      ]
+    },
+    {
+      "id": "shift-06-03",
+      "stand": "stand-06",
+      "start_local": "2027-09-10T15:00:00",
+      "end_local": "2027-09-10T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-165",
+        "worker-166",
+        "worker-167"
+      ],
+      "pending_workers": [
+        "worker-168"
+      ]
+    },
+    {
+      "id": "shift-06-04",
+      "stand": "stand-06",
+      "start_local": "2027-09-10T17:00:00",
+      "end_local": "2027-09-10T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-170",
+        "worker-171",
+        "worker-172"
+      ],
+      "pending_workers": [
+        "worker-173"
+      ]
+    },
+    {
+      "id": "shift-06-05",
+      "stand": "stand-06",
+      "start_local": "2027-09-11T09:00:00",
+      "end_local": "2027-09-11T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-150",
+        "worker-151",
+        "worker-152"
+      ],
+      "pending_workers": [
+        "worker-153"
+      ]
+    },
+    {
+      "id": "shift-06-06",
+      "stand": "stand-06",
+      "start_local": "2027-09-11T11:00:00",
+      "end_local": "2027-09-11T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-155",
+        "worker-156",
+        "worker-157"
+      ],
+      "pending_workers": [
+        "worker-158"
+      ]
+    },
+    {
+      "id": "shift-06-07",
+      "stand": "stand-06",
+      "start_local": "2027-09-11T13:00:00",
+      "end_local": "2027-09-11T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-160",
+        "worker-161",
+        "worker-162"
+      ],
+      "pending_workers": [
+        "worker-163"
+      ]
+    },
+    {
+      "id": "shift-06-08",
+      "stand": "stand-06",
+      "start_local": "2027-09-11T15:00:00",
+      "end_local": "2027-09-11T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-165",
+        "worker-166",
+        "worker-167"
+      ],
+      "pending_workers": [
+        "worker-168"
+      ]
+    },
+    {
+      "id": "shift-06-09",
+      "stand": "stand-06",
+      "start_local": "2027-09-11T17:00:00",
+      "end_local": "2027-09-11T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-170",
+        "worker-171",
+        "worker-172"
+      ],
+      "pending_workers": [
+        "worker-173"
+      ]
+    },
+    {
+      "id": "shift-06-10",
+      "stand": "stand-06",
+      "start_local": "2027-09-12T09:00:00",
+      "end_local": "2027-09-12T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-150",
+        "worker-151",
+        "worker-152"
+      ],
+      "pending_workers": [
+        "worker-153"
+      ]
+    },
+    {
+      "id": "shift-06-11",
+      "stand": "stand-06",
+      "start_local": "2027-09-12T11:00:00",
+      "end_local": "2027-09-12T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-155",
+        "worker-156",
+        "worker-157"
+      ],
+      "pending_workers": [
+        "worker-158"
+      ]
+    },
+    {
+      "id": "shift-06-12",
+      "stand": "stand-06",
+      "start_local": "2027-09-12T13:00:00",
+      "end_local": "2027-09-12T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-160",
+        "worker-161",
+        "worker-162"
+      ],
+      "pending_workers": [
+        "worker-163"
+      ]
+    },
+    {
+      "id": "shift-06-13",
+      "stand": "stand-06",
+      "start_local": "2027-09-12T15:00:00",
+      "end_local": "2027-09-12T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-165",
+        "worker-166",
+        "worker-167"
+      ],
+      "pending_workers": [
+        "worker-168"
+      ]
+    },
+    {
+      "id": "shift-06-14",
+      "stand": "stand-06",
+      "start_local": "2027-09-12T17:00:00",
+      "end_local": "2027-09-12T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-170",
+        "worker-171",
+        "worker-172"
+      ],
+      "pending_workers": [
+        "worker-173"
+      ]
+    },
+    {
+      "id": "shift-07-00",
+      "stand": "stand-07",
+      "start_local": "2027-09-10T09:00:00",
+      "end_local": "2027-09-10T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-175",
+        "worker-176",
+        "worker-177"
+      ],
+      "pending_workers": [
+        "worker-178"
+      ]
+    },
+    {
+      "id": "shift-07-01",
+      "stand": "stand-07",
+      "start_local": "2027-09-10T11:00:00",
+      "end_local": "2027-09-10T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-180",
+        "worker-181",
+        "worker-182"
+      ],
+      "pending_workers": [
+        "worker-183"
+      ]
+    },
+    {
+      "id": "shift-07-02",
+      "stand": "stand-07",
+      "start_local": "2027-09-10T13:00:00",
+      "end_local": "2027-09-10T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-185",
+        "worker-186",
+        "worker-187"
+      ],
+      "pending_workers": [
+        "worker-188"
+      ]
+    },
+    {
+      "id": "shift-07-03",
+      "stand": "stand-07",
+      "start_local": "2027-09-10T15:00:00",
+      "end_local": "2027-09-10T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-190",
+        "worker-191",
+        "worker-192"
+      ],
+      "pending_workers": [
+        "worker-193"
+      ]
+    },
+    {
+      "id": "shift-07-04",
+      "stand": "stand-07",
+      "start_local": "2027-09-10T17:00:00",
+      "end_local": "2027-09-10T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-195",
+        "worker-196",
+        "worker-197"
+      ],
+      "pending_workers": [
+        "worker-198"
+      ]
+    },
+    {
+      "id": "shift-07-05",
+      "stand": "stand-07",
+      "start_local": "2027-09-11T09:00:00",
+      "end_local": "2027-09-11T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-175",
+        "worker-176",
+        "worker-177"
+      ],
+      "pending_workers": [
+        "worker-178"
+      ]
+    },
+    {
+      "id": "shift-07-06",
+      "stand": "stand-07",
+      "start_local": "2027-09-11T11:00:00",
+      "end_local": "2027-09-11T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-180",
+        "worker-181",
+        "worker-182"
+      ],
+      "pending_workers": [
+        "worker-183"
+      ]
+    },
+    {
+      "id": "shift-07-07",
+      "stand": "stand-07",
+      "start_local": "2027-09-11T13:00:00",
+      "end_local": "2027-09-11T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-185",
+        "worker-186",
+        "worker-187"
+      ],
+      "pending_workers": [
+        "worker-188"
+      ]
+    },
+    {
+      "id": "shift-07-08",
+      "stand": "stand-07",
+      "start_local": "2027-09-11T15:00:00",
+      "end_local": "2027-09-11T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-190",
+        "worker-191",
+        "worker-192"
+      ],
+      "pending_workers": [
+        "worker-193"
+      ]
+    },
+    {
+      "id": "shift-07-09",
+      "stand": "stand-07",
+      "start_local": "2027-09-11T17:00:00",
+      "end_local": "2027-09-11T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-195",
+        "worker-196",
+        "worker-197"
+      ],
+      "pending_workers": [
+        "worker-198"
+      ]
+    },
+    {
+      "id": "shift-07-10",
+      "stand": "stand-07",
+      "start_local": "2027-09-12T09:00:00",
+      "end_local": "2027-09-12T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-175",
+        "worker-176",
+        "worker-177"
+      ],
+      "pending_workers": [
+        "worker-178"
+      ]
+    },
+    {
+      "id": "shift-07-11",
+      "stand": "stand-07",
+      "start_local": "2027-09-12T11:00:00",
+      "end_local": "2027-09-12T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-180",
+        "worker-181",
+        "worker-182"
+      ],
+      "pending_workers": [
+        "worker-183"
+      ]
+    },
+    {
+      "id": "shift-07-12",
+      "stand": "stand-07",
+      "start_local": "2027-09-12T13:00:00",
+      "end_local": "2027-09-12T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-185",
+        "worker-186",
+        "worker-187"
+      ],
+      "pending_workers": [
+        "worker-188"
+      ]
+    },
+    {
+      "id": "shift-07-13",
+      "stand": "stand-07",
+      "start_local": "2027-09-12T15:00:00",
+      "end_local": "2027-09-12T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-190",
+        "worker-191",
+        "worker-192"
+      ],
+      "pending_workers": [
+        "worker-193"
+      ]
+    },
+    {
+      "id": "shift-07-14",
+      "stand": "stand-07",
+      "start_local": "2027-09-12T17:00:00",
+      "end_local": "2027-09-12T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-195",
+        "worker-196",
+        "worker-197"
+      ],
+      "pending_workers": [
+        "worker-198"
+      ]
+    },
+    {
+      "id": "shift-08-00",
+      "stand": "stand-08",
+      "start_local": "2027-09-10T09:00:00",
+      "end_local": "2027-09-10T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-200",
+        "worker-201",
+        "worker-202"
+      ],
+      "pending_workers": [
+        "worker-203"
+      ]
+    },
+    {
+      "id": "shift-08-01",
+      "stand": "stand-08",
+      "start_local": "2027-09-10T11:00:00",
+      "end_local": "2027-09-10T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-205",
+        "worker-206",
+        "worker-207"
+      ],
+      "pending_workers": [
+        "worker-208"
+      ]
+    },
+    {
+      "id": "shift-08-02",
+      "stand": "stand-08",
+      "start_local": "2027-09-10T13:00:00",
+      "end_local": "2027-09-10T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-210",
+        "worker-211",
+        "worker-212"
+      ],
+      "pending_workers": [
+        "worker-213"
+      ]
+    },
+    {
+      "id": "shift-08-03",
+      "stand": "stand-08",
+      "start_local": "2027-09-10T15:00:00",
+      "end_local": "2027-09-10T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-215",
+        "worker-216",
+        "worker-217"
+      ],
+      "pending_workers": [
+        "worker-218"
+      ]
+    },
+    {
+      "id": "shift-08-04",
+      "stand": "stand-08",
+      "start_local": "2027-09-10T17:00:00",
+      "end_local": "2027-09-10T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-220",
+        "worker-221",
+        "worker-222"
+      ],
+      "pending_workers": [
+        "worker-223"
+      ]
+    },
+    {
+      "id": "shift-08-05",
+      "stand": "stand-08",
+      "start_local": "2027-09-11T09:00:00",
+      "end_local": "2027-09-11T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-200",
+        "worker-201",
+        "worker-202"
+      ],
+      "pending_workers": [
+        "worker-203"
+      ]
+    },
+    {
+      "id": "shift-08-06",
+      "stand": "stand-08",
+      "start_local": "2027-09-11T11:00:00",
+      "end_local": "2027-09-11T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-205",
+        "worker-206",
+        "worker-207"
+      ],
+      "pending_workers": [
+        "worker-208"
+      ]
+    },
+    {
+      "id": "shift-08-07",
+      "stand": "stand-08",
+      "start_local": "2027-09-11T13:00:00",
+      "end_local": "2027-09-11T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-210",
+        "worker-211",
+        "worker-212"
+      ],
+      "pending_workers": [
+        "worker-213"
+      ]
+    },
+    {
+      "id": "shift-08-08",
+      "stand": "stand-08",
+      "start_local": "2027-09-11T15:00:00",
+      "end_local": "2027-09-11T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-215",
+        "worker-216",
+        "worker-217"
+      ],
+      "pending_workers": [
+        "worker-218"
+      ]
+    },
+    {
+      "id": "shift-08-09",
+      "stand": "stand-08",
+      "start_local": "2027-09-11T17:00:00",
+      "end_local": "2027-09-11T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-220",
+        "worker-221",
+        "worker-222"
+      ],
+      "pending_workers": [
+        "worker-223"
+      ]
+    },
+    {
+      "id": "shift-08-10",
+      "stand": "stand-08",
+      "start_local": "2027-09-12T09:00:00",
+      "end_local": "2027-09-12T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-200",
+        "worker-201",
+        "worker-202"
+      ],
+      "pending_workers": [
+        "worker-203"
+      ]
+    },
+    {
+      "id": "shift-08-11",
+      "stand": "stand-08",
+      "start_local": "2027-09-12T11:00:00",
+      "end_local": "2027-09-12T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-205",
+        "worker-206",
+        "worker-207"
+      ],
+      "pending_workers": [
+        "worker-208"
+      ]
+    },
+    {
+      "id": "shift-08-12",
+      "stand": "stand-08",
+      "start_local": "2027-09-12T13:00:00",
+      "end_local": "2027-09-12T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-210",
+        "worker-211",
+        "worker-212"
+      ],
+      "pending_workers": [
+        "worker-213"
+      ]
+    },
+    {
+      "id": "shift-08-13",
+      "stand": "stand-08",
+      "start_local": "2027-09-12T15:00:00",
+      "end_local": "2027-09-12T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-215",
+        "worker-216",
+        "worker-217"
+      ],
+      "pending_workers": [
+        "worker-218"
+      ]
+    },
+    {
+      "id": "shift-08-14",
+      "stand": "stand-08",
+      "start_local": "2027-09-12T17:00:00",
+      "end_local": "2027-09-12T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-220",
+        "worker-221",
+        "worker-222"
+      ],
+      "pending_workers": [
+        "worker-223"
+      ]
+    },
+    {
+      "id": "shift-09-00",
+      "stand": "stand-09",
+      "start_local": "2027-09-10T09:00:00",
+      "end_local": "2027-09-10T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-225",
+        "worker-226",
+        "worker-227"
+      ],
+      "pending_workers": [
+        "worker-228"
+      ]
+    },
+    {
+      "id": "shift-09-01",
+      "stand": "stand-09",
+      "start_local": "2027-09-10T11:00:00",
+      "end_local": "2027-09-10T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-230",
+        "worker-231",
+        "worker-232"
+      ],
+      "pending_workers": [
+        "worker-233"
+      ]
+    },
+    {
+      "id": "shift-09-02",
+      "stand": "stand-09",
+      "start_local": "2027-09-10T13:00:00",
+      "end_local": "2027-09-10T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-235",
+        "worker-236",
+        "worker-237"
+      ],
+      "pending_workers": [
+        "worker-238"
+      ]
+    },
+    {
+      "id": "shift-09-03",
+      "stand": "stand-09",
+      "start_local": "2027-09-10T15:00:00",
+      "end_local": "2027-09-10T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-240",
+        "worker-241",
+        "worker-242"
+      ],
+      "pending_workers": [
+        "worker-243"
+      ]
+    },
+    {
+      "id": "shift-09-04",
+      "stand": "stand-09",
+      "start_local": "2027-09-10T17:00:00",
+      "end_local": "2027-09-10T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-245",
+        "worker-246",
+        "worker-247"
+      ],
+      "pending_workers": [
+        "worker-248"
+      ]
+    },
+    {
+      "id": "shift-09-05",
+      "stand": "stand-09",
+      "start_local": "2027-09-11T09:00:00",
+      "end_local": "2027-09-11T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-225",
+        "worker-226",
+        "worker-227"
+      ],
+      "pending_workers": [
+        "worker-228"
+      ]
+    },
+    {
+      "id": "shift-09-06",
+      "stand": "stand-09",
+      "start_local": "2027-09-11T11:00:00",
+      "end_local": "2027-09-11T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-230",
+        "worker-231",
+        "worker-232"
+      ],
+      "pending_workers": [
+        "worker-233"
+      ]
+    },
+    {
+      "id": "shift-09-07",
+      "stand": "stand-09",
+      "start_local": "2027-09-11T13:00:00",
+      "end_local": "2027-09-11T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-235",
+        "worker-236",
+        "worker-237"
+      ],
+      "pending_workers": [
+        "worker-238"
+      ]
+    },
+    {
+      "id": "shift-09-08",
+      "stand": "stand-09",
+      "start_local": "2027-09-11T15:00:00",
+      "end_local": "2027-09-11T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-240",
+        "worker-241",
+        "worker-242"
+      ],
+      "pending_workers": [
+        "worker-243"
+      ]
+    },
+    {
+      "id": "shift-09-09",
+      "stand": "stand-09",
+      "start_local": "2027-09-11T17:00:00",
+      "end_local": "2027-09-11T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-245",
+        "worker-246",
+        "worker-247"
+      ],
+      "pending_workers": [
+        "worker-248"
+      ]
+    },
+    {
+      "id": "shift-09-10",
+      "stand": "stand-09",
+      "start_local": "2027-09-12T09:00:00",
+      "end_local": "2027-09-12T11:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-225",
+        "worker-226",
+        "worker-227"
+      ],
+      "pending_workers": [
+        "worker-228"
+      ]
+    },
+    {
+      "id": "shift-09-11",
+      "stand": "stand-09",
+      "start_local": "2027-09-12T11:00:00",
+      "end_local": "2027-09-12T13:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-230",
+        "worker-231",
+        "worker-232"
+      ],
+      "pending_workers": [
+        "worker-233"
+      ]
+    },
+    {
+      "id": "shift-09-12",
+      "stand": "stand-09",
+      "start_local": "2027-09-12T13:00:00",
+      "end_local": "2027-09-12T15:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-235",
+        "worker-236",
+        "worker-237"
+      ],
+      "pending_workers": [
+        "worker-238"
+      ]
+    },
+    {
+      "id": "shift-09-13",
+      "stand": "stand-09",
+      "start_local": "2027-09-12T15:00:00",
+      "end_local": "2027-09-12T17:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-240",
+        "worker-241",
+        "worker-242"
+      ],
+      "pending_workers": [
+        "worker-243"
+      ]
+    },
+    {
+      "id": "shift-09-14",
+      "stand": "stand-09",
+      "start_local": "2027-09-12T17:00:00",
+      "end_local": "2027-09-12T19:00:00",
+      "timezone": "Europe/Berlin",
+      "capacity": 5,
+      "assigned_workers": [
+        "worker-245",
+        "worker-246",
+        "worker-247"
+      ],
+      "pending_workers": [
+        "worker-248"
+      ]
+    }
+  ]
+}
