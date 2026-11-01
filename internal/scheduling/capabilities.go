@@ -109,7 +109,7 @@ func (t *Tx) issue(c Command, out *Result) error {
 		kind = "connection"
 		worker = c.WorkerID
 		expiry = t.store.Now().Add(7 * 24 * time.Hour)
-		if err = t.db.Exec("UPDATE capabilities SET disabled=true WHERE worker_id=? AND kind='connection'", worker).Error; err != nil {
+		if err = t.db.Exec("UPDATE capabilities SET disabled=true WHERE worker_id=? AND kind IN ('connection','fresh')", worker).Error; err != nil {
 			return err
 		}
 	case "organizer-invite":
