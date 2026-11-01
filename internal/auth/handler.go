@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/zitadel/oidc/v3/pkg/client/rp"
 	oidchttp "github.com/zitadel/oidc/v3/pkg/http"
@@ -110,12 +111,18 @@ func (h *Handler) Protect(next, denied http.Handler) http.Handler {
 		}
 		session, err := h.sessions.read(r)
 		if err != nil {
+			login := "/auth/login"
+			if r.Method == http.MethodGet && r.URL.RequestURI() != "/" {
+				if next := safeContinuation(r.URL.RequestURI()); next != "/" {
+					login += "?next=" + url.QueryEscape(next)
+				}
+			}
 			if r.Header.Get("HX-Request") == "true" {
-				w.Header().Set("HX-Redirect", "/auth/login")
+				w.Header().Set("HX-Redirect", login)
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
-			http.Redirect(w, r, "/auth/login", http.StatusSeeOther)
+			http.Redirect(w, r, login, http.StatusSeeOther)
 			return
 		}
 		r = r.WithContext(context.WithValue(r.Context(), userContextKey{}, session.User))
@@ -214,6 +221,8 @@ func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 func noStore(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "private, no-store")
+		w.Header().Set("Referrer-Policy", "no-referrer")
+		w.Header().Set("Vary", "HX-Request, HX-History-Restore-Request")
 		next.ServeHTTP(w, r)
 	})
 }
@@ -238,14 +247,28 @@ type continuation struct {
 }
 
 func (h *Handler) saveContinuation(w http.ResponseWriter, r *http.Request, state string) {
-	path := r.URL.Query().Get("next")
-	u, err := url.Parse(path)
-	if err != nil || u.IsAbs() || u.Host != "" || !strings.HasPrefix(path, "/") || strings.HasPrefix(path, "//") || len(path) > 500 {
-		path = "/"
-	}
+	path := safeContinuation(r.URL.Query().Get("next"))
 	data, _ := json.Marshal(continuation{state, path, time.Now().Add(5 * time.Minute).Unix()})
 	value := base64.RawURLEncoding.EncodeToString(h.sessions.aead.Seal(nil, nil, data, append(h.sessions.binding, []byte("return")...)))
 	http.SetCookie(w, &http.Cookie{Name: "herbstfest_return", Value: value, Path: "/auth", HttpOnly: true, Secure: h.sessions.secure, SameSite: http.SameSiteLaxMode, MaxAge: 300})
+}
+
+func safeContinuation(path string) string {
+	u, err := url.Parse(path)
+	if err != nil || u.IsAbs() || u.Host != "" || u.User != nil || u.Fragment != "" || !strings.HasPrefix(path, "/") || strings.HasPrefix(path, "//") || len(path) > 1500 || strings.ContainsAny(path, "\\\r\n") {
+		return "/"
+	}
+	if strings.HasPrefix(u.Path, "//") || strings.ContainsAny(u.Path, "\\\r\n") || strings.HasPrefix(u.Path, "/auth/") {
+		return "/"
+	}
+	for _, value := range []string{path, u.Path} {
+		for _, r := range value {
+			if unicode.IsControl(r) {
+				return "/"
+			}
+		}
+	}
+	return u.String()
 }
 func (h *Handler) continuation(w http.ResponseWriter, r *http.Request) string {
 	cookie, err := r.Cookie("herbstfest_return")

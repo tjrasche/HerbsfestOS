@@ -1,0 +1,81 @@
+package ui
+
+import "github.com/tjrasche/HerbsfestOS/internal/auth"
+
+templ Page(meta PageMeta, shell ShellModel, body templ.Component) {
+	<!DOCTYPE html>
+	<html lang="de">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<meta name="htmx-config" content='{"historyCacheSize":0,"historyRestoreAsHxRequest":false,"refreshOnHistoryMiss":true,"timeout":20000,"responseHandling":[{"code":"204","swap":false},{"code":"[2345]..","swap":true}]}'/>
+			<title>{ meta.Title }</title>
+			<meta name="theme-color" content="#102b4c"/>
+			<link rel="icon" type="image/svg+xml" href="/static/brand/mascot.svg"/>
+			<link rel="preload" href="/static/brand/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin/>
+			<link rel="stylesheet" href="/static/style.css"/>
+			<script src="/static/htmx.min.js" defer></script>
+			<script src="/static/app.js" defer></script>
+		</head>
+		<body hx-history="false" data-private-page="true">
+			<a class="skip-link" href="#main">Zum Inhalt springen</a>
+			@AppFrame(meta, shell, body)
+			@Loading()
+			<div id="app-status" class="sr-only" role="status" aria-live="polite"></div>
+			<div id="network-error" class="network-error" role="alert" hidden><p></p><button type="button" class="button button--secondary" data-refresh>Seite neu laden</button></div>
+		</body>
+	</html>
+}
+
+templ Frame(meta PageMeta, shell ShellModel, body templ.Component) {
+	<title>{ meta.Title }</title>
+	@AppFrame(meta, shell, body)
+}
+
+templ AppFrame(meta PageMeta, shell ShellModel, body templ.Component) {
+	<div id="app-frame" hx-history="false" class={ templ.KV("app-shell",shell.Private),templ.KV("guest-shell",!shell.Private) }>
+		if shell.Private {
+			<aside class="sidebar" aria-label="Arbeitsbereich">
+				@Brand(scheduleHref(shell))
+				<details class="mobile-menu" id="workspace-menu"><summary>Menü</summary>@PrimaryNavigation(meta, shell)</details>
+				<div class="desktop-menu">@PrimaryNavigation(meta, shell)</div>
+				<div class="sidebar__bottom"><p>Ein Fest, das verbindet.</p><a href="https://ringinger-herbstfest.de/" target="_blank" rel="noopener noreferrer">Unsere Fest-Website ↗</a></div>
+			</aside>
+			<div class="workspace">
+				<header class="topbar">
+					@Breadcrumbs(meta)
+					<div class="topbar__session"><span class="topbar__user">{ auth.CurrentUser(ctx).DisplayName() }</span><form method="post" action="/auth/logout"><button class="button button--quiet" type="submit">Abmelden</button></form></div>
+				</header>
+				if shell.Selected!="" || (shell.Global && len(shell.Editions)>0) {
+					<div class="edition-context">
+						if shell.Global && len(shell.Editions)>0 {
+							@EditionSelector(shell)
+						} else {
+							<span>{ shell.SelectedEdition }</span>
+						}
+						if shell.Selected!="" && shell.Selected==shell.Current {
+							@Badge("Aktuelle Ausgabe", "success")
+						} else if shell.Selected!="" {
+							@Badge("Nicht aktuelle Ausgabe", "warning")
+						}
+						<span class="edition-context__note">{ editionExplanation(shell) }</span>
+					</div>
+				}
+				<main id="main" class="main-content" tabindex="-1">@body</main>
+				@WorkspaceFooter()
+			</div>
+		} else {
+			<header class="guest-header">@Brand("/public/")<a href="https://ringinger-herbstfest.de/">Zur Fest-Website ↗</a></header>
+			<main id="main" class="guest-main" tabindex="-1">@body</main>
+			@WorkspaceFooter()
+		}
+	</div>
+}
+
+templ Brand(href string) {
+	<a class="brand" href={ templ.URL(href) } { LinkAttributes(href)... } aria-label="Ringinger Herbstfest · Startseite"><span class="brand__mark"><img src="/static/brand/mascot.svg" width="48" height="48" alt=""/></span><span class="brand__name">Ringinger<strong>Herbstfest<span class="brand__period">.</span></strong></span></a>
+}
+
+templ WorkspaceFooter() {
+	<footer class="workspace-footer"><div class="workspace-footer__signature"><strong>HerbstfestOS</strong><span>Mit Herz organisiert.</span></div><a class="hosting-credit" href="https://rasche-thalhofer.cloud/" target="_blank" rel="noopener noreferrer"><span class="hosting-credit__logo"><img src="/static/brand/rasche-thalhofer.svg" width="30" height="31" alt=""/></span><span class="hosting-credit__copy"><span class="hosting-credit__thanks">Mit freundlicher Unterstützung durch</span><span class="hosting-credit__company">Rasche &amp; Thalhofer UG (haftungsbeschränkt)</span><span class="hosting-credit__gift">Cloud geschenkt, damit ihr feiern könnt.</span></span></a></footer>
+}

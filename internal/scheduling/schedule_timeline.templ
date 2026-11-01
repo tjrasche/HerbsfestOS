@@ -1,0 +1,49 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ ScheduleTimeline(m ScheduleModel) {
+	if len(m.Shifts)==0 {
+		@ui.EmptyState("An diesem Tag sind noch keine Dienste geplant", "Wähle einen anderen Tag oder lege als Standteam den ersten Dienst an.")
+	} else {
+		<section aria-label="Dienstplan nach Uhrzeit" class="timeline-section">
+			<div class="timeline-scroll" role="region" aria-label="Zeitachse in Berliner Ortszeit" tabindex="0">
+				<div class="timeline-column-headings" style={ timelineStyle(m) } aria-hidden="true">
+					for _,column:=range m.Columns {
+						<span style={ "grid-column:" + n(column.Start+1) + " / span " + n(column.Lanes) }>{ column.Label }</span>
+					}
+				</div>
+				<div class="schedule-timeline" style={ timelineStyle(m) }>
+					<div class="timeline-axis" aria-hidden="true">
+						for _,hour:=range m.Hours {
+							<span style={ "top:" + n(hour.Top) + "px" }>{ hour.Label }</span>
+						}
+					</div>
+					<div class="timeline-blocks">
+						for _,sh:=range m.Shifts {
+							@ShiftSummaryBlock(sh)
+						}
+					</div>
+				</div>
+			</div>
+			<ol class="timeline-semantic-list">
+				for _,sh:=range m.Shifts {
+					<li>
+						<a data-shift-list-id={ sh.ID } href={ safe(sh.Href) } { ui.LinkAttributes(sh.Href)... } aria-current={ shiftCurrent(sh.Selected) }>
+							<time datetime={ iso(sh.StartsAt) }>{ conciseTime(sh.Shift) }</time><strong>{ sh.Stand+" · "+sh.Title }</strong>
+							<span>
+								{ n(sh.Confirmed)+" / "+n(sh.Capacity)+" bestätigt" }
+								if sh.Cancelled {
+									· Abgesagt
+								}
+								if sh.Pending>0 {
+									{ " · "+n(sh.Pending)+" offen" }
+								}
+							</span>
+						</a>
+					</li>
+				}
+			</ol>
+		</section>
+	}
+}

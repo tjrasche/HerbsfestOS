@@ -1,0 +1,32 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ AccessContent(v OrganisationPage, f FormState) {
+	@ui.PageHeader("Gesamtorganisation", "Teams & Zugriff", "Globaler Zugriff und Standteams sind eigene Berechtigungen.") {
+	}
+	@OrganisationNavigation("access", v.Shell)@ui.FormFeedback(f)
+	@ui.Card("Gesamtorganisation", "Mindestens ein global berechtigtes Konto muss erhalten bleiben.") {
+		<div class="record-list">
+			for _,a:=range v.Globals {
+				<div class="record-row">
+					<div><strong>{ a.Name }</strong><p class="muted">{ "Konto "+shortID(a.ID) }</p></div>
+					<details>
+						<summary>Globalen Zugriff entfernen</summary>
+						@ui.Form(orgPageURL("/admin/access/"+a.ID+"/remove", v.Shell)) {
+							<p>{ a.Name+" verliert Zugriff auf Katalog, Ausgaben und globale Verwaltung. Standteam-Zuordnungen bleiben eigenständig." }</p><label class="check-label"><input type="checkbox" name="confirm" value="true" required/> Entfernen des globalen Zugriffs bestätigen</label>@ui.SubmitButton("Globalen Zugriff entfernen", "Wird entfernt …", "danger")
+						}
+					</details>
+				</div>
+			}
+		</div>
+		@OrganisationPagination("/admin/access", contextQuery(v.Shell), v.Page, v.HasNext)
+		@ui.Form(orgPageURL("/admin/invitations", v.Shell)) {
+			<input type="hidden" name="scope" value="global"/><input type="hidden" name="return_to" value="/admin/access"/>
+			<p>Eine private Einladung gilt sieben Tage. Sie wird erst nach Anmeldung und ausdrücklicher Annahme verbraucht.</p>@ui.SubmitButton("Globale Einladung erstellen", "Wird erstellt …", "primary")
+		}
+	}
+	@ui.Card("Standteams", "Teamzuordnungen gehören zur Teilnahme eines Stands an einer Ausgabe.") {
+		<a href={ safe(orgPageURL("/admin/editions", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/editions",v.Shell))... }>Ausgabe und Standteam auswählen</a>
+	}
+}

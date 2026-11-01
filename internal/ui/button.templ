@@ -1,0 +1,10 @@
+package ui
+
+templ Button(label string, icon IconName, variant string, attributes templ.Attributes) {
+	<button class={ "button button--" + buttonVariant(variant) } { attributes... }>
+		if icon != "" {
+			@Icon(icon)
+		}
+		<span>{ label }</span>
+	</button>
+}

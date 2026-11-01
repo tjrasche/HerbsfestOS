@@ -1,0 +1,29 @@
+package scheduling
+
+templ OrganisationField(prefix, name, label, value, hint, kind string, limit int, required bool, f FormState) {
+	<div class="field">
+		<label class="field__label" for={ prefix + "-" + name }>{ label }</label>
+		<input class="field__input" id={ prefix + "-" + name } name={ name } type={ kind } value={ f.Value(name, value) } maxlength={ n(limit) } required?={ required } aria-invalid={ f.Error(name) != "" } aria-describedby={ prefix + "-" + name + "-hint" }/>
+		<p id={ prefix + "-" + name + "-hint" } class={ templ.KV("field__error",f.Error(name)!=""),templ.KV("field__hint",f.Error(name)=="") }>
+			if f.Error(name)!="" {
+				{ f.Error(name) }
+			} else {
+				{ hint }
+			}
+		</p>
+	</div>
+}
+
+templ OrganisationTextarea(prefix, name, label, value, hint string, limit int, f FormState) {
+	<div class="field">
+		<label class="field__label" for={ prefix + "-" + name }>{ label }</label>
+		<textarea class="field__input" id={ prefix + "-" + name } name={ name } rows="5" maxlength={ n(limit) } aria-invalid={ f.Error(name) != "" } aria-describedby={ prefix + "-" + name + "-hint" }>{ f.Value(name,value) }</textarea>
+		<p id={ prefix + "-" + name + "-hint" } class="field__hint">
+			if f.Error(name)!="" {
+				{ f.Error(name) }
+			} else {
+				{ hint }
+			}
+		</p>
+	</div>
+}

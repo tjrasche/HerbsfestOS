@@ -1,0 +1,16 @@
+package ui
+
+templ TextField(name, label, value, placeholder, hint, message string, attributes templ.Attributes) {
+	<div class="field">
+		<label class="field__label" for={ name }>{ label }</label>
+		<input class="field__input" id={ name } name={ name } value={ value } placeholder={ placeholder } aria-invalid={ message != "" } aria-describedby={ name + "-hint" } { attributes... }/>
+		if message != "" {
+			<p class="field__error" id={ name + "-hint" } role="alert">
+				@Icon(IconInfo)
+				<span>{ message }</span>
+			</p>
+		} else {
+			<p class="field__hint" id={ name + "-hint" }>{ hint }</p>
+		}
+	</div>
+}

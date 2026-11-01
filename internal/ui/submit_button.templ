@@ -1,0 +1,5 @@
+package ui
+
+templ SubmitButton(label, pending, variant string) {
+	<button type="submit" class={ "button","button--"+buttonVariant(variant) } data-pending-label={ pending }>{ label }</button>
+}

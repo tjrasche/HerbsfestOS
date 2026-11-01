@@ -1,0 +1,10 @@
+package ui
+
+templ PrimaryNavigation(meta PageMeta, shell ShellModel) {
+	<nav class="navigation" aria-label="Hauptnavigation">
+		<p class="navigation__label">Gemeinsam organisieren</p>
+		for _,item:=range navItems(shell) {
+			<a class={ "nav-link",templ.KV("nav-link--active",meta.Active==item.ID) } href={ templ.URL(item.Href) } aria-current={ activePageValue(meta.Active == item.ID) } { LinkAttributes(item.Href)... }><span>{ item.Label }</span><span class="nav-link__indicator" aria-hidden="true"></span></a>
+		}
+	</nav>
+}

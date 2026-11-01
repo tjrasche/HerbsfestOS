@@ -1,0 +1,19 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ StandListContent(v OrganisationPage, f FormState) {
+	@ui.PageHeader("Dauerhafter Katalog", "Stände", "Standnamen und Helferzugehörigkeiten bleiben über Ausgaben hinweg erhalten.") {
+		<a class="button button--primary" href={ safe(orgPageURL("/admin/stands/new", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/stands/new",v.Shell))... }>Neuer Stand</a>
+	}
+	@OrganisationNavigation("stands", v.Shell)@ui.FormFeedback(f)
+	if len(v.Stands)==0 {
+		@ui.EmptyState("Noch kein Stand", "Legt den ersten Stand an und lasst ihn anschließend an der Ausgabe teilnehmen.")
+	}
+	<div class="record-list">
+		for _,s:=range v.Stands {
+			<article class="card record-row"><div><h2><a href={ safe(orgPageURL("/admin/stands/"+s.ID, v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/stands/"+s.ID,v.Shell))... }>{ s.Name }</a></h2><p>{ n(s.Members)+" dauerhafte Helferzugehörigkeiten" }</p></div><a href={ safe(orgPageURL("/stands/"+s.ID+"/members", v.Shell)) } { ui.LinkAttributes(orgPageURL("/stands/"+s.ID+"/members",v.Shell))... }>Helfer verwalten</a></article>
+		}
+	</div>
+	@OrganisationPagination("/admin/stands", contextQuery(v.Shell), v.Page, v.HasNext)
+}

@@ -1,0 +1,47 @@
+package scheduling
+
+templ PrintRoster(m PrintModel) {
+	<!DOCTYPE html>
+	<html lang="de">
+		<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>{ "Dienstplan · "+m.Participation.Name+" · "+m.Edition.Label }</title><link rel="stylesheet" href="/static/style.css"/><script src="/static/app.js" defer></script>
+</head>
+		<body class="print-roster" hx-history="false" data-private-page="true">
+			<div class="no-print print-controls"><a class="button button--secondary" href={ safe(m.ReturnURL) }>← Zurück zum Plan</a><button type="button" class="button button--primary" data-print>Dienstplan drucken</button><p>Enthält ausschließlich bestätigte Einteilungen. Bitte die ausgedruckte Liste sorgfältig behandeln.</p></div>
+			if len(m.Days)==0 {
+				<h1>{ "Ringinger Herbstfest · "+m.Edition.Label+" · "+m.Participation.Name }</h1>
+				<p>Keine bestätigten Dienste für diese Auswahl.</p>
+			}
+			for _,d:=range m.Days {
+				<table class="print-table">
+					<thead><tr><th colspan="3"><span class="print-identity">{ "Ringinger Herbstfest · "+m.Edition.Label+" · "+m.Participation.Name+" · "+d.Date }</span><span class="print-revision">{ "Druckstand: "+m.Now.In(Berlin).Format("02.01.2006 15:04 MST") }</span></th></tr><tr><th>Zeit / Dienst</th><th>Bestätigte Helfer</th><th>Besetzung</th></tr></thead>
+					<tbody>
+						for _,sh:=range d.Shifts {
+							<tr>
+								<td><strong>{ sh.Title }</strong><br/>{ conciseTime(sh.Shift) }</td>
+								<td>
+									if len(sh.Roster)==0 {
+										Noch unbesetzt
+									} else {
+										for i,p:=range sh.Roster {
+											if i>0 {
+												<br/>
+											}
+											{ p.Name }
+										}
+									}
+								</td>
+								<td>
+									{ n(len(sh.Roster))+" / "+n(sh.Capacity) }
+									if sh.Free>0 {
+										<br/>
+										{ n(sh.Free)+" frei" }
+									}
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			}
+		</body>
+	</html>
+}

@@ -1,0 +1,23 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ DirectoryContent(v DirectoryPageModel, f FormState) {
+	@ui.PageHeader("Helfer finden", "Helfer suchen", "Gleiche Namen oder Kontakte beweisen keine Identität. Prüfe vor einer Einteilung die richtige Person.") {
+	}
+	@ui.FormFeedback(f)
+	if v.MemberStand.ID!="" {
+		@ui.Notice("Zum Stand hinzufügen", "Wähle eine Person für "+v.MemberStand.Name+". Die dauerhafte Zugehörigkeit legt noch keinen Dienst fest.", "info")
+	}
+	<form method="get" action="/directory" class="filter-bar" hx-get="/directory" hx-target="#app-frame" hx-swap="outerHTML" hx-push-url="true" hx-sync="this:replace" hx-trigger="submit, input changed delay:350ms from:input[name='q']" hx-indicator="#page-loading">
+		@OrganisationQueryHidden(directoryContext(v), "q", "page")
+		<label for="directory-q">Name oder exakter Kontakt<input id="directory-q" type="search" name="q" value={ v.Query } maxlength="200" autocomplete="off"/></label>
+		@ui.SubmitButton("Suchen", "Wird gesucht …", "primary")
+	</form>
+	<p class="muted">Bis zu 25 Treffer pro Seite. Nicht zugehörige Kontakte bleiben maskiert.</p>
+	@DirectoryResultsContent(v)
+	@OrganisationPagination("/directory", directoryContext(v), v.Page, v.HasNext)
+	if directoryStandID(v)!="" {
+		<p><a href={ safe(orgPageURL("/stands/"+directoryStandID(v)+"/members", v.Shell)) } { ui.LinkAttributes(orgPageURL("/stands/"+directoryStandID(v)+"/members",v.Shell))... }>Neue Person beim Stand anlegen</a></p>
+	}
+}

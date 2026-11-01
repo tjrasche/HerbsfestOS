@@ -1,0 +1,24 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ ShiftSummaryBlock(sh ShiftSummary) {
+	<a data-shift-id={ sh.ID } class={ "shift-block",templ.KV("shift-block--cancelled",sh.Cancelled),templ.KV("shift-block--full",sh.Confirmed>=sh.Capacity),templ.KV("shift-block--selected",sh.Selected) } style={ shiftStyle(sh) } href={ safe(sh.Href) } { ui.LinkAttributes(sh.Href)... } aria-current={ shiftCurrent(sh.Selected) } aria-label={ sh.Stand + ", " + conciseTime(sh.Shift) + ", " + sh.Title + ", " + n(sh.Confirmed) + " von " + n(sh.Capacity) + " bestätigt" + cancelledLabel(sh.Cancelled) }>
+		<span class="shift-block__stand">{ sh.Stand }</span><strong>{ sh.Title }</strong><time datetime={ iso(sh.StartsAt) }>{ sh.StartsAt.In(Berlin).Format("15:04")+"–"+sh.EndsAt.In(Berlin).Format("15:04") }</time><span>{ n(sh.Confirmed)+" / "+n(sh.Capacity)+" bestätigt" }</span>
+		if sh.Pending>0 {
+			<span class="shift-block__pending">{ n(sh.Pending)+" offene Anfragen" }</span>
+		}
+		if sh.Cancelled {
+			<span>Abgesagt</span>
+		}
+		if sh.Outside {
+			<span>Zeiten prüfen</span>
+		}
+		if sh.Continuation {
+			<span>Fortsetzung vom Vortag</span>
+		}
+		if sh.Continues {
+			<span>Weiter am nächsten Tag</span>
+		}
+	</a>
+}

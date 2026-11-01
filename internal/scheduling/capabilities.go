@@ -19,6 +19,46 @@ func (t *Tx) capability(token string) (Capability, error) {
 	return c, nil
 }
 func (t *Tx) issue(c Command, out *Result) error {
+	if c.CapabilityID != "" {
+		old, err := t.managedCapability(c.CapabilityID)
+		if err != nil {
+			return err
+		}
+		if c.Action == "capability-revoke" {
+			if err = t.db.Exec("UPDATE capabilities SET disabled=true WHERE digest=?", old.Digest).Error; err != nil {
+				return err
+			}
+			return t.audit(c.Action, old.Kind, "{}")
+		}
+		if c.Action != "capability-reissue" || old.ConsumedBy != nil {
+			return ErrConflict
+		}
+		if err = t.db.Exec("UPDATE capabilities SET disabled=true WHERE digest=?", old.Digest).Error; err != nil {
+			return err
+		}
+		c.CapabilityID = ""
+		c.Token = ""
+		switch old.Kind {
+		case "signup":
+			c.Action = "signup-link"
+			c.ParticipationID = *old.ParticipationID
+			if old.ShiftID != nil {
+				c.ID = *old.ShiftID
+			}
+		case "connection", "fresh":
+			c.Action = "connection-link"
+			c.WorkerID = *old.WorkerID
+		case "organizer":
+			c.Action = "organizer-invite"
+			c.Scope = old.Scope
+			if old.ParticipationID != nil {
+				c.ParticipationID = *old.ParticipationID
+			}
+		default:
+			return ErrInvalid
+		}
+		return t.issue(c, out)
+	}
 	var err error
 	var worker, part, shift, issuer any
 	var expiry any
@@ -145,6 +185,7 @@ func (t *Tx) issue(c Command, out *Result) error {
 		return err
 	}
 	out.Token = token
+	out.ID = digest(token)
 	return t.audit(c.Action, kind, "{}")
 }
 func (t *Tx) redeem(who Identity, c Command, out *Result) error {
@@ -235,7 +276,24 @@ type SignupInput struct {
 	Token, Key, FirstName, LastName string
 	ShiftIDs                        []string
 }
-type Submission struct{ WorkerID, ConnectionToken string }
+type ReceiptItem struct {
+	ShiftID, Title, Stand, Edition, Status string
+	StartsAt, EndsAt                       time.Time
+}
+type SubmissionReceipt struct {
+	FirstName, LastName string
+	Items               []ReceiptItem
+}
+type Submission struct {
+	WorkerID, ConnectionToken string
+	Receipt                   SubmissionReceipt
+}
+
+func (t *Tx) submissionReceipt(worker string, in SignupInput) (SubmissionReceipt, error) {
+	r := SubmissionReceipt{FirstName: clean(in.FirstName), LastName: clean(in.LastName)}
+	err := t.db.Raw("SELECT s.id AS shift_id,s.title,s.starts_at,s.ends_at,st.name AS stand,e.label AS edition,r.status FROM requests r JOIN shifts s ON s.id=r.shift_id JOIN participations p ON p.id=s.participation_id JOIN stands st ON st.id=p.stand_id JOIN editions e ON e.id=p.edition_id WHERE r.worker_id=? AND s.id IN ? ORDER BY s.starts_at,s.id", worker, in.ShiftIDs).Scan(&r.Items).Error
+	return r, err
+}
 
 func (s *Store) Submit(ctx context.Context, who Identity, in SignupInput) (Submission, error) {
 	var out Submission
@@ -266,8 +324,10 @@ func (s *Store) Submit(ctx context.Context, who Identity, in SignupInput) (Submi
 			if err := t.check("view_details", "worker:proof"); err != nil {
 				return err
 			}
-			out = Submission{old.WorkerID, old.ConnectionToken}
-			return nil
+			out = Submission{WorkerID: old.WorkerID, ConnectionToken: old.ConnectionToken}
+			var err error
+			out.Receipt, err = t.submissionReceipt(old.WorkerID, in)
+			return err
 		}
 		var cap Capability
 		var err error
@@ -350,7 +410,11 @@ func (s *Store) Submit(ctx context.Context, who Identity, in SignupInput) (Submi
 		if err = t.db.Exec("INSERT INTO submissions(key,fingerprint,worker_id,connection_token) VALUES(?,?,?,?)", digest(in.Key), fingerprint, worker, proof).Error; err != nil {
 			return err
 		}
-		out = Submission{worker, proof}
+		out = Submission{WorkerID: worker, ConnectionToken: proof}
+		out.Receipt, err = t.submissionReceipt(worker, in)
+		if err != nil {
+			return err
+		}
 		return t.audit("submit", worker, "{}")
 	})
 	return out, err

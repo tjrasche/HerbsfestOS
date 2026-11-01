@@ -1,0 +1,26 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ EditionListContent(v OrganisationPage, f FormState) {
+	@ui.PageHeader("Gesamtorganisation", "Ausgaben", "Festtage und Ausgabewechsel werden hier gemeinsam vorbereitet.") {
+		<a class="button button--primary" href={ safe(orgPageURL("/admin/editions/new", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/editions/new",v.Shell))... }>Neue Ausgabe</a>
+	}
+	@OrganisationNavigation("editions", v.Shell)@ui.FormFeedback(f)
+	if len(v.Editions)==0 {
+		@ui.EmptyState("Noch keine Ausgabe", "Mit einer ersten Ausgabe beginnt die Vorbereitung.")
+	}
+	<div class="record-list">
+		for _,e:=range v.Editions {
+			<article class="card record-row">
+				<div><h2><a href={ safe(orgPageURL("/admin/editions/"+e.ID, v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/editions/"+e.ID,v.Shell))... }>{ e.Label }</a></h2><p>{ displayDate(e.StartDay)+" bis "+displayDate(e.EndDay) }</p><p>{ n(e.Enabled)+" aktive Stände · "+n(e.MissingTeams)+" ohne Team" }</p></div>
+				if e.ID==v.Shell.Current {
+					@ui.Badge("Aktuelle Ausgabe", "success")
+				} else {
+					@ui.Badge("Weitere Ausgabe", "neutral")
+				}
+			</article>
+		}
+	</div>
+	@OrganisationPagination("/admin/editions", contextQuery(v.Shell), v.Page, v.HasNext)
+}

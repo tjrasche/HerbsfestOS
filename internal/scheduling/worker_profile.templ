@@ -1,0 +1,70 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ WorkerProfileContent(v WorkerProfile, f FormState) {
+	@ui.PageHeader("Helferangaben", v.Worker.Name(), "Kontaktangaben werden mit den berechtigten Standteams geteilt.") {
+		if v.Shell.Organizer {
+			<a class="button button--secondary" href={ safe(orgPageURL(canonical("/workers/"+v.Worker.ID+"/assign", contextQuery(v.Shell)), v.Shell)) } { ui.LinkAttributes(orgPageURL(canonical("/workers/"+v.Worker.ID+"/assign",contextQuery(v.Shell)),v.Shell))... }>Einteilen</a>
+		}
+	}
+	@ui.FormFeedback(f)
+	<p class="muted">{ "Referenz "+shortID(v.Worker.ID) }</p>
+	if v.Worker.AccountID!=nil {
+		@ui.Badge("Konto verbunden", "success")
+	} else {
+		@ui.Badge("Noch kein Konto verbunden", "neutral")
+	}
+	<div class="detail-grid">
+		@ui.Card("Kontaktangaben", "Nur berechtigte Personen können die Angaben bearbeiten.") {
+			if v.CanEditContacts {
+				@WorkerFormContent(v, f)
+			} else {
+				<p>{ contactLabel(v.Worker.Email,v.Worker.Phone) }</p>
+				<p>Diese Angaben sind für dich schreibgeschützt.</p>
+			}
+		}
+		@ui.Card("Zugehörigkeit", "Diese Zugehörigkeiten bestehen über Ausgaben hinweg.") {
+			if len(v.Memberships)==0 {
+				<p>In deinem Berechtigungsbereich ist keine Standzugehörigkeit hinterlegt.</p>
+			}
+			<ul>
+				for _,m:=range v.Memberships {
+					<li>{ m.Name }</li>
+				}
+			</ul>
+			if v.Worker.ID==v.Shell.WorkerID {
+				<a href={ safe(orgPageURL("/requests/mine", v.Shell)) } { ui.LinkAttributes(orgPageURL("/requests/mine",v.Shell))... }>Meine Anfragen öffnen</a>
+			}
+		}
+	</div>
+	if !v.CanEditNotes {
+		@ui.Card("Gemeinsame Notizen", "Für diese Person und berechtigte Standteams sichtbar.") {
+			<p class="preserve-lines">{ nonempty(v.Worker.Notes,"Noch keine gemeinsamen Notizen.") }</p>
+			<p class="muted">Berechtigte Standteams und die Gesamtorganisation können diese Notizen ändern.</p>
+		}
+	}
+	if len(v.Assignments)>0 {
+		@ui.Card("Einteilungen", "Sichtbare Einteilungen der ausgewählten Ausgabe, höchstens 25.") {
+			<div class="record-list">
+				for _,a:=range v.Assignments {
+					<div class="record-row"><a href={ safe(orgPageURL("/shifts/"+a.ShiftID, v.Shell)) } { ui.LinkAttributes(orgPageURL("/shifts/"+a.ShiftID,v.Shell))... }>{ a.Title+" · "+a.Stand }</a><time datetime={ iso(a.StartsAt) }>{ a.StartsAt.In(Berlin).Format("02.01.2006 15:04")+" – "+a.EndsAt.In(Berlin).Format("15:04") }</time></div>
+				}
+			</div>
+		}
+	}
+	if v.CanIssueConnection {
+		@ui.Card("Konto verbinden", "Ein privater Link bestätigt die Verbindung erst nach Anmeldung und ausdrücklicher Annahme.") {
+			@ui.Form(orgPageURL("/workers/"+v.Worker.ID+"/connection-links", v.Shell)) {
+				<input type="hidden" name="return_to" value={ "/workers/" + v.Worker.ID }/>
+				<p>Ein neuer Link ersetzt einen bestehenden Kontoverbindungslink. Bitte nur persönlich teilen.</p>
+				<label class="check-label"><input type="checkbox" name="confirm" value="true" required/> Bisherigen Kontoverbindungslink für diese Person ersetzen</label>
+				@ui.SubmitButton("Privaten Kontolink erstellen / ersetzen", "Wird erstellt …", "secondary")
+			}
+			@CapabilityRows(v.Links, v.Shell)
+		}
+	}
+	if v.Shell.Global {
+		<p><a href={ safe(orgPageURL("/admin/workers/merge?target="+v.Worker.ID, v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/workers/merge?target="+v.Worker.ID,v.Shell))... }>Möglichen doppelten Datensatz vergleichen</a></p>
+	}
+}

@@ -1,0 +1,13 @@
+package scheduling
+
+import "net/url"
+
+templ OrganisationQueryHidden(values url.Values, exclude ...string) {
+	for _,key:=range sortedQueryKeys(values) {
+		if !contains(exclude,key) {
+			for _,value:=range values[key] {
+				<input type="hidden" name={ key } value={ value }/>
+			}
+		}
+	}
+}

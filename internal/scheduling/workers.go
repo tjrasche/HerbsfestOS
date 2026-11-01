@@ -65,6 +65,9 @@ func (t *Tx) workers(c Command, out *Result) error {
 		if old.ID == "" {
 			return ErrInvalid
 		}
+		if c.PreserveNotes {
+			c.Notes = old.Notes
+		}
 		if c.Notes != old.Notes {
 			if err := t.permitWorker(c.ID, "edit_notes"); err != nil {
 				return err
@@ -109,6 +112,51 @@ func (t *Tx) merge(target, source string, c Command, fresh bool) error {
 	}
 	if fresh && b.AccountID != nil {
 		return ErrConflict
+	}
+	if !fresh {
+		preview, err := t.mergePreview(target, source)
+		if err != nil {
+			return err
+		}
+		if c.PreviewFingerprint == "" || c.PreviewFingerprint != preview.Fingerprint {
+			return ErrConflict
+		}
+		switch c.EmailChoice {
+		case "target":
+			c.Email = a.Email
+		case "source":
+			c.Email = b.Email
+		}
+		switch c.PhoneChoice {
+		case "target":
+			c.Phone = a.Phone
+		case "source":
+			c.Phone = b.Phone
+		}
+		if c.EmailChoice == "clear" {
+			c.ClearEmail = true
+		}
+		if c.PhoneChoice == "clear" {
+			c.ClearPhone = true
+		}
+		if c.ClearEmail {
+			c.Email = ""
+		}
+		if c.ClearPhone {
+			c.Phone = ""
+		}
+		if c.ClearNotes {
+			c.Notes = ""
+		}
+		if !mergeContactValid(a.Email, b.Email, c.Email, c.EmailChoice, c.ClearEmail) || !mergeContactValid(a.Phone, b.Phone, c.Phone, c.PhoneChoice, c.ClearPhone) {
+			return ErrInvalid
+		}
+		if (a.Notes != "" || b.Notes != "") && c.Notes == "" && !c.ClearNotes {
+			return ErrInvalid
+		}
+		if c.ClearNotes && c.Notes != "" {
+			return ErrInvalid
+		}
 	}
 
 	var reqs []Request

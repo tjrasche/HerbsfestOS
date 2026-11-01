@@ -1,0 +1,20 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ AssignmentRemovalContent(m ShiftDetailModel, person Person, f FormState) {
+	@ui.PageHeader(m.Participation.Name, "Einteilung entfernen", person.Name+" · "+m.Shift.Title+" · "+conciseTime(m.Shift.Shift)) {
+	}
+	@ui.FormFeedback(f)
+	<section class="panel form-panel">
+		<p>Diese bestätigte Einteilung wird beendet. Die dauerhafte Zugehörigkeit zum Stand bleibt erhalten. Bitte informiere die Person persönlich.</p>
+		@ui.Form("/shifts/" + m.Shift.ID + "/assignments/" + person.ID + "/remove") {
+			@Hidden("return_to", canonical("/shifts/"+m.Shift.ID, filterValues(m.Schedule.Filter)))
+			<label for="assignment-remove-confirm"><input id="assignment-remove-confirm" type="checkbox" name="confirm" value="true" checked?={ f.Checked("confirm") } required aria-invalid={ f.Error("confirm") != "" } aria-describedby="assignment-remove-confirm-error"/>Einteilung von { person.Name } für diesen Dienst entfernen</label>
+			if f.Error("confirm")!="" {
+				<p class="field__error" id="assignment-remove-confirm-error">{ f.Error("confirm") }</p>
+			}
+			<div class="action-row">@ui.SubmitButton("Einteilung entfernen", "Wird entfernt …", "danger")@ui.ButtonLink("Abbrechen", canonical("/shifts/"+m.Shift.ID, filterValues(m.Schedule.Filter)), "", "secondary")</div>
+		}
+	</section>
+}

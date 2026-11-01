@@ -1,0 +1,33 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ EditionReadiness(v OrganisationPage) {
+	<div class="notice" data-readiness={ boolString(v.Ready) }>
+		<div>
+			<strong>
+				if v.Edition.ID==v.Shell.Current {
+					Aktuelle Ausgabe ist freigegeben
+				} else if v.Ready {
+					Bereit zum Aktivieren
+				} else {
+					Vorbereitung vervollständigen
+				}
+			</strong>
+			<p>{ n(v.Enabled)+" aktive Stände · "+n(v.MissingTeams)+" ohne Standteam" }</p>
+			if v.Enabled==0 {
+				<p>Mindestens einen Stand an dieser Ausgabe teilnehmen lassen.</p>
+			}
+			if v.MissingTeams>0 {
+				<p>Jeder aktive Stand benötigt mindestens ein Standteam-Konto.</p>
+			}
+			if v.Edition.ID==v.Shell.Current {
+				<p>Die Ausgabe ist bereits für alle aktuell. Die Dienstplanung und Anfragen können jetzt bearbeitet werden.</p>
+			}
+			<p>Schichten und Besetzung helfen bei der Planung; sie sind keine Voraussetzung zum Aktivieren.</p>
+			if v.Edition.ID!="" {
+				<a href={ safe(orgPageURL("/admin/editions/"+v.Edition.ID, v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/editions/"+v.Edition.ID,v.Shell))... }>Ausgabe und nächste Aufgaben öffnen</a>
+			}
+		</div>
+	</div>
+}

@@ -1,0 +1,21 @@
+package ui
+
+templ EditionSelector(shell ShellModel) {
+	<div class="edition-selector">
+		@Form("/edition-selection") {
+			<input type="hidden" name="return_to" value={ shell.ReturnURL }/>
+			<label for="workspace-edition">
+				Ausgabe
+				<select id="workspace-edition" name="edition" required>
+					if shell.Selected=="" {
+						<option value="" selected disabled>Ausgabe wählen</option>
+					}
+					for _,edition:=range shell.Editions {
+						<option value={ edition.ID } selected?={ edition.ID==shell.Selected }>{ edition.Label }</option>
+					}
+				</select>
+			</label>
+			@SubmitButton("Ansehen", "Wird geladen …", "secondary")
+		}
+	</div>
+}

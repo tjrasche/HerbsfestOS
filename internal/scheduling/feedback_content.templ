@@ -1,0 +1,23 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ FeedbackContent(v FeedbackPageModel, f FormState) {
+	@ui.PageHeader("Gemeinsam verbessern", "Feedback", nonempty(v.Shell.SelectedEdition, "Noch keine Ausgabe ausgewählt")) {
+	}
+	@ui.FormFeedback(f)
+	if v.Shell.Selected!="" {
+		@ui.Card("Notiz festhalten", "Feedback gehört zur ausgewählten Ausgabe. Neueste Notizen stehen zuerst.") {
+			@ui.Form(orgPageURL(canonical("/feedback-notes", contextQuery(v.Shell)), v.Shell)) {
+				@OrganisationField("feedback", "title", "Notiz", "", "1 bis 200 Zeichen.", "text", 200, true, f)@ui.SubmitButton("Feedback speichern", "Wird gespeichert …", "primary")
+			}
+		}
+	} else {
+		@ui.EmptyState("Zuerst eine Ausgabe anlegen", "Feedback kann anschließend für diese Ausgabe gesammelt werden.")
+	}
+	if len(v.Rows)==0&&v.Shell.Selected!="" {
+		@ui.EmptyState("Noch kein Feedback", "Haltet Beobachtungen und Ideen für diese Ausgabe fest.")
+	}
+	@FeedbackListContent(v.Rows)
+	@OrganisationPagination("/feedback-notes", contextQuery(v.Shell), v.Page, v.HasNext)
+}

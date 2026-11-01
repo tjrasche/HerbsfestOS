@@ -1,0 +1,46 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ MergeContent(v MergePage, f FormState) {
+	@ui.PageHeader("Helferdaten prüfen", "Helfer zusammenführen", "Nur Datensätze derselben realen Person zusammenführen. Gleiche Kontakte oder Namen beweisen keine Identität.") {
+	}
+	@OrganisationNavigation("access", v.Shell)@ui.FormFeedback(f)
+	if v.Preview!=nil {
+		@MergePreviewContent(*v.Preview, f, v.Shell)
+	} else {
+		if v.TargetID!="" {
+			<p>{ "Beibehaltene Referenz: "+shortID(v.TargetID) }</p><a href={ safe(orgPageURL("/workers/"+v.TargetID, v.Shell)) } { ui.LinkAttributes(orgPageURL("/workers/"+v.TargetID,v.Shell))... }>Beibehaltene Person öffnen</a>
+		}
+		@ui.GetForm("/admin/workers/merge") {
+			@OrganisationQueryHidden(contextQuery(v.Shell))
+			<input type="hidden" name="target" value={ v.TargetID }/>
+			<label for="merge-search">
+				if v.TargetID=="" {
+					Beibehaltene Person suchen
+				} else {
+					Zweite Person suchen
+				}
+				<input id="merge-search" name="q" type="search" value={ v.Query } minlength="2" maxlength="200" required/>
+			</label>@ui.SubmitButton("Suchen", "Wird gesucht …", "primary")
+		}
+		<div class="record-list">
+			for _,w:=range v.Candidates {
+				<article class="card record-row">
+					<div><strong>{ w.Name() }</strong><p>{ contactLabel(w.Email,w.Phone) }</p><p class="muted">{ shortID(w.ID) }</p></div>
+					<a href={ safe(orgPageURL(mergeCandidateURL(v, w.ID), v.Shell)) } { ui.LinkAttributes(orgPageURL(mergeCandidateURL(v,w.ID),v.Shell))... }>
+						if v.TargetID=="" {
+							Beibehalten
+						} else {
+							Vergleichen
+						}
+					</a>
+				</article>
+			}
+		</div>
+		if len(v.Query)>=2&&len(v.Candidates)==0 {
+			<p>Keine passende andere Person gefunden.</p>
+		}
+		@OrganisationPagination("/admin/workers/merge", mergeQuery(v), v.Page, v.HasNext)
+	}
+}

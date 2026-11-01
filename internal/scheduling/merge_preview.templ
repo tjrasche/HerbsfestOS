@@ -1,0 +1,61 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ MergePersonContent(label string, p MergePerson) {
+	@ui.Card(label, p.Name()) {
+		<dl>
+			<dt>Referenz</dt>
+			<dd>{ shortID(p.ID) }</dd>
+			<dt>Kontakt-E-Mail</dt>
+			<dd>{ nonempty(p.Email,"Nicht hinterlegt") }</dd>
+			<dt>Telefon</dt>
+			<dd>{ nonempty(p.Phone,"Nicht hinterlegt") }</dd>
+			<dt>Konto</dt>
+			<dd>
+				if p.AccountID!=nil {
+					Verbunden
+				} else {
+					Nicht verbunden
+				}
+			</dd>
+			<dt>Zugehörigkeiten / Anfragen / aktive Einteilungen</dt>
+			<dd>{ n(p.Memberships)+" / "+n(p.Requests)+" / "+n(p.Assignments) }</dd>
+			<dt>Gemeinsame Notizen</dt>
+			<dd class="preserve-lines">{ nonempty(p.Notes,"Keine Notizen") }</dd>
+		</dl>
+	}
+}
+
+templ MergePreviewContent(p MergeComparison, f FormState, shell ui.ShellModel) {
+	<div class="detail-grid">@MergePersonContent("Beibehaltene Person", p.Target)@MergePersonContent("Zusammenzuführende Person", p.Source)</div>
+	if p.Blocked {
+		@ui.Notice("Unterschiedliche Konten", "Die Datensätze besitzen unterschiedliche verbundene Konten und können nicht zusammengeführt werden.", "warning")
+	} else {
+		@ui.Card("Resultierende Angaben", "Zugehörigkeiten, Anfragen und Einteilungen werden zusammengeführt. Offene Kontoverbindungslinks beider Datensätze werden ungültig.") {
+			@ui.Form(orgPageURL("/admin/workers/merge", shell)) {
+				<input type="hidden" name="target" value={ p.Target.ID }/><input type="hidden" name="source" value={ p.Source.ID }/><input type="hidden" name="fingerprint" value={ p.Fingerprint }/>
+				@OrganisationField("merge", "first_name", "Resultierender Vorname", p.Result.FirstName, "", "text", 120, true, f)
+				@OrganisationField("merge", "last_name", "Resultierender Nachname", p.Result.LastName, "", "text", 120, true, f)
+				if p.EmailConflict {
+					@MergeContactChoice("email", "Kontakt-E-Mail", p.Target.Email, p.Source.Email, f)
+				}
+				@OrganisationField("merge", "email", "Resultierende Kontakt-E-Mail", p.Result.Email, "Bei Auswahl der ursprünglichen E-Mail wird dieser Wert serverseitig ersetzt.", "email", 320, false, f)
+				<label class="check-label"><input type="checkbox" name="clear_email" value="true" checked?={ f.Checked("clear_email") }/> Kontakt-E-Mail ausdrücklich leeren</label>
+				if p.PhoneConflict {
+					@MergeContactChoice("phone", "Telefon", p.Target.Phone, p.Source.Phone, f)
+				}
+				@OrganisationField("merge", "phone", "Resultierendes Telefon", p.Result.Phone, "Bei Auswahl der ursprünglichen Nummer wird dieser Wert serverseitig ersetzt.", "tel", 80, false, f)
+				<label class="check-label"><input type="checkbox" name="clear_phone" value="true" checked?={ f.Checked("clear_phone") }/> Telefonnummer ausdrücklich leeren</label>
+				@OrganisationTextarea("merge", "notes", "Resultierende gemeinsame Notizen", p.Result.Notes, "Beide bisherigen Texte sind vorbefüllt. Für die Person und berechtigte Standteams sichtbar.", 20000, f)
+				<label class="check-label"><input type="checkbox" name="clear_notes" value="true" checked?={ f.Checked("clear_notes") }/> Gemeinsame Notizen ausdrücklich leeren</label>
+				<label class="check-label"><input type="checkbox" name="confirm" value="true" required/> Ich habe beide Personen, die resultierenden Angaben und die Folgen geprüft. Die Zusammenführung kann nicht direkt rückgängig gemacht werden.</label>
+				@ui.SubmitButton("Personen zusammenführen", "Wird zusammengeführt …", "danger")
+			}
+		}
+	}
+}
+
+templ MergeContactChoice(name, label, target, source string, f FormState) {
+	<div class="field"><label for={ "merge-" + name + "-choice" }>{ label+": unterschiedliche Angaben auflösen" }</label><select id={ "merge-" + name + "-choice" } name={ name + "_choice" } required><option value="">Bitte bewusst auswählen</option><option value="target" selected?={ f.Value(name+"_choice","")=="target" }>{ "Beibehalten: "+target }</option><option value="source" selected?={ f.Value(name+"_choice","")=="source" }>{ "Übernehmen: "+source }</option><option value="custom" selected?={ f.Value(name+"_choice","")=="custom" }>Eigenen resultierenden Wert verwenden</option><option value="clear" selected?={ f.Value(name+"_choice","")=="clear" }>Ausdrücklich leeren</option></select></div>
+}

@@ -1,0 +1,8 @@
+package scheduling
+
+import "net/url"
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ OrganisationPagination(path string, q url.Values, page int, more bool) {
+	@ui.Pagination(page, orgPrevious(path, q, page), orgNext(path, q, page, more))
+}

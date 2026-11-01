@@ -140,7 +140,7 @@ func run() error {
 	}
 	private := http.NewServeMux()
 	mux := newMux(authHandler.Protect(private, ui.AccessDenied()))
-	scheduling.NewHandler(scheduling.New(db, fgaClient)).Register(private, mux, authHandler.Optional)
+	scheduling.NewHandler(scheduling.New(db, fgaClient), authConfig.BaseURL).Register(private, mux, authHandler.Optional)
 	authHandler.Register(mux)
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

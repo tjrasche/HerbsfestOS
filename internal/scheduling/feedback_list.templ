@@ -1,0 +1,9 @@
+package scheduling
+
+templ FeedbackListContent(rows []Note) {
+	<div class="record-list">
+		for _,note:=range rows {
+			<article class="card record-row"><p>{ note.Title }</p><time datetime={ iso(note.CreatedAt) }>{ note.CreatedAt.In(Berlin).Format("02.01.2006 15:04") }</time></article>
+		}
+	</div>
+}

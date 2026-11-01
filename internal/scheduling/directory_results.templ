@@ -1,0 +1,49 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ DirectoryResultsContent(v DirectoryPageModel) {
+	if len(v.Query)==0 {
+		@ui.EmptyState("Wen suchst du?", "Gib mindestens zwei Zeichen eines Namens oder einen exakten Kontakt ein.")
+	}
+	if len(v.Query)==1 {
+		@ui.EmptyState("Bitte die Suche ergänzen", "Ein einzelnes Zeichen ist zu kurz. Gib mindestens zwei Zeichen oder einen exakten Kontakt ein.")
+	}
+	if len(v.Query)>=2&&len(v.Rows)==0 {
+		@ui.EmptyState("Keine passenden Helfer", "Suche mit einem anderen Namen oder einem exakten Kontakt. Gleiche Namen können verschiedene Personen sein.")
+	}
+	<div class="record-list">
+		for _,row:=range v.Rows {
+			<article class="card record-row" data-worker-id={ row.ID }>
+				<div>
+					<h2>{ row.Name() }</h2>
+					<p>{ contactLabel(row.Email,row.Phone) }</p>
+					<p class="muted">
+						{ "Referenz "+shortID(row.ID) }
+						if !row.Full {
+							· Kontakte zum Schutz der Person maskiert
+						}
+					</p>
+				</div>
+				<div class="action-row">
+					if row.Full {
+						<a href={ safe(orgPageURL(canonical("/workers/"+row.ID, contextQuery(v.Shell)), v.Shell)) } { ui.LinkAttributes(orgPageURL(canonical("/workers/"+row.ID,contextQuery(v.Shell)),v.Shell))... }>Angaben öffnen</a>
+					}
+					if v.MemberStand.ID!="" {
+						if v.AlreadyMembers[row.ID] {
+							@ui.Badge("Bereits beim Stand", "success")
+						} else {
+							@ui.Form(canonical("/stands/"+v.MemberStand.ID+"/members", directoryPageQuery(v))) {
+								<input type="hidden" name="worker_id" value={ row.ID }/>
+								<input type="hidden" name="return_to" value={ directoryPageURL(v) }/>
+								@ui.SubmitButton("Zum Stand hinzufügen", "Wird hinzugefügt …", "secondary")
+							}
+						}
+					} else {
+						<a class="button button--secondary" href={ safe(orgPageURL(canonical("/workers/"+row.ID+"/assign", directoryContext(v)), v.Shell)) } { ui.LinkAttributes(orgPageURL(canonical("/workers/"+row.ID+"/assign",directoryContext(v)),v.Shell))... }>Einteilen</a>
+					}
+				</div>
+			</article>
+		}
+	</div>
+}

@@ -1,0 +1,18 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ WorkerFormContent(v WorkerProfile, f FormState) {
+	@ui.Form(orgPageURL(canonical("/workers/"+v.Worker.ID, contextQuery(v.Shell)), v.Shell)) {
+		<div class="schedule-form">
+			@OrganisationField("worker", "first_name", "Vorname", v.Worker.FirstName, "", "text", 120, true, f)
+			@OrganisationField("worker", "last_name", "Nachname", v.Worker.LastName, "", "text", 120, true, f)
+			@OrganisationField("worker", "email", "Kontakt-E-Mail", v.Worker.Email, "Optional.", "email", 320, false, f)
+			@OrganisationField("worker", "phone", "Telefon", v.Worker.Phone, "Optional.", "tel", 80, false, f)
+		</div>
+		if v.CanEditNotes {
+			@OrganisationTextarea("worker", "notes", "Gemeinsame Notizen", v.Worker.Notes, "Für diese Person und berechtigte Standteams sichtbar.", 20000, f)
+		}
+		@ui.SubmitButton("Angaben speichern", "Wird gespeichert …", "primary")
+	}
+}

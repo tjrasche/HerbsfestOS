@@ -1,0 +1,30 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ RequestDecision(id, decision, label, returnURL, accessible string) {
+	@ui.Form("/requests/" + id + "/" + decision) {
+		@Hidden("return_to", returnURL)<button type="submit" class={ "button",templ.KV("button--primary",decision=="approve"),templ.KV("button--secondary",decision!="approve") } aria-label={ accessible } data-pending-label="Wird gespeichert …">{ label }</button>
+	}
+}
+
+templ PendingRequestRow(row RequestRow, returnURL string) {
+	<li class="record-row" data-request-id={ row.ID }>
+		<div>
+			<h2>{ row.Name }</h2>
+			<p><strong>{ row.Stand+" · "+row.Title }</strong></p>
+			<p>{ row.Time()+" · "+row.Edition }</p>
+			<p class="muted">{ n(row.Confirmed)+" / "+n(row.Capacity)+" bestätigt" }</p>
+			if row.Stale {
+				<p class="schedule-warning">Für frühere Dienstzeiten angefragt. Vor einer Bestätigung bitte abstimmen.</p>
+			}
+		</div>
+		<div class="action-row">
+			if row.CanEdit {
+				@RequestDecision(row.ID, "approve", "Bestätigen", returnURL, row.Name+" für "+row.Title+" bestätigen")@RequestDecision(row.ID, "decline", "Ablehnen", returnURL, row.Name+" für "+row.Title+" ablehnen")
+			} else {
+				@ui.Badge("Nur Ansicht", "neutral")
+			}
+		</div>
+	</li>
+}

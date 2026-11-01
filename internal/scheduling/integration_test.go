@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -106,7 +107,7 @@ func TestApplicationCapacityAtomicityAndRetry(t *testing.T) {
 	must(t, e)
 	again, e := app.Submit(ctx, s.Identity{}, input)
 	must(t, e)
-	if one != again {
+	if !reflect.DeepEqual(one, again) {
 		t.Fatal("retry changed result")
 	}
 	input.Key = s.ID() + s.ID()

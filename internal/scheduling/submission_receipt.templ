@@ -1,0 +1,18 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ SubmissionReceiptContent(out Submission) {
+	<p class="eyebrow">Danke fürs Anpacken</p>
+	<h1>Deine Anfragen sind gespeichert.</h1>
+	<p><strong>{ out.Receipt.FirstName+" "+out.Receipt.LastName }</strong>, deine ausgewählten Dienste warten auf Bestätigung durch die Standorganisation. Noch ist kein Platz zugesagt.</p>
+	<ul class="record-list">
+		for _,item:=range out.Receipt.Items {
+			<li class="record-row"><div><p class="section-kicker">{ item.Edition+" · "+item.Stand }</p><h2>{ item.Title }</h2><p>{ conciseTime(Shift{StartsAt:item.StartsAt,EndsAt:item.EndsAt}) }</p></div>@ui.Badge(status(item.Status), requestTone(item.Status))</li>
+		}
+	</ul>
+	if out.ConnectionToken!="" {
+		<section class="panel"><h2>Optional: Konto verbinden</h2><p>Mit einem Konto kannst du deine Anfragen später ansehen und offene Anfragen zurückziehen. Deine Anfragen bleiben auch ohne Konto erhalten.</p><div class="action-row"><a class="button button--primary" href={ safe("/proof/" + out.ConnectionToken) }>Anmelden oder Konto erstellen</a></div></section>
+	}
+	<p class="help-text">Ohne Konto: Bitte wende dich für Änderungen persönlich an die Standorganisation. Speichere dir diese Übersicht bei Bedarf mit der Druckfunktion deines Browsers.</p>
+}

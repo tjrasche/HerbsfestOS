@@ -1,0 +1,65 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ EditionDetailContent(v OrganisationPage, f FormState) {
+	@ui.PageHeader("Ausgaben", nonempty(v.Edition.Label, "Neue Ausgabe"), "Festtage, teilnehmende Stände und die aktuelle Ausgabe verwalten.") {
+	}
+	@OrganisationNavigation("editions", v.Shell)@ui.FormFeedback(f)
+	<div class="detail-grid">
+		@ui.Card("Festtage", "Die Ausgabe betrifft Teilnahme und Standteams; der Standkatalog bleibt dauerhaft.") {
+			@EditionFormContent(v, f)
+		}
+		if v.Edition.ID!="" {
+			@ui.Card("Freigabe", "Aktivieren ändert die aktuelle Ausgabe für alle.") {
+				@EditionReadiness(v)
+				if v.Edition.ID==v.Shell.Current {
+					@ui.Badge("Aktuelle Ausgabe", "success")
+				} else {
+					@ui.Form(orgPageURL("/admin/editions/"+v.Edition.ID+"/activate", v.Shell)) {
+						<label class="check-label"><input type="checkbox" name="confirm" value="true" required/> Ich bestätige: { v.Edition.Label } wird die aktuelle Ausgabe für alle.</label>
+						@ui.SubmitButton("Ausgabe aktivieren", "Wird aktiviert …", "primary")
+					}
+				}
+			}
+		}
+	</div>
+	if v.Edition.ID!="" {
+		@ui.Card("Teilnehmende Stände", "Teams gehören zu dieser Ausgabe. Helferzugehörigkeiten bleiben dauerhaft.") {
+			if len(v.Participations)==0 {
+				<p>Noch keine Standteilnahme. Fügt unten einen Stand hinzu.</p>
+			}
+			<div class="record-list">
+				for _,p:=range v.Participations {
+					<article class="record-row">
+						<div><h3><a href={ safe(orgPageURL(participationPath(v.Edition.ID, p.ID), v.Shell)) } { ui.LinkAttributes(orgPageURL(participationPath(v.Edition.ID,p.ID),v.Shell))... }>{ p.Name }</a></h3><p>{ n(p.TeamCount)+" Teamkonten · "+n(p.ShiftCount)+" Dienste" }</p></div>
+						if p.Enabled {
+							@ui.Badge("Aktiv", "success")
+						} else {
+							@ui.Badge("Deaktiviert", "neutral")
+						}
+						if p.Enabled&&p.TeamCount==0 {
+							@ui.Badge("Team fehlt", "warning")
+						}
+					</article>
+				}
+			</div>
+			if len(v.Stands)>0 {
+				@ui.Form(orgPageURL("/admin/editions/"+v.Edition.ID+"/participations", v.Shell)) {
+					<input type="hidden" name="enabled" value="true"/>
+					<div class="field">
+						<label for="participation-stand">Stand teilnehmen lassen</label>
+						<select id="participation-stand" name="stand_id" required>
+							<option value="">Stand auswählen</option>
+							for _,s:=range v.Stands {
+								<option value={ s.ID } selected?={ f.Value("stand_id","")==s.ID }>{ s.Name }</option>
+							}
+						</select>
+					</div>
+					@ui.SubmitButton("Stand teilnehmen lassen", "Wird hinzugefügt …", "primary")
+				}
+			}
+			<p><a href={ safe(orgPageURL("/admin/stands/new", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/stands/new",v.Shell))... }>Neuen dauerhaften Stand anlegen</a></p>
+		}
+	}
+}

@@ -1,0 +1,17 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ LinkReplacementContent(action, back, scope string, f FormState) {
+	@ui.PageHeader("Privat teilen", "Linkersetzung bestätigen", scope)
+	@ui.FormFeedback(f)
+	@ui.Card("Neuen Link erstellen / bisherigen Link ersetzen", "Ein bestehender Link für diesen Bereich wird dabei ungültig. Es wird keine Nachricht versandt.") {
+		@ui.Form(action) {
+			<input type="hidden" name="return_to" value={ back }/>
+			<label class="check-label" for="link-replacement-confirm"><input id="link-replacement-confirm" type="checkbox" name="confirm" value="true" required aria-invalid="true" aria-describedby="link-replacement-confirm-error"/> Ich bestätige die Ersetzung des bisherigen Links.</label>
+			<p id="link-replacement-confirm-error" class="field__error">{ f.Error("confirm") }</p>
+			@ui.SubmitButton("Link erstellen / ersetzen", "Wird erstellt …", "secondary")
+		}
+		<a class="button button--quiet" href={ safe(back) } { ui.LinkAttributes(back)... }>Zurück ohne Ersetzung</a>
+	}
+}

@@ -1,0 +1,34 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ PendingRequestsContent(m RequestsModel, f FormState) {
+	@ui.PageHeader("Standorganisation", "Offene Anfragen", "Jede Anfrage wird einzeln geprüft. Eine Anfrage hält noch keinen Platz frei.") {
+	}
+	@ui.FormFeedback(f)
+	@ui.GetForm("/requests/pending") {
+		if m.Shell.Global && m.Shell.Selected!="" {
+			@Hidden("edition", m.Shell.Selected)
+		}
+		<label>
+			Stand
+			<select name="stand">
+				<option value="">Alle sichtbaren Stände</option>
+				for _,p:=range m.Stands {
+					<option value={ p.ID } selected?={ p.ID==m.Filter.Stand }>{ p.Name }</option>
+				}
+			</select>
+		</label>
+		<label>Tag<input type="date" name="day" value={ m.Filter.Day }/></label>@ui.SubmitButton("Anfragen anzeigen", "Wird geladen …", "secondary")
+	}
+	if len(m.Rows)==0 {
+		@ui.EmptyState("Alles geprüft", "Für diese Auswahl gibt es keine offenen Anfragen.")
+	} else {
+		<ul class="record-list">
+			for _,row:=range m.Rows {
+				@PendingRequestRow(row, requestsReturn(m))
+			}
+		</ul>
+	}
+	@ui.Pagination(m.Filter.Page, m.Previous, m.Next)
+}

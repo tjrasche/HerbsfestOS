@@ -1,0 +1,17 @@
+package ui
+
+import "strconv"
+
+templ ErrorContent(status int, message string) {
+	<div class="recovery-panel">
+		<p class="eyebrow">{ "HerbstfestOS · "+strconv.Itoa(status) }</p>
+		<h1>{ errorHeading(status) }</h1>
+		<p class="page-description">{ message }</p>
+		<div class="action-row">
+			<a class="button button--primary" href="/" { LinkAttributes("/")... }>Zur Dienstplanung</a><a class="button button--secondary" href="/requests/mine" { LinkAttributes("/requests/mine")... }>Meine Anfragen</a>
+			if status==503 {
+				<button class="button button--secondary" type="button" data-refresh>Erneut versuchen</button>
+			}
+		</div>
+	</div>
+}

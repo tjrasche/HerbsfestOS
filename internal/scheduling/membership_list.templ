@@ -1,0 +1,36 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ MembershipContent(v MembershipPage, f FormState) {
+	@ui.PageHeader("Dauerhafte Helferzugehörigkeit", v.Stand.Name, "Die Zugehörigkeit bleibt beim Ausgabewechsel erhalten. Sie ist keine Organisatorrolle.") {
+	}
+	@ui.FormFeedback(f)
+	@ui.GetForm("/stands/" + v.Stand.ID + "/members") {
+		@OrganisationQueryHidden(contextQuery(v.Shell))
+		<label for="members-q">Helfer dieses Stands suchen<input id="members-q" type="search" name="q" value={ v.Query } maxlength="200"/></label>@ui.SubmitButton("Suchen", "Wird gesucht …", "secondary")
+	}
+	if len(v.Rows)==0 {
+		@ui.EmptyState("Keine passenden Zugehörigkeiten", "Sucht zuerst im Helferverzeichnis, bevor ihr eine neue Person anlegt.")
+	}
+	<div class="record-list">
+		for _,m:=range v.Rows {
+			<div class="card record-row">
+				<a href={ safe(orgPageURL("/workers/"+m.ID, v.Shell)) } { ui.LinkAttributes(orgPageURL("/workers/"+m.ID,v.Shell))... }>{ m.Name }</a>
+				<details>
+					<summary>Zugehörigkeit entfernen</summary>
+					@ui.Form(orgPageURL(canonical("/stands/"+v.Stand.ID+"/members/"+m.ID+"/remove", membershipQuery(v)), v.Shell)) {
+						<p>{ m.Name+" gehört danach nicht mehr dauerhaft zu "+v.Stand.Name+". Zukünftige aktive Einteilungen verhindern das Entfernen." }</p><label class="check-label"><input type="checkbox" name="confirm" value="true" required/> Entfernen bestätigen</label>@ui.SubmitButton("Zugehörigkeit entfernen", "Wird entfernt …", "danger")
+					}
+				</details>
+			</div>
+		}
+	</div>
+	@OrganisationPagination("/stands/"+v.Stand.ID+"/members", membershipQuery(v), v.Page, v.HasNext)
+	@ui.Card("Neue Person hinzufügen", "Bitte zuerst suchen: Ähnliche Namen können verschiedene Personen sein.") {
+		<a href={ safe(membershipDirectoryURL(v)) } { ui.LinkAttributes(membershipDirectoryURL(v))... }>Im Helferverzeichnis suchen</a>
+		@ui.Form(orgPageURL(canonical("/stands/"+v.Stand.ID+"/members", membershipQuery(v)), v.Shell)) {
+			@OrganisationField("member", "first_name", "Vorname", "", "", "text", 120, true, f)@OrganisationField("member", "last_name", "Nachname", "", "", "text", 120, true, f)@ui.SubmitButton("Neue Person zum Stand hinzufügen", "Wird hinzugefügt …", "primary")
+		}
+	}
+}

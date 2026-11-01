@@ -1,0 +1,96 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ ShiftDetailContent(m ShiftDetailModel, f FormState) {
+	<div class="action-row detail-back">@ui.ButtonLink("← Zurück zum Plan", m.ReturnURL, "", "quiet")</div>
+	@ui.PageHeader(m.Edition.Label+" · "+m.Participation.Name, m.Shift.Title, conciseTime(m.Shift.Shift)+" · Berliner Ortszeit") {
+		if m.CanEdit && !m.Shift.Cancelled {
+			@ui.ButtonLink("Dienst bearbeiten", canonical("/shifts/"+m.Shift.ID+"/edit", filterValues(m.Schedule.Filter)), "", "secondary")
+		}
+	}
+	@ui.FormFeedback(f)
+	<div class="detail-grid shift-detail-layout">
+		<div class="shift-detail-timeline">@ScheduleTimeline(m.Schedule)</div>
+		<div>
+			<section class="detail-panel">
+				<div class="section-heading">
+					<h2>{ n(len(m.Shift.Roster))+" / "+n(m.Shift.Capacity)+" bestätigt" }</h2>
+					if m.Shift.Cancelled {
+						@ui.Badge("Abgesagt", "warning")
+					} else if m.Shift.Free<=0 {
+						@ui.Badge("Voll besetzt", "success")
+					} else {
+						@ui.Badge(n(m.Shift.Free)+" freie Plätze", "brand")
+					}
+				</div>
+				if m.Shift.Outside {
+					@ui.Notice("Zeiten prüfen", "Dieser Dienst liegt außerhalb des korrigierten Ausgabefensters. Die Zeiten bleiben erhalten.", "warning")
+				}
+				if m.Shift.Overlap {
+					@ui.Notice("Überschneidung", "Mindestens eine bestätigte Einteilung überschneidet sich mit einem weiteren Dienst. Bitte persönlich abstimmen.", "warning")
+				}
+				if len(m.Shift.Roster)==0 {
+					<p class="muted">Noch niemand eingeteilt.</p>
+				} else {
+					<ul class="roster-list">
+						for _,person:=range m.Shift.Roster {
+							<li>
+								<span>{ person.Name }</span>
+								if m.CanEdit&&!m.Shift.Cancelled {
+									@ui.ButtonLink("Einteilung entfernen", canonical("/shifts/"+m.Shift.ID+"/assignments/"+person.ID+"/remove", filterValues(m.Schedule.Filter)), "", "quiet")
+								}
+							</li>
+						}
+					</ul>
+				}
+				if m.CanEdit&&!m.Shift.Cancelled {
+					<div class="action-row">@ui.ButtonLink("Helfer suchen und einteilen", canonical("/directory", assignmentQuery(m)), "", "primary")</div>
+				}
+				if !m.CanEdit {
+					<p class="help-text">Nur das ausdrücklich zugeordnete Standteam kann den Dienst bearbeiten.</p>
+				}
+				if m.CanRequest {
+					@ui.Form("/requests") {
+						@Hidden("key", freshKey())@Hidden("shift", m.Shift.ID)@Hidden("return_to", canonical("/shifts/"+m.Shift.ID, filterValues(m.Schedule.Filter)))@ui.SubmitButton("Diesen Dienst anfragen", "Wird angefragt …", "primary")
+					}
+					<p class="help-text">Deine Anfrage wartet anschließend auf Bestätigung.</p>
+				}
+			</section>
+			if len(m.Shift.Pending)>0 {
+				<section class="detail-panel">
+					<h2>Offene Anfragen</h2>
+					<ul class="record-list">
+						for _,r:=range m.Shift.Pending {
+							<li class="request-detail-row">
+								<p>
+									<strong>{ r.Name }</strong>
+									if r.Stale {
+										<span class="help-text">Für frühere Dienstzeiten angefragt.</span>
+									}
+								</p>
+								if m.CanEdit {
+									<div class="action-row">@RequestDecision(r.ID, "approve", "Bestätigen", canonical("/shifts/"+m.Shift.ID, filterValues(m.Schedule.Filter)), r.Name+" bestätigen")@RequestDecision(r.ID, "decline", "Ablehnen", canonical("/shifts/"+m.Shift.ID, filterValues(m.Schedule.Filter)), r.Name+" ablehnen")</div>
+								}
+							</li>
+						}
+					</ul>@ui.ButtonLink("Alle offenen Anfragen", canonical("/requests/pending", filterValues(m.Schedule.Filter)), "", "quiet")
+				</section>
+			}
+			if m.CanEdit&&!m.Shift.Cancelled {
+				<section class="detail-panel">
+					<h2>Privat teilen</h2>
+					<p class="muted">Ein neuer Anmeldelink ersetzt den bisherigen Link für diesen Dienst.</p>@ui.Form("/shifts/" + m.Shift.ID + "/links") {
+	@Hidden("return_to", canonical("/shifts/"+m.Shift.ID, filterValues(m.Schedule.Filter)))<label><input type="checkbox" name="confirm" value="true" required/>Bisherigen Link ersetzen</label>@ui.SubmitButton("Anmeldelink erstellen", "Wird erstellt …", "secondary")
+}
+				</section>
+				<section class="detail-panel danger-zone">
+					<h2>Dienst absagen</h2>
+					<p>Bestätigte Einteilungen enden, offene Anfragen werden geschlossen. Bitte informiere die Helfer persönlich.</p>@ui.Form("/shifts/" + m.Shift.ID + "/cancel") {
+	@Hidden("return_to", canonical("/shifts/"+m.Shift.ID, filterValues(m.Schedule.Filter)))<label><input type="checkbox" name="confirm" value="true" checked?={ f.ID=="cancel"&&f.Checked("confirm") } required/>Absage dieses Dienstes bestätigen</label>@ui.SubmitButton("Dienst absagen", "Wird abgesagt …", "danger")
+}
+				</section>
+			}
+		</div>
+	</div>
+}

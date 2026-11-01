@@ -1,0 +1,47 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ ParticipationDetailContent(v OrganisationPage, f FormState) {
+	@ui.PageHeader(v.Edition.Label, v.Participation.Name, "Standteam und Teilnahme gelten ausschließlich für diese Ausgabe.") {
+		<a class="button button--secondary" href={ safe(orgPageURL("/?edition="+v.Edition.ID+"&stand="+v.Participation.ID, v.Shell)) } { ui.LinkAttributes(orgPageURL("/?edition="+v.Edition.ID+"&stand="+v.Participation.ID,v.Shell))... }>Dienstplan öffnen</a>
+	}
+	@OrganisationNavigation("editions", v.Shell)@ui.FormFeedback(f)
+	<div class="detail-grid">
+		@ui.Card("Teilnahme", v.Edition.Label) {
+			if v.Participation.Enabled {
+				@ui.Badge("Aktiv", "success")
+			} else {
+				@ui.Badge("Deaktiviert", "neutral")
+			}
+			@ui.Form(orgPageURL(participationPath(v.Edition.ID, v.Participation.ID), v.Shell)) {
+				<input type="hidden" name="enabled" value={ boolString(!v.Participation.Enabled) }/>
+				if v.Participation.Enabled {
+					<p>Deaktivieren sperrt Anmeldung und gewöhnliche Standorganisation dieser Ausgabe. Historische Dienste bleiben erhalten. Die aktuelle Ausgabe muss mindestens einen aktiven Stand mit Team behalten.</p>
+					<label class="check-label"><input type="checkbox" name="confirm" value="true" required/> Teilnahme dieser Ausgabe deaktivieren</label>
+					@ui.SubmitButton("Teilnahme deaktivieren", "Wird deaktiviert …", "danger")
+				} else {
+					@ui.SubmitButton("Teilnahme reaktivieren", "Wird reaktiviert …", "secondary")
+				}
+			}
+			<a href={ safe(orgPageURL("/stands/"+v.Participation.StandID+"/members", v.Shell)) } { ui.LinkAttributes(orgPageURL("/stands/"+v.Participation.StandID+"/members",v.Shell))... }>Dauerhafte Helferzugehörigkeit verwalten</a>
+		}
+		@ui.Card("Standteam", "Diese Konten können im Rahmen der aktuellen Ausgabe Dienste bearbeiten.") {
+			@TeamListContent(v, f)
+		}
+	</div>
+	@ui.Card("Links & Einladungen", "Persönlich teilen; es wird keine Nachricht versandt.") {
+		<div class="action-row">
+			@ui.Form(orgPageURL("/admin/invitations", v.Shell)) {
+				<input type="hidden" name="scope" value="team"/><input type="hidden" name="participation_id" value={ v.Participation.ID }/><input type="hidden" name="return_to" value={ participationPath(v.Edition.ID, v.Participation.ID) }/>@ui.SubmitButton("Private Teameinladung erstellen", "Wird erstellt …", "secondary")
+			}
+			@ui.Form(orgPageURL("/participations/"+v.Participation.ID+"/links", v.Shell)) {
+				<input type="hidden" name="return_to" value={ participationPath(v.Edition.ID, v.Participation.ID) }/>
+				<p>Ein neuer Anmeldelink ersetzt den bisherigen Link für diesen Stand.</p>
+				<label class="check-label"><input type="checkbox" name="confirm" value="true" required/> Bisherigen Anmeldelink für diesen Stand ersetzen</label>
+				@ui.SubmitButton("Anmeldelink erstellen / ersetzen", "Wird erstellt …", "secondary")
+			}
+		</div>
+		@CapabilityRows(v.Links, v.Shell)
+	}
+}

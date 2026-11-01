@@ -7,6 +7,8 @@ import (
 )
 
 type Command struct {
+	CapabilityID, PreviewFingerprint, EmailChoice, PhoneChoice                                               string
+	ClearEmail, ClearPhone, ClearNotes, PreserveNotes                                                        bool
 	Action, ID, ParticipationID, EditionID, SourceID, StandID, WorkerID, OtherWorkerID, AccountID            string
 	Label, StartDay, EndDay, Name, Title, Start, End, FirstName, LastName, Email, Phone, Notes, Token, Scope string
 	Capacity, Version                                                                                        int
@@ -141,7 +143,7 @@ func (s *Store) Execute(ctx context.Context, who Identity, c Command) (Result, e
 			return t.schedule(c, &out)
 		case "member-add", "member-remove", "worker-save", "worker-merge":
 			return t.workers(c, &out)
-		case "signup-link", "connection-link", "organizer-invite", "capability-revoke":
+		case "signup-link", "connection-link", "organizer-invite", "capability-revoke", "capability-reissue":
 			return t.issue(c, &out)
 		case "redeem-organizer", "connect":
 			return t.redeem(who, c, &out)

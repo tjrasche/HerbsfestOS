@@ -1,0 +1,21 @@
+package ui
+
+templ Breadcrumbs(meta PageMeta) {
+	<nav class="breadcrumb" aria-label="Brotkrumennavigation">
+		<ol>
+			if len(meta.Breadcrumbs)==0 {
+				<li><span>HerbstfestOS</span></li>
+				<li aria-current="page">{ meta.Heading }</li>
+			}
+			for i,b:=range meta.Breadcrumbs {
+				<li>
+					if b.Href!="" && i<len(meta.Breadcrumbs)-1 {
+						<a href={ templ.URL(b.Href) } { LinkAttributes(b.Href)... }>{ b.Label }</a>
+					} else {
+						<span aria-current="page">{ b.Label }</span>
+					}
+				</li>
+			}
+		</ol>
+	</nav>
+}

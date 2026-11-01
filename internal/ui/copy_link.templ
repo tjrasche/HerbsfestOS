@@ -1,0 +1,6 @@
+package ui
+
+templ CopyLink(url string) {
+	<div class="copy-link-field"><label for="created-link-url">Privater Link<input id="created-link-url" type="url" value={ url } readonly/></label><button class="button button--secondary" type="button" data-copy-target="created-link-url">Link kopieren</button></div>
+	<p class="help-text">Falls das Kopieren nicht möglich ist: Link im Feld markieren und manuell kopieren. Bitte nur persönlich teilen.</p>
+}

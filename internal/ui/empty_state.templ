@@ -1,0 +1,10 @@
+package ui
+
+templ EmptyState(title, description string) {
+	<div class="empty-state">
+		<div class="empty-state__icon">@Icon(IconNote)</div>
+		<h3>{ title }</h3>
+		<p>{ description }</p>
+		{ children... }
+	</div>
+}

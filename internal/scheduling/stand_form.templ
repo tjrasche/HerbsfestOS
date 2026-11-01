@@ -1,0 +1,10 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ StandFormContent(v OrganisationPage, f FormState) {
+	@ui.Form(orgPageURL(standAction(v.Stand.ID), v.Shell)) {
+		@OrganisationField("stand", "name", "Standname", v.Stand.Name, "Dieser Name gilt gemeinsam für alle Ausgaben.", "text", 120, true, f)
+		@ui.SubmitButton("Stand speichern", "Wird gespeichert …", "primary")
+	}
+}

@@ -1,0 +1,60 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ OwnRequestsContent(m RequestsModel, f FormState) {
+	@ui.PageHeader("Dein Einsatz zählt", "Meine Anfragen", "Hier stehen deine angefragten und bestätigten Dienste. Frühere Ausgaben bleiben lesbar.") {
+		if m.Shell.WorkerID!="" {
+			@ui.ButtonLink("Meine Angaben", "/workers/"+m.Shell.WorkerID, "", "secondary")
+		}
+	}
+	@ui.FormFeedback(f)
+	if m.Shell.WorkerID=="" {
+		@ui.EmptyState("Noch kein Helferdatensatz verbunden", "Wenn du bereits ohne Konto angefragt hast, kannst du den privaten Verbindungslink von der Standorganisation nutzen. Ein Konto bleibt optional.")
+	} else {
+		@ui.GetForm("/requests/mine") {
+			if m.Shell.Global && m.Shell.Selected!="" {
+				@Hidden("edition",m.Shell.Selected)
+			}
+			<label>
+				Status
+				<select name="status">
+					<option value="">Alle Anfragen</option>
+					for _,value:=range requestStatuses() {
+						<option value={ value } selected?={ value==m.Status }>{ status(value) }</option>
+					}
+				</select>
+			</label>@ui.SubmitButton("Filtern", "Wird geladen …", "secondary")
+		}
+		if len(m.Rows)==0 {
+			@ui.EmptyState("Noch keine Anfragen", "Deine Anfragen erscheinen hier, sobald du einen Dienst angefragt hast.")
+		} else {
+			<ul class="record-list">
+				for _,row:=range m.Rows {
+					<li class="record-row">
+						<div>
+							<p class="section-kicker">
+								{ row.Edition }
+								if row.EditionID!=m.Shell.Current {
+									· Archiv
+								}
+							</p>
+							<h2>{ row.Title }</h2>
+							<p>{ row.Stand+" · "+row.Time() }</p>
+							if row.Stale {
+								<p class="schedule-warning">Dienstzeiten wurden geändert. Bitte mit der Organisation abstimmen.</p>
+							}
+						</div>
+						<div class="action-row">
+							@ui.Badge(status(row.Status), requestTone(row.Status))
+							if row.CanWithdraw {
+								@RequestDecision(row.ID, "withdraw", "Zurückziehen", requestsReturn(m), row.Title+" zurückziehen")
+							}
+						</div>
+					</li>
+				}
+			</ul>
+		}
+		@ui.Pagination(m.Filter.Page, m.Previous, m.Next)
+	}
+}

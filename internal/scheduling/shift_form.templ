@@ -1,0 +1,35 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ ShiftFormContent(m ShiftFormModel) {
+	<div class="action-row detail-back">@ui.ButtonLink("← Zurück zum Plan", m.ReturnURL, "", "quiet")</div>
+	@ui.PageHeader(m.Edition.Label+" · "+m.Participation.Name, shiftFormHeading(m.Shift.ID), "Beginn und Ende werden in Berliner Ortszeit angegeben. Über Nacht ist möglich.") {
+	}
+	@ui.FormFeedback(m.Form)
+	<section class="panel form-panel">
+		@ui.Form(m.Action) {
+			@Hidden("return_to", m.ReturnURL)@Hidden("version", m.Form.Value("version", n(m.Shift.Version)))
+			@ui.InputField("shift-title", "title", "Dienstbezeichnung", m.Form.Value("title", m.Shift.Title), "Zum Beispiel: Aufbau oder Ausschank", m.Form.Error("title"), templ.Attributes{"required": true, "maxlength": "120"})
+			<div class="form-columns">
+				@ui.InputField("shift-start", "start", "Beginn", m.Form.Value("start", localInput(m.Shift.StartsAt)), "Berliner Ortszeit", m.Form.Error("start"), templ.Attributes{"type": "datetime-local", "required": true})
+				@ui.InputField("shift-end", "end", "Ende", m.Form.Value("end", localInput(m.Shift.EndsAt)), "Berliner Ortszeit", m.Form.Error("end"), templ.Attributes{"type": "datetime-local", "required": true})
+			</div>
+			if m.StartAmbiguous {
+				@OffsetChoice("start_offset", "Beginn", m.Form.Value("start_offset", ""))
+			}
+			if m.EndAmbiguous {
+				@OffsetChoice("end_offset", "Ende", m.Form.Value("end_offset", ""))
+			}
+			@ui.InputField("shift-capacity", "capacity", "Plätze", m.Form.Value("capacity", n(max(1, m.Shift.Capacity))), "Bestätigte Einteilungen können die Kapazität nicht überschreiten.", m.Form.Error("capacity"), templ.Attributes{"type": "number", "min": "1", "required": true})
+			if m.Shift.ID!="" {
+				<label class="checkbox-line"><input type="checkbox" name="confirm" value="true" checked?={ m.Form.Checked("confirm") }/>Zeitänderung trotz vorhandener Einteilungen bestätigen. Bitte Helfer persönlich informieren; offene Anfragen werden markiert.</label>
+			}
+			<div class="action-row">@ui.SubmitButton("Dienst speichern", "Wird gespeichert …", "primary")@ui.ButtonLink("Abbrechen", m.ReturnURL, "", "secondary")</div>
+		}
+	</section>
+}
+
+templ OffsetChoice(name, label, value string) {
+	<fieldset class="offset-choice"><legend>{ label+": doppelte Stunde bei der Zeitumstellung" }</legend><label><input type="radio" name={ name } value="+02:00" required checked?={ value=="+02:00" }/>Erstes Auftreten · Sommerzeit (MESZ, +02:00)</label><label><input type="radio" name={ name } value="+01:00" required checked?={ value=="+01:00" }/>Zweites Auftreten · Normalzeit (MEZ, +01:00)</label></fieldset>
+}

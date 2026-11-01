@@ -1,25 +1,25 @@
 # HerbstfestOS
 
-Barebones server-rendered Go application for managing a nonprofit festival.
-The first domain is a feedback note: a specific feedback point to track.
-Signed-in festival team members create and list notes at `/`; htmx updates
-the page without a full reload, and the form also works with JavaScript
-disabled. `/public/` is an anonymous landing page.
+Server-rendered volunteer scheduling for a nonprofit festival. Organisers manage
+editions, stands, teams, helpers and requests; volunteers can submit names-only
+requests without an account. htmx enhances navigation and forms, which also work
+without JavaScript. `/public/` is an anonymous landing page.
 
 ## Stack and structure
 
 - Go 1.26+, standard `net/http` routing and cross-origin protection.
 - templ for HTML, self-hosted htmx 2.0.11, plain CSS, embedded assets.
 - GORM with its PostgreSQL driver.
-- ZITADEL OIDC with PKCE for production login and project-role authorization.
-- OpenFGA infrastructure and a standard-library Go client for future permissions.
+- ZITADEL OIDC with PKCE for production identity and encrypted sessions.
+- PostgreSQL-owned permission facts checked through the pinned OpenFGA model.
 - ko for container builds; Kustomize for Kubernetes configuration.
 
 ```text
 cmd/web/                   server, dependency wiring, public/private routing, migrations
-internal/feedbacknote/     entity, service, repository, handler, templates
+internal/scheduling/      scheduling commands, scoped reads, HTTP routes and feature templates
+internal/feedbacknote/     legacy feedback package; not the live scheduling routes
 internal/database/         database connection and pool
-internal/auth/             OIDC login, encrypted sessions and project-role guard
+internal/auth/             OIDC login, encrypted sessions and identity guard
 internal/openfga/          reusable REST client, configuration and connectivity check
 internal/ui/               shared layout, public landing page and embedded assets
 config/app/                application Deployment, Service, configuration
@@ -68,8 +68,10 @@ Postgres is exported as an archive containing only the node's platform, which
 also works with Docker's containerd image store.
 
 Kind deploys the Go app, OpenFGA, and separate plain Postgres instances for each. It sets
-`AUTH_MODE=development`: login and role checks are bypassed, and the private
-layout displays “Lokale Entwicklung”. OpenFGA's dev API uses no authentication
+`AUTH_MODE=development`: hosted login is replaced with the fixed synthetic identity
+`urn:herbstfest:local` / `developer`, and the layout displays “Lokale Entwicklung”.
+PostgreSQL facts and OpenFGA still enforce every business permission; development
+mode does not grant global or stand-team access. OpenFGA's dev API uses no authentication
 and is internal to the cluster; its database has a separate 1Gi volume and
 public development credentials. ZITADEL is not deployed into kind.
 Full SSO in the kind Deployment is not configured; see the local OIDC
@@ -91,19 +93,24 @@ make kind-down         # deletes the local cluster and its database data
 
 ## Design system
 
-The feedback page uses a shared German application shell with responsive
-navigation. Visit `/design-system` for the live component gallery: colors,
-typography, buttons, badges, cards, form fields, notices, and empty states.
-In OIDC mode, the top bar shows the verified user's name and a POST logout
-button. A signed-in user without the required project role sees a friendly
-403 page with instructions to contact the organizers and sign in again.
+The operational UI uses a shared German application shell with responsive
+navigation, an edition selector and resource-specific pages. `/design-system` is
+a public component reference outside operational navigation. A verified login
+identifies an account; fresh database facts and OpenFGA decide which resources
+and actions that account can access. Global visibility alone does not allow
+schedule editing: an explicit participation team grant is required.
 
-Shared templ components live in `internal/ui/components.templ`; icons live in
-`internal/ui/icons.templ`. Wrap a domain page in `ui.Layout(title, activePage)`
-and keep its content/htmx fragments in the domain package. The feedback page
-demonstrates this: htmx swaps `#notes`, while the navigation and layout remain
-outside the fragment. Buttons accept templ attributes for native form behavior.
-Forms remain usable without JavaScript.
+Reusable components each have a dedicated `.templ` source under `internal/ui/`
+(for example `page_shell.templ`, `navigation.templ`, `form_field.templ`,
+`form_feedback.templ` and `loading.templ`); icons remain in `icons.templ`.
+Feature components live beside the scheduling handlers. Shared `PageMeta`,
+`ShellModel` and `FormState` types describe presentation state. The response
+boundary renders `ui.Page` for full requests or `ui.Frame` for htmx requests.
+The frame replaces `#app-frame`, including refreshed navigation and context;
+`#page-loading` and `#app-status` persist outside it. Private and bearer pages
+use no-store responses, disable htmx history snapshots and re-authorise after
+history restoration. `ui.Layout` remains a compatibility wrapper for reference
+pages. Ordinary links/forms, inline errors and success context work without JS.
 
 The footer thanks Rasche & Thalhofer UG (haftungsbeschränkt) for providing free
 hosting. Its locally embedded logo comes from
@@ -155,9 +162,17 @@ issuer is <https://auth.r-und-t.app>; its administrator console is at
 
 | Method | Route | Access and behavior |
 | --- | --- | --- |
-| GET | `/` | Feedback notes; requires the project role `club-member` |
-| POST | `/feedback-notes` | Creates a note; requires the same role |
-| GET | `/design-system` | Component gallery; requires the same role |
+| GET | `/` | Bounded stand/day schedule for the authenticated identity |
+| GET | `/requests/mine` | Own current and archived requests |
+| GET | `/requests/pending` | Scoped, paginated request queue |
+| GET | `/directory`, `/workers/{worker}` | Permission-checked search and profiles |
+| GET | `/admin`, `/admin/editions`, `/admin/stands` | Global organisation and setup |
+| GET/POST | `/feedback-notes` | Global-only, edition-scoped feedback |
+| GET | `/register/{token}` | Public names-only signup |
+| GET | `/proof/{token}` | Optional identity, scoped proof context; never consumes on GET |
+| POST | `/proof/{token}` | Authenticated, explicit proof acceptance |
+| GET | `/print/{participation}` | Authorised confirmed roster |
+| GET | `/design-system` | Public component reference |
 | GET | `/public` | Anonymous redirect to `/public/` |
 | GET | `/public/` | Anonymous festival landing page |
 | GET | `/static/...` | Public embedded CSS, JavaScript, logos and fonts |
@@ -169,8 +184,8 @@ issuer is <https://auth.r-und-t.app>; its administrator console is at
 
 `cmd/web/routes.go` mounts a separate public mux under `/public/`, outside the
 auth middleware. Public handlers register relative paths: `/signup` on that
-mux would become `/public/signup`. Register each future public domain handler
-there; keep private handlers on the protected mux in `cmd/web/main.go`. The
+mux would become `/public/signup`. Public signup/proof capability routes are registered directly on the outer mux
+by scheduling; private handlers use the protected mux in `cmd/web/main.go`. The
 initial public template is `internal/ui/public.templ` and reuses the design
 system components. Unknown public subpaths return 404 without starting login;
 paths such as `/publicity` remain protected. Cross-origin protection still
@@ -189,20 +204,20 @@ client has no client secret. Its configured public identifiers are:
 | Issuer | `https://auth.r-und-t.app` |
 | Redirect URI | `https://herbstfest.r-und-t.app/auth/callback` |
 | Post-logout redirect URI | `https://herbstfest.r-und-t.app/` |
-| Required project role | `club-member` |
+| Legacy project role | `club-member` (not an application permission grant) |
 
-Project and application configuration is managed in the ZITADEL console.
-Enable **Assert Roles on Authentication**, create the `club-member` role,
-and explicitly assign it to each festival team member through the project's
-authorizations. Organization/instance administrator status alone does not
-grant app access. The app checks the project-specific roles claim; an
-identically named role in another project does not grant access. See the
-[console setup guide](docs/zitadel-app-setup.txt) for the detailed steps.
+Project and application configuration is managed in the ZITADEL console; this
+UI redesign does not change provider settings. Existing project role claims,
+names and email addresses do not grant business permissions. Application access
+comes from trusted global grants, edition-specific teams, persistent memberships
+and account bindings in PostgreSQL, checked with OpenFGA. See the
+[console setup guide](docs/zitadel-app-setup.txt) for provider configuration.
 
-Unauthenticated private requests return `303` to `/auth/login`. Expired htmx
-sessions return `401` with `HX-Redirect` so the whole browser goes to login.
-Authenticated users without `club-member` receive `403`; htmx redirects them
-to the full access-denied page. Successful login always returns to `/`.
+Unauthenticated private requests return `303` to login. Expired htmx sessions
+return `401` with `HX-Redirect` for a full browser login. Safe GET destinations
+are retained through the validated login continuation; interrupted POSTs are
+never replayed. Authenticated requests without the actual resource permission
+receive a branded `403` response.
 
 ### Configuration and sessions
 
@@ -213,11 +228,11 @@ an automatically loaded configuration file.
 | --- | --- |
 | `DATABASE_URL` | Required PostgreSQL connection string |
 | `HTTP_ADDR` | Listen address; defaults to `:8080` |
-| `AUTH_MODE` | Defaults to `oidc`; `development` explicitly bypasses auth |
+| `AUTH_MODE` | Defaults to `oidc`; `development` supplies a fixed local identity, with business permissions still enforced |
 | `ZITADEL_ISSUER` | OIDC issuer origin |
-| `APP_BASE_URL` | Browser-facing app origin, used for callback/logout URLs |
+| `APP_BASE_URL` | Trusted browser-facing origin for callback/logout and absolute private sharing links; configure it explicitly in development too |
 | `ZITADEL_CLIENT_ID` | Web/PKCE application client ID |
-| `ZITADEL_PROJECT_ID` | Project whose `club-member` role grants access |
+| `ZITADEL_PROJECT_ID` | OIDC project scope retained for provider compatibility; project roles do not grant business permissions |
 | `AUTH_SESSION_KEY` | Base64-encoded random 32-byte app session key |
 
 OIDC mode fails startup if required auth configuration is missing. Origins
@@ -229,9 +244,9 @@ sealed `rundt/herbsfest-auth` Secret supplies `AUTH_SESSION_KEY` to the web
 container only. This key is separate from ZITADEL's own secrets and shared by
 app replicas. AES-GCM encrypts and authenticates the host-only, Secure,
 HttpOnly, SameSite=Lax session cookie; local HTTP uses a non-Secure cookie.
-Sessions last at most one hour and never outlive the ID token. Role changes
-take effect at the next login or session expiry. Rotating the session key
-invalidates existing app sessions.
+Sessions last at most one hour and never outlive the ID token. Database grant,
+team and account-binding changes are checked on the next request; provider
+session expiry is separate. Rotating the session key invalidates app sessions.
 
 ### Test SSO locally
 
@@ -255,7 +270,9 @@ export AUTH_SESSION_KEY="$(openssl rand -base64 32)"
 make run
 ```
 
-Use your local client ID and a user assigned `club-member` in the project.
+Use your local client ID and an explicitly identified test account. Grant its
+application resources through the scheduling database/administration workflow;
+project-role membership does not grant scheduling permissions.
 `make run` respects the explicit OIDC mode. These shell exports configure the
 local Go process; they do not change the kind Deployment. To run SSO inside
 kind, its dev ConfigMap would need OIDC settings and its Deployment a local
@@ -263,11 +280,12 @@ session-key Secret reference; those are not part of the default dev overlay.
 
 ## OpenFGA connection scaffold
 
-OpenFGA is installed as a future authorization backend. The existing ZITADEL
-`club-member` guard continues to protect private routes, and `/public/` stays
-anonymous. No authorization model, store, relationship tuples or application
-service decorators are installed yet. Missing store/model configuration makes
-`Client.Check` return an error; it never grants access by default.
+OpenFGA enforces scheduling permissions against the pinned application model.
+The identity guard protects private routes; PostgreSQL supplies fresh trusted
+global/team/membership/account facts as contextual tuples under the scheduling
+revision lock. Missing model configuration or an unavailable engine fails closed.
+`/public/`, signup capabilities and optional proof context retain their explicit
+public boundaries.
 
 `internal/openfga` uses standard `net/http` without an additional SDK dependency.
 `cmd/web` constructs one reusable client when `OPENFGA_API_URL` is configured,
@@ -610,7 +628,7 @@ go run ./cmd/rehearsal
 # Refuses a non-loopback target, a database without the _rehearsal suffix,
 # or a target already containing editions.
 go tool templ generate
-AUTH_MODE=development HTTP_ADDR=127.0.0.1:58080 go run ./cmd/web
+AUTH_MODE=development APP_BASE_URL=http://127.0.0.1:58080 HTTP_ADDR=127.0.0.1:58080 go run ./cmd/web
 ```
 
 Open `http://127.0.0.1:58080/`. The rehearsal explicitly grants the synthetic local identity `urn:herbstfest:local` / `developer` global and team access. Signup is `http://127.0.0.1:58080/register/synthetic-rehearsal-registration-only`. Development authentication still goes through database/OpenFGA permission checks. Guest signup stays anonymous in this mode. Optional hosted login requires a separately configured development ZITADEL client; the rehearsal does not contact or modify the live provider.
@@ -620,12 +638,18 @@ SCHEDULING_TEST_DATABASE_URL='postgres://localhost:55432/scheduling_test?sslmode
 SCHEDULING_TEST_FGA_URL=http://127.0.0.1:58180 go test ./...
 go vet ./...
 # With Playwright/Chromium installed in your selected Python environment:
-python3 scripts/test-scheduling-browser.py
+SCHEDULING_BROWSER_URL=http://127.0.0.1:58080 python3 scripts/test-ui-redesign-browser.py
 ```
 
-Integration tests isolate each case in a new PostgreSQL schema and fresh in-memory FGA store, then drop the schemas. Never point the integration suite at production. Without both test environment variables, database integration tests explicitly skip. Browser artifacts go to `/tmp/herbstfest-browser` by default. The browser test submits synthetic requests and requires the local rehearsal application.
+Integration tests isolate each case in a new PostgreSQL schema and fresh in-memory FGA store, then drop the schemas. Never point the integration suite at production. Without both test environment variables, database integration tests explicitly skip. Browser artifacts go to `/tmp/herbstfest-ui-redesign` by default. The browser test submits synthetic requests and requires the local rehearsal application. `scripts/test-scheduling-browser.py` is a compatibility entry point for the same suite. Optional `SCHEDULING_BROWSER_EMPTY_URL`, `SCHEDULING_BROWSER_STAND_URL` and `SCHEDULING_BROWSER_MEMBER_URL` enable separately prepared disposable role fixtures; the empty fixture must have no editions because the suite completes first setup.
 
 For this SSH host, tools were installed without sudo under `/tmp/herbstfest-tools`; Go is `/tmp/herbstfest-tools/go/bin/go`, PostgreSQL binaries are under `/tmp/herbstfest-tools/pg/usr/lib/postgresql/18/bin`, and `LD_LIBRARY_PATH=/tmp/herbstfest-tools/pg/usr/lib/x86_64-linux-gnu` is required for PostgreSQL client tools. Existing disposable OpenFGA is `/tmp/wayfinder-validation/openfga`; browser Python is `/tmp/wayfinder-validation/browser-env/bin/python`. The local database user is `tjark`. These temporary paths are session conveniences, not deployment dependencies.
+
+The redesigned UI opens a bounded stand/day schedule, focused shift details and
+separate request, people and organisation screens. See the
+[implementation plan](docs/implementation/ui-ux-redesign.md) and
+[verification notes](docs/implementation/ui-ux-redesign-validation.md) for routes,
+component contracts, measured limits and the full disposable validation command.
 
 ### GitOps deployment and initial setup
 

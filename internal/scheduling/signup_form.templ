@@ -1,0 +1,55 @@
+package scheduling
+
+import (
+	"github.com/tjrasche/HerbsfestOS/internal/ui"
+	"time"
+)
+
+templ SignupContent(v SignupView, in SignupInput, f FormState, now time.Time) {
+	<p class="eyebrow">{ v.Edition+" · "+v.Name }</p>
+	<h1>Gemeinsam wird’s ein Fest.</h1>
+	<p>Wähle passende Dienste aus. Nur Vor- und Nachname sind nötig. Jede Anfrage wird von der Standorganisation bestätigt.</p>
+	@ui.FormFeedback(f)
+	@ui.Form("/register/" + in.Token) {
+		@Hidden("key", in.Key)
+		<div class="form-columns">@ui.InputField("signup-first_name", "first_name", "Vorname", in.FirstName, "", f.Error("first_name"), templ.Attributes{"required": true, "maxlength": "120", "autocomplete": "given-name"})@ui.InputField("signup-last_name", "last_name", "Nachname", in.LastName, "", f.Error("last_name"), templ.Attributes{"required": true, "maxlength": "120", "autocomplete": "family-name"})</div>
+		<fieldset id="signup-shift" class="signup-choices" aria-invalid={ f.Error("shift") != "" } aria-describedby="signup-shift-hint">
+			<legend>Deine Dienste</legend>
+			<p id="signup-shift-hint" class={ templ.KV("field__error",f.Error("shift")!=""),templ.KV("help-text",f.Error("shift")=="") }>
+				if f.Error("shift")!="" {
+					{ f.Error("shift") }
+				} else {
+					Du kannst mehrere Dienste gemeinsam anfragen.
+				}
+			</p>
+			if len(v.Shifts)==0 {
+				<p class="muted">Hier werden derzeit keine Dienste zur Anmeldung angeboten.</p>
+			}
+			for i,sh:=range v.Shifts {
+				if i==0||sh.StartsAt.In(Berlin).Format("2006-01-02")!=v.Shifts[i-1].StartsAt.In(Berlin).Format("2006-01-02") {
+					<h2 class="signup-day">{ sh.StartsAt.In(Berlin).Format("02.01.2006") }</h2>
+				}
+				<label class={ "signup-shift",templ.KV("signup-shift--unavailable",sh.Cancelled||sh.Free<=0||!now.Before(sh.StartsAt)) }>
+					<input type="checkbox" name="shift" value={ sh.ID } checked?={ contains(in.ShiftIDs,sh.ID) } disabled?={ sh.Cancelled||sh.Free<=0||!now.Before(sh.StartsAt) }/>
+					<span>
+						<strong>{ sh.Title }</strong><span>{ conciseTime(sh.Shift) }</span>
+						<span>
+							if sh.Cancelled {
+								Abgesagt
+							} else if !now.Before(sh.StartsAt) {
+								Keine neuen Anfragen
+							} else if sh.Free<=0 {
+								Voll besetzt
+							} else {
+								{ n(sh.Free)+" freie Plätze" }
+							}
+						</span>
+					</span>
+				</label>
+			}
+		</fieldset>
+		<p class="signup-selection"><output id="signup-selected-count">{ n(len(in.ShiftIDs)) }</output> Dienste ausgewählt</p>
+		@ui.SubmitButton("Alle ausgewählten Dienste anfragen", "Anfragen werden gespeichert …", "primary")
+	}
+	<p class="help-text">Ein Konto ist optional. Ohne Konto kannst du dich für Änderungen und Rückfragen an deine Standorganisation wenden. Es werden keine E-Mails oder SMS versendet.</p>
+}

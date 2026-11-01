@@ -1,0 +1,43 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ OrganisationOverviewContent(v OrganisationPage, f FormState) {
+	@ui.PageHeader("Gemeinsam organisieren", "Organisation", "Ausgaben, dauerhafte Stände und Zugriffsrechte an einem Ort.") {
+	}
+	@OrganisationNavigation("overview", v.Shell)
+	@ui.FormFeedback(f)
+	<div class="detail-grid">
+		@ui.Card("Nächster Schritt", "Die Vorbereitung folgt den tatsächlichen Freigaberegeln.") {
+			if v.EditionCount==0 {
+				<h3>Willkommen im Orga-Team</h3>
+				<p>Legt zuerst die Ausgabe an. Danach kommen Stände, Teilnahme und Standteams.</p>
+				<a class="button button--primary" href={ safe(orgPageURL("/admin/editions/new", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/editions/new",v.Shell))... }>Erste Ausgabe erstellen</a>
+			} else if v.Edition.ID!="" {
+				<p><strong>{ v.Edition.Label }</strong> · { displayDate(v.Edition.StartDay) } bis { displayDate(v.Edition.EndDay) }</p>
+				@EditionReadiness(v)
+			} else {
+				<p>Eine Ausgabe ist angelegt. Öffnet sie, ergänzt die teilnehmenden Stände und ordnet Standteams zu.</p><a class="button button--primary" href={ safe(orgPageURL("/admin/editions", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/editions",v.Shell))... }>Ausgabe vorbereiten</a>
+			}
+		}
+		@ui.Card("Vorbereitung", "Dauerhafte Zugehörigkeit und die Ausgabe bleiben getrennt.") {
+			<ol class="record-list">
+				<li><a href={ safe(orgPageURL("/admin/editions/new", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/editions/new",v.Shell))... }>Ausgabe erstellen</a></li>
+				<li><a href={ safe(orgPageURL("/admin/stands", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/stands",v.Shell))... }>Stände anlegen / teilnehmen lassen</a></li>
+				<li><a href={ safe(orgPageURL("/admin/editions", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/editions",v.Shell))... }>Standteams zuordnen</a></li>
+				<li><a href={ safe(orgPageURL("/admin/editions", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/editions",v.Shell))... }>Ausgabe aktivieren</a></li>
+			</ol>
+		}
+	</div>
+	<div class="detail-grid">
+		@ui.Card("Ausgaben", n(v.EditionCount)+" angelegt") {
+			<a href={ safe(orgPageURL("/admin/editions", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/editions",v.Shell))... }>Ausgaben verwalten</a>
+		}
+		@ui.Card("Stände", n(v.StandCount)+" dauerhafte Stände") {
+			<a href={ safe(orgPageURL("/admin/stands", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/stands",v.Shell))... }>Standkatalog öffnen</a>
+		}
+		@ui.Card("Zugriff", n(v.GlobalCount)+" Konten in der Gesamtorganisation") {
+			<a href={ safe(orgPageURL("/admin/access", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/access",v.Shell))... }>Zugriff prüfen</a>
+		}
+	</div>
+}

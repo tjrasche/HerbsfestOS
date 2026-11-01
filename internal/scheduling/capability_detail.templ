@@ -1,0 +1,42 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ CapabilityDetailContent(v CapabilityRecordPage, f FormState) {
+	@ui.PageHeader("Linkverwaltung", linkKind(v.Link.Kind), v.Link.Label) {
+	}
+	@ui.FormFeedback(f)
+	@ui.Card("Status", v.Link.Status) {
+		<dl>
+			<dt>Erstellt</dt>
+			<dd>{ v.Link.CreatedAt.In(Berlin).Format("02.01.2006 15:04") }</dd>
+			<dt>Gültigkeit</dt>
+			<dd>
+				if v.Link.ExpiresAt!=nil {
+					{ v.Link.ExpiresAt.In(Berlin).Format("02.01.2006 15:04") }
+				} else {
+					Kein festes Ablaufdatum; nur nutzbar solange Stand und aktuelle Ausgabe freigegeben sind.
+				}
+			</dd>
+			if v.Link.Issuer!="" {
+				<dt>Ausstellendes Konto</dt>
+				<dd>{ v.Link.Issuer }</dd>
+			}
+			if v.Link.ConsumedAccount!="" {
+				<dt>Einlösendes Konto</dt>
+				<dd>{ v.Link.ConsumedAccount }</dd>
+			}
+		</dl>
+		<p>Die private URL ist nur direkt nach dem Erstellen sichtbar. Sie kann nicht aus diesem Datensatz wiederhergestellt werden.</p>
+		if v.Link.CanReissue {
+			@ui.Form(orgPageURL("/links/"+v.Link.ID+"/reissue", v.Shell)) {
+				<p>Ein Ersatzlink behält den Bereich bei und macht den alten Link ungültig.</p><label class="check-label"><input type="checkbox" name="confirm" value="true" required/> Alten Link durch einen neuen privaten Link ersetzen</label>@ui.SubmitButton("Ersatzlink erstellen", "Wird erstellt …", "secondary")
+			}
+		}
+		if v.Link.CanRevoke {
+			@ui.Form(orgPageURL("/links/"+v.Link.ID+"/revoke", v.Shell)) {
+				<p>Widerrufen verhindert die zukünftige Nutzung dieses Links. Bereits erteilte Rollen und gespeicherte Anfragen bleiben bestehen.</p><label class="check-label"><input type="checkbox" name="confirm" value="true" required/> Diesen Link widerrufen</label>@ui.SubmitButton("Link widerrufen", "Wird widerrufen …", "danger")
+			}
+		}
+	}
+}

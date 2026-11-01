@@ -1,0 +1,10 @@
+package ui
+
+templ ButtonLink(label, href string, icon IconName, variant string) {
+	<a class={ "button button--" + buttonVariant(variant) } href={ templ.URL(href) } { LinkAttributes(href)... }>
+		if icon != "" {
+			@Icon(icon)
+		}
+		<span>{ label }</span>
+	</a>
+}

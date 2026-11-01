@@ -1,0 +1,40 @@
+package scheduling
+
+import (
+	"github.com/tjrasche/HerbsfestOS/internal/auth"
+	"github.com/tjrasche/HerbsfestOS/internal/ui"
+)
+
+templ ProofContextContent(v ProofInfo, token string, f FormState) {
+	<p class="eyebrow">Persönlich für dich</p>
+	<h1>Private Einladung bestätigen</h1>
+	<p>Öffnen allein löst diesen Link nicht ein. Die Verbindung wird erst mit deiner ausdrücklichen Bestätigung hergestellt.</p>
+	@ui.FormFeedback(f)
+	<section class="panel proof-summary">
+		<h2>{ v.Purpose }</h2>
+		if v.WorkerName!="" {
+			<p>{ v.WorkerName }</p>
+		}
+		if v.Stand!="" {
+			<p>{ v.Stand+" · "+v.Edition }</p>
+		}
+		<p class="help-text">{ "Gültig bis "+v.ExpiresAt.In(Berlin).Format("02.01.2006, 15:04")+" Uhr (Berlin). Einmal verwendbar." }</p>
+	</section>
+	if !v.SignedIn {
+		<div class="action-row"><a class="button button--primary" href={ safe(loginPath(token)) }>Anmelden oder Konto erstellen</a></div>
+		<p class="help-text">Nach der Anmeldung kehrst du zu dieser Bestätigung zurück.</p>
+	} else {
+		<section class="panel">
+			<h2>Dein angemeldetes Konto</h2>
+			<p><strong>{ auth.CurrentUser(ctx).DisplayName() }</strong></p>
+			<p class="help-text">{ "Kontoreferenz: "+nonempty(shortID(v.AccountID),shortID(auth.CurrentUser(ctx).Subject)) }</p>
+			if v.CanProceed {
+				@ui.Form("/proof/" + token) {
+					<label><input type="checkbox" name="confirm" value="true" checked?={ f.Checked("confirm") } required/>Diese Einladung für mein angemeldetes Konto annehmen</label>@ui.SubmitButton(proofLabel(v.Kind), "Wird verbunden …", "primary")
+				}
+			} else {
+				<p class="schedule-warning">Dieser Helferdatensatz ist bereits mit einem anderen Konto verbunden. Bitte wende dich an die Organisation.</p>
+			}
+		</section>
+	}
+}

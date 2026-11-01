@@ -1,0 +1,8 @@
+package ui
+
+templ Notice(title, description, tone string) {
+	<div class={ "notice notice--" + tone }>
+		@Icon(IconInfo)
+		<div><strong>{ title }</strong><p>{ description }</p></div>
+	</div>
+}

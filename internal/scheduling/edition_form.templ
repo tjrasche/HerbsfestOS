@@ -1,0 +1,28 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ EditionFormContent(v OrganisationPage, f FormState) {
+	@ui.Form(orgPageURL(editionAction(v.Edition.ID), v.Shell)) {
+		<div class="schedule-form">
+			@OrganisationField("edition", "label", "Ausgabenbezeichnung", v.Edition.Label, "Zum Beispiel Herbstfest 2027.", "text", 80, true, f)
+			@OrganisationField("edition", "start_day", "Erster Festtag", optionalDate(v.Edition.StartDay), "", "date", 10, true, f)
+			@OrganisationField("edition", "end_day", "Letzter Festtag", optionalDate(v.Edition.EndDay), "", "date", 10, true, f)
+			if v.Edition.ID=="" {
+				<div class="field">
+					<label for="edition-source">Aktive Stände und Teams übernehmen aus</label>
+					<select id="edition-source" name="source_id">
+						<option value="">Aktuelle Ausgabe (falls vorhanden)</option>
+						for _,e:=range v.Shell.Editions {
+							<option value={ e.ID } selected?={ f.Value("source_id","")==e.ID }>{ e.Label }</option>
+						}
+					</select>
+				</div>
+				<p>Der Dienstplan startet leer. Dauerhafte Helferzugehörigkeiten bleiben erhalten.</p>
+			} else {
+				<p>Datumskorrekturen behalten bestehende Dienste bei. Abweichende Dienste bleiben im Plan markiert.</p>
+			}
+		</div>
+		@ui.SubmitButton("Ausgabe speichern", "Wird gespeichert …", "primary")
+	}
+}

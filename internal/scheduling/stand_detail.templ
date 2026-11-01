@@ -1,0 +1,35 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ StandDetailContent(v OrganisationPage, f FormState) {
+	@ui.PageHeader("Dauerhafte Stände", nonempty(v.Stand.Name, "Neuer Stand"), "Name und Zugehörigkeit gehören zum Stand. Teilnahme und Team werden je Ausgabe festgelegt.") {
+	}
+	@OrganisationNavigation("stands", v.Shell)@ui.FormFeedback(f)
+	@ui.Card("Standname", "Über alle Ausgaben hinweg gemeinsam.") {
+		@StandFormContent(v, f)
+	}
+	if v.Stand.ID!="" {
+		@ui.Card("Helferzugehörigkeit", n(v.Stand.Members)+" Personen gehören dauerhaft zu diesem Stand.") {
+			<a class="button button--secondary" href={ safe(orgPageURL("/stands/"+v.Stand.ID+"/members", v.Shell)) } { ui.LinkAttributes(orgPageURL("/stands/"+v.Stand.ID+"/members",v.Shell))... }>Helfer verwalten</a>
+		}
+		@ui.Card("Teilnahme nach Ausgabe", "Die Standorganisation wird für jede Ausgabe zugeordnet.") {
+			if len(v.Participations)==0 {
+				<p>Dieser Stand nimmt noch an keiner Ausgabe teil.</p>
+			}
+			<div class="record-list">
+				for _,p:=range v.Participations {
+					<div class="record-row">
+						<a href={ safe(orgPageURL(participationPath(p.EditionID, p.ID), v.Shell)) } { ui.LinkAttributes(orgPageURL(participationPath(p.EditionID,p.ID),v.Shell))... }>{ p.Name }</a><span>{ n(p.TeamCount)+" Teamkonten" }</span>
+						if p.Enabled {
+							@ui.Badge("Aktiv", "success")
+						} else {
+							@ui.Badge("Deaktiviert", "neutral")
+						}
+					</div>
+				}
+			</div>
+			<a href={ safe(orgPageURL("/admin/editions", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/editions",v.Shell))... }>Teilnahme bei einer Ausgabe hinzufügen</a>
+		}
+	}
+}

@@ -1,0 +1,17 @@
+package ui
+
+import "strconv"
+
+templ Pagination(page int, previous, next string) {
+	if previous!="" || next!="" {
+		<nav class="pagination" aria-label="Seiten">
+			if previous!="" {
+				<a class="button button--secondary" rel="prev" href={ templ.URL(previous) } { LinkAttributes(previous)... }>Zurück</a>
+			}
+			<span>{ "Seite "+strconv.Itoa(page) }</span>
+			if next!="" {
+				<a class="button button--secondary" rel="next" href={ templ.URL(next) } { LinkAttributes(next)... }>Weitere Treffer</a>
+			}
+		</nav>
+	}
+}

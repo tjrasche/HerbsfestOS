@@ -15,6 +15,7 @@ var (
 	ErrUnavailable = errors.New("Berechtigungen sind derzeit nicht erreichbar. Bitte erneut versuchen.")
 	ErrInvalid     = errors.New("Bitte Eingaben und Auswahl prüfen.")
 	ErrConflict    = errors.New("Daten wurden geändert oder der Dienst ist voll. Bitte Auswahl prüfen und erneut versuchen.")
+	ErrNotFound    = errors.New("Diese Seite wurde nicht gefunden.")
 	Berlin         = mustBerlin()
 )
 

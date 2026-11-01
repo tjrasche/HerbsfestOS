@@ -1,0 +1,80 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ ScheduleContent(m ScheduleModel, f FormState) {
+	@ui.PageHeader("Gemeinsam anpacken", "Dienstplanung", "Ein Stand, ein Tag und alle Dienste im Blick. Anfragen werden von der Standorganisation bestätigt.") {
+		if m.SelectedStand().CanEdit {
+			@ui.ButtonLink("Dienst anlegen", canonical("/participations/"+m.Filter.Stand+"/shifts/new", filterValues(m.Filter)), "", "primary")
+		}
+		if m.Filter.Stand!="all" && m.Filter.Stand!="" {
+			<a class="button button--quiet" href={ safe(canonical("/print/"+m.Filter.Stand, filterValues(m.Filter))) }>Druckansicht</a>
+		}
+	}
+	@ui.FormFeedback(f)
+	if m.Shell.Selected=="" {
+		if m.Shell.Global {
+			@ui.EmptyState("Die erste Ausgabe wartet auf dich", "Lege eine Ausgabe und Stände an. Weise die Standteams zu und aktiviere anschließend die Ausgabe.")
+			<div class="action-row">@ui.ButtonLink("Erste Ausgabe erstellen", "/admin/editions/new", "", "primary")@ui.ButtonLink("Einrichtung ansehen", "/admin", "", "secondary")</div>
+		} else {
+			@ui.EmptyState("Noch kein Dienstplan verfügbar", "Deine eigenen Anfragen bleiben über den Menüpunkt Meine Anfragen erreichbar. Für einen Standzugang wende dich an die Organisation.")
+		}
+	} else {
+		@ScheduleFilters(m)
+		<div class="schedule-meta">
+			<p>{ dayLabel(m.Filter.Day) }<span>· Berliner Ortszeit</span></p>
+			<div class="action-row">
+				if m.Shell.Organizer {
+					@ui.ButtonLink("Offene Anfragen ("+n(m.Pending)+")", canonical("/requests/pending", filterValues(m.Filter)), "", "secondary")
+				}
+				@ui.ButtonLink("Meine Anfragen", "/requests/mine", "", "quiet")
+			</div>
+		</div>
+		if len(m.Stands)==0 {
+			@ui.EmptyState("Für diesen Zugang ist kein Stand freigegeben", "Du kannst deine eigenen Anfragen ansehen. Bitte wende dich für einen Standzugang an die Organisation.")
+		}
+		if len(m.Stands)>0 {
+			if !m.SelectedStand().CanEdit && m.Filter.Stand!="all" {
+				<p class="help-text">Nur Ansicht. Bearbeiten und Einteilen ist dem ausdrücklich zugeordneten Standteam möglich.</p>
+				if m.Shell.Global {
+					<div class="action-row">@ui.ButtonLink("Standteam und Zugriff verwalten", "/admin/editions/"+m.Edition.ID+"/participations/"+m.Filter.Stand, "", "secondary")</div>
+				}
+			}
+			@ScheduleTimeline(m)
+			@ui.Pagination(m.Filter.Page, m.Previous, m.Next)
+		}
+	}
+}
+
+templ ScheduleFilters(m ScheduleModel) {
+	<div class="schedule-filters">
+		@ui.GetForm("/") {
+			if m.Shell.Global && m.Shell.Selected!="" {
+				@Hidden("edition", m.Shell.Selected)
+			}
+			<label>
+				Stand
+				<select name="stand">
+					for _,p:=range m.Stands {
+						<option value={ p.ID } selected?={ p.ID==m.Filter.Stand }>{ p.Name }</option>
+					}
+					if len(m.Stands)>1 {
+						<option value="all" selected?={ m.Filter.Stand=="all" }>Alle sichtbaren Stände</option>
+					}
+				</select>
+			</label>
+			<label>
+				Tag
+				<select name="day">
+					if len(m.Days)==0 {
+						<option value={ m.Filter.Day }>{ dayLabel(m.Filter.Day) }</option>
+					}
+					for _,d:=range m.Days {
+						<option value={ d.Value } selected?={ d.Value==m.Filter.Day }>{ d.Label }</option>
+					}
+				</select>
+			</label>
+			@ui.SubmitButton("Plan anzeigen", "Wird geladen …", "secondary")
+		}
+	</div>
+}

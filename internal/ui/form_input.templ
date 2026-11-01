@@ -1,0 +1,12 @@
+package ui
+
+templ InputField(id, name, label, value, hint, message string, attributes templ.Attributes) {
+	<div class="field">
+		<label for={ id }>{ label }</label><input id={ id } name={ name } value={ value } aria-invalid={ message != "" } aria-describedby={ id + "-hint" } { attributes... }/>
+		if message!="" {
+			<p id={ id + "-hint" } class="field__error">{ message }</p>
+		} else if hint!="" {
+			<p id={ id + "-hint" } class="help-text">{ hint }</p>
+		}
+	</div>
+}

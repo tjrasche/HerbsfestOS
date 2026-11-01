@@ -1,0 +1,20 @@
+package ui
+
+templ FormFeedback(f FormState) {
+	if f.HasErrors() {
+		<div id="form-errors" class="form-errors" tabindex="-1" role="alert">
+			<h2>Bitte prüfe deine Angaben</h2>
+			<p>{ f.Summary }</p>
+			if len(f.Errors)>0 {
+				<ul>
+					for name,message:=range f.Errors {
+						<li><a href={ templ.SafeURL("#" + f.ID + "-" + name) }>{ message }</a></li>
+					}
+				</ul>
+			}
+		</div>
+	}
+	if f.Message!="" {
+		<div class="notice notice--success" role="status"><p>{ f.Message }</p></div>
+	}
+}

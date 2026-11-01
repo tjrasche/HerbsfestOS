@@ -1,0 +1,60 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ AssignmentContent(v AssignmentPage, f FormState) {
+	@ui.PageHeader("Einteilung", v.Worker.Name, "Die Einteilung legt im selben Schritt die dauerhafte Standzugehörigkeit an.") {
+	}
+	@ui.FormFeedback(f)
+	<a href={ safe(orgPageURL(canonical("/directory", assignmentContext(v)), v.Shell)) } { ui.LinkAttributes(orgPageURL(canonical("/directory",assignmentContext(v)),v.Shell))... }>Zurück zur Helfersuche</a>
+	@ui.GetForm("/workers/" + v.Worker.ID + "/assign") {
+		@OrganisationQueryHidden(assignmentContext(v), "stand", "day", "page", "shift")
+		<div class="filter-bar">
+			<label for="assignment-stand">
+				Stand
+				<select id="assignment-stand" name="stand" required>
+					for _,p:=range v.Stands {
+						<option value={ p.ID } selected?={ v.Stand==p.ID }>{ p.Name }</option>
+					}
+				</select>
+			</label><label for="assignment-day">Tag<input id="assignment-day" type="date" name="day" value={ v.Day } required/></label>@ui.SubmitButton("Dienste anzeigen", "Wird geladen …", "secondary")
+		</div>
+	}
+	if len(v.Stands)==0 {
+		@ui.EmptyState("Keine bearbeitbaren Stände", "Für eine Einteilung ist eine ausdrückliche Standteam-Zuordnung der aktuellen Ausgabe erforderlich.")
+	} else if len(v.Choices)==0 {
+		@ui.EmptyState("Keine Dienste an diesem Tag", "Wähle einen anderen Tag. Abgesagte Dienste werden hier nicht angeboten.")
+	} else {
+		@ui.Form(orgPageURL(canonical("/workers/"+v.Worker.ID+"/assign", assignmentContext(v)), v.Shell)) {
+			if v.ReturnTo!="" {
+				<input type="hidden" name="return_to" value={ v.ReturnTo }/>
+			}
+			<fieldset>
+				<legend>Dienst für { v.Worker.Name } auswählen</legend>
+				<div class="record-list">
+					for _,sh:=range v.Choices {
+						<label class="signup-shift"><input type="radio" name="shift_id" value={ sh.ID } required checked?={ f.Value("shift_id",v.Shift)==sh.ID } disabled?={ sh.Confirmed>=sh.Capacity }/><span><strong>{ sh.Title }</strong><br/>{ sh.Stand+" · "+sh.StartsAt.In(Berlin).Format("02.01.2006 15:04")+" – "+sh.EndsAt.In(Berlin).Format("15:04") }<br/>{ n(sh.Confirmed)+" / "+n(sh.Capacity)+" bestätigt" }</span></label>
+					}
+				</div>
+			</fieldset>
+			@ui.SubmitButton("Verbindlich einteilen", "Wird eingeteilt …", "primary")
+		}
+	}
+	@OrganisationPagination("/workers/"+v.Worker.ID+"/assign", assignmentContext(v), v.Page, v.HasNext)
+	if len(v.MembershipStands)>0 {
+		@ui.Card("Nur zum Stand hinzufügen", "Dauerhafte Zugehörigkeit herstellen, ohne bereits einen Dienst einzuteilen.") {
+			@ui.Form(orgPageURL(canonical("/workers/"+v.Worker.ID+"/memberships", assignmentContext(v)), v.Shell)) {
+				<label for="assignment-membership-stand">
+					Standzugehörigkeit
+					<select id="assignment-membership-stand" name="stand_id" required>
+						<option value="">Stand auswählen</option>
+						for _,stand:=range v.MembershipStands {
+							<option value={ stand.ID } selected?={ f.Value("stand_id","")==stand.ID }>{ stand.Name }</option>
+						}
+					</select>
+				</label>
+				@ui.SubmitButton("Zum Stand hinzufügen", "Wird hinzugefügt …", "secondary")
+			}
+		}
+	}
+}

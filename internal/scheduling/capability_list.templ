@@ -1,0 +1,28 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ CapabilityRows(rows []CapabilityView, shell ui.ShellModel) {
+	if len(rows)==0 {
+		<p class="muted">Noch keine Links in diesem Bereich.</p>
+	}
+	<div class="record-list">
+		for _,c:=range rows {
+			<article class="record-row"><div><h3><a href={ safe(orgPageURL("/links/"+c.ID, shell)) } { ui.LinkAttributes(orgPageURL("/links/"+c.ID,shell))... }>{ linkKind(c.Kind) }</a></h3><p>{ c.Label }</p><p class="muted">{ "Erstellt "+c.CreatedAt.In(Berlin).Format("02.01.2006 15:04") }</p></div>@ui.Badge(c.Status, "neutral")</article>
+		}
+	</div>
+}
+
+templ CapabilityListContent(v CapabilitiesPage, f FormState) {
+	@ui.PageHeader("Private Einladungen", "Einladungen", "Status, Ablauf und Widerruf ohne private Linktokens anzuzeigen.") {
+	}
+	@OrganisationNavigation("invitations", v.Shell)@ui.FormFeedback(f)
+	@ui.GetForm("/admin/invitations") {
+		@OrganisationQueryHidden(contextQuery(v.Shell))
+		<div class="filter-bar"><label for="invitation-scope">Bereich<select id="invitation-scope" name="scope"><option value="">Alle Bereiche</option><option value="global" selected?={ v.Kind=="global" }>Gesamtorganisation</option><option value="team" selected?={ v.Kind=="team" }>Standteam</option></select></label><label for="invitation-status">Status<select id="invitation-status" name="status"><option value="">Alle Status</option><option value="active" selected?={ v.Status=="active" }>Aktiv / derzeit nicht nutzbar</option><option value="consumed" selected?={ v.Status=="consumed" }>Eingelöst</option><option value="expired" selected?={ v.Status=="expired" }>Abgelaufen</option><option value="revoked" selected?={ v.Status=="revoked" }>Widerrufen</option></select></label>@ui.SubmitButton("Filtern", "Wird geladen …", "secondary")</div>
+	}
+	@CapabilityRows(v.Rows,v.Shell)
+	@OrganisationPagination("/admin/invitations", capabilitiesQuery(v), v.Page, v.HasNext)
+	<p>Neue Teameinladungen werden bei der jeweiligen Standteilnahme erstellt. Die ursprünglichen privaten URLs sind nicht wiederherstellbar.</p>
+	<a href={ safe(orgPageURL("/admin/access", v.Shell)) } { ui.LinkAttributes(orgPageURL("/admin/access",v.Shell))... }>Globale Einladung erstellen</a>
+}

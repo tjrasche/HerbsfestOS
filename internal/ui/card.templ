@@ -1,0 +1,15 @@
+package ui
+
+templ Card(title, description string) {
+	<section class="card">
+		<header class="card__header">
+			<h2>{ title }</h2>
+			if description != "" {
+				<p>{ description }</p>
+			}
+		</header>
+		<div class="card__body">
+			{ children... }
+		</div>
+	</section>
+}

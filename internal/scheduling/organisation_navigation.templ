@@ -1,0 +1,13 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ OrganisationNavigation(active string, shell ui.ShellModel) {
+	<nav class="filter-bar" aria-label="Organisation verwalten">
+		<a href={ safe(orgPageURL("/admin", shell)) } aria-current={ orgCurrent(active, "overview") } { ui.LinkAttributes(orgPageURL("/admin",shell))... }>Übersicht</a>
+		<a href={ safe(orgPageURL("/admin/editions", shell)) } aria-current={ orgCurrent(active, "editions") } { ui.LinkAttributes(orgPageURL("/admin/editions",shell))... }>Ausgaben</a>
+		<a href={ safe(orgPageURL("/admin/stands", shell)) } aria-current={ orgCurrent(active, "stands") } { ui.LinkAttributes(orgPageURL("/admin/stands",shell))... }>Stände</a>
+		<a href={ safe(orgPageURL("/admin/access", shell)) } aria-current={ orgCurrent(active, "access") } { ui.LinkAttributes(orgPageURL("/admin/access",shell))... }>Teams &amp; Zugriff</a>
+		<a href={ safe(orgPageURL("/admin/invitations", shell)) } aria-current={ orgCurrent(active, "invitations") } { ui.LinkAttributes(orgPageURL("/admin/invitations",shell))... }>Einladungen</a>
+	</nav>
+}

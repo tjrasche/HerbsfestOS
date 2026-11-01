@@ -1,0 +1,11 @@
+package ui
+
+templ Form(action string) {
+	<form method="post" action={ templ.URL(action) } hx-post={ action } hx-target="#app-frame" hx-swap="outerHTML" hx-indicator="#page-loading" hx-disabled-elt="find button[type='submit']" hx-sync="this:drop" class="schedule-form">{ children... }
+</form>
+}
+
+templ GetForm(action string) {
+	<form method="get" action={ templ.URL(action) } hx-get={ action } hx-target="#app-frame" hx-swap="outerHTML" hx-push-url="true" hx-indicator="#page-loading" class="filter-bar">{ children... }
+</form>
+}

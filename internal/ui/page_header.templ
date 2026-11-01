@@ -1,0 +1,14 @@
+package ui
+
+templ PageHeader(eyebrow, title, description string) {
+	<header class="page-header">
+		<div class="page-header__copy">
+			<p class="eyebrow"><span class="brand-dot" aria-hidden="true"></span>{ eyebrow }</p>
+			<h1>{ title }</h1>
+			<p class="page-description">{ description }</p>
+		</div>
+		<div class="page-header__actions">
+			{ children... }
+		</div>
+	</header>
+}

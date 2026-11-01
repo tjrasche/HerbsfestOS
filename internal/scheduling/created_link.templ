@@ -1,0 +1,17 @@
+package scheduling
+
+import "github.com/tjrasche/HerbsfestOS/internal/ui"
+
+templ CreatedLinkContent(absolute, back, record string) {
+	@ui.PageHeader("Persönlich teilen", "Link erstellt", "Bitte den vollständigen Link kopieren und persönlich teilen. Es wurde keine Nachricht versandt.") {
+	}
+	@ui.Card("Private URL", "Diese URL wird nur jetzt angezeigt. Wer sie erhält, kann den beschriebenen Vorgang starten.") {
+		@ui.CopyLink(absolute)
+		<div class="action-row"><a class="button button--primary" href={ safe(back) } { ui.LinkAttributes(back)... }>Zurück zur Aufgabe</a><a href={ safe(record) } { ui.LinkAttributes(record)... }>Linkstatus verwalten</a></div>
+	}
+}
+
+templ LinkFailureContent(f FormState) {
+	@ui.FormFeedback(f)
+	<p>Bitte kehre zum betroffenen Stand oder Helferdatensatz zurück und prüfe die Berechtigung und den Linkstatus.</p><a href="/" { ui.LinkAttributes("/")... }>Zur Dienstplanung</a>
+}
