@@ -12,9 +12,13 @@ import (
 type RequestRow struct {
 	Request
 	Name, Title, Stand, Edition, EditionID, ParticipationID string
-	StartsAt, EndsAt                                        time.Time
-	CurrentVersion, Capacity, Confirmed                     int
-	Enabled, CanEdit, CanWithdraw, Stale                    bool
+	// DisplayStatus reflects the current duty while Request.Status retains the
+	// recorded decision, including approvals whose assignment has since ended.
+	DisplayStatus                        string
+	StartsAt, EndsAt                     time.Time
+	CurrentVersion, Capacity, Confirmed  int
+	Enabled, CanEdit, CanWithdraw, Stale bool
+	ShiftCancelled, Assigned             bool
 }
 
 func (r RequestRow) Time() string { return conciseTime(Shift{StartsAt: r.StartsAt, EndsAt: r.EndsAt}) }
@@ -39,18 +43,20 @@ func (s *Store) OwnRequests(ctx context.Context, who Identity, edition, statusFi
 		if err := t.permitWorker(t.worker, "view_details"); err != nil {
 			return err
 		}
-		q := `SELECT r.*,s.title,s.starts_at,s.ends_at,s.version AS current_version,p.enabled,p.id AS participation_id,e.id AS edition_id,e.label AS edition,st.name AS stand FROM requests r JOIN shifts s ON s.id=r.shift_id JOIN participations p ON p.id=s.participation_id JOIN editions e ON e.id=p.edition_id JOIN stands st ON st.id=p.stand_id WHERE r.worker_id=?`
+		// Derive the displayed state before filtering and paging, so an ended
+		// assignment cannot remain in the confirmed filter or its page count.
+		q := `SELECT * FROM (SELECT r.*,s.title,s.starts_at,s.ends_at,s.version AS current_version,s.cancelled AS shift_cancelled,coalesce(a.active,false) AS assigned,CASE WHEN s.cancelled AND r.status IN ('pending','approved') THEN 'cancelled' WHEN r.status='approved' AND NOT coalesce(a.active,false) THEN 'removed' ELSE r.status END AS display_status,p.enabled,p.id AS participation_id,e.id AS edition_id,e.label AS edition,st.name AS stand FROM requests r JOIN shifts s ON s.id=r.shift_id JOIN participations p ON p.id=s.participation_id JOIN editions e ON e.id=p.edition_id JOIN stands st ON st.id=p.stand_id LEFT JOIN assignments a ON a.shift_id=r.shift_id AND a.worker_id=r.worker_id WHERE r.worker_id=?) own_requests`
 		args := []any{t.worker}
 		if statusFilter != "" {
 			switch statusFilter {
-			case "pending", "approved", "declined", "withdrawn", "cancelled":
-				q += " AND r.status=?"
+			case "pending", "approved", "declined", "withdrawn", "cancelled", "removed":
+				q += " WHERE display_status=?"
 				args = append(args, statusFilter)
 			default:
 				return ErrInvalid
 			}
 		}
-		q += " ORDER BY (e.id=?) DESC,s.starts_at DESC,r.id LIMIT 21 OFFSET ?"
+		q += " ORDER BY (edition_id=?) DESC,starts_at DESC,id LIMIT 21 OFFSET ?"
 		args = append(args, t.current, (out.Filter.Page-1)*20)
 		if err := t.db.Raw(q, args...).Scan(&out.Rows).Error; err != nil {
 			return err
@@ -72,8 +78,8 @@ func (s *Store) OwnRequests(ctx context.Context, who Identity, edition, statusFi
 		}
 		for i := range out.Rows {
 			row := &out.Rows[i]
-			row.Stale = row.ShiftVersion != row.CurrentVersion
-			row.CanWithdraw = row.Status == "pending" && row.Enabled && row.EditionID == t.current
+			row.Stale = (row.DisplayStatus == "pending" || row.DisplayStatus == "approved") && row.ShiftVersion != row.CurrentVersion
+			row.CanWithdraw = row.DisplayStatus == "pending" && row.Enabled && row.EditionID == t.current
 		}
 		return nil
 	})
@@ -228,13 +234,19 @@ func requestTone(value string) string {
 		return "success"
 	case "pending":
 		return "brand"
-	case "declined", "cancelled":
+	case "declined", "cancelled", "removed":
 		return "warning"
 	}
 	return "neutral"
 }
 func requestStatuses() []string {
-	return []string{"pending", "approved", "declined", "withdrawn", "cancelled"}
+	return []string{"pending", "approved", "declined", "withdrawn", "cancelled", "removed"}
+}
+func ownRequestStatus(value string) string {
+	if value == "removed" {
+		return "Einteilung aufgehoben"
+	}
+	return status(value)
 }
 
 // Only an empty page needs an exact count: after the final decision on a page,

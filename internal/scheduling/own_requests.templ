@@ -21,7 +21,7 @@ templ OwnRequestsContent(m RequestsModel, f FormState) {
 				<select name="status">
 					<option value="">Alle Anfragen</option>
 					for _,value:=range requestStatuses() {
-						<option value={ value } selected?={ value==m.Status }>{ status(value) }</option>
+						<option value={ value } selected?={ value==m.Status }>{ ownRequestStatus(value) }</option>
 					}
 				</select>
 			</label>@ui.SubmitButton("Filtern", "Wird geladen …", "secondary")
@@ -41,12 +41,16 @@ templ OwnRequestsContent(m RequestsModel, f FormState) {
 							</p>
 							<h2>{ row.Title }</h2>
 							<p>{ row.Stand+" · "+row.Time() }</p>
-							if row.Stale {
+							if row.ShiftCancelled {
+								<p>Dieser Dienst wurde abgesagt.</p>
+							} else if row.DisplayStatus=="removed" {
+								<p>Deine Einteilung für diesen Dienst wurde aufgehoben.</p>
+							} else if row.Stale {
 								<p class="schedule-warning">Dienstzeiten wurden geändert. Bitte mit der Organisation abstimmen.</p>
 							}
 						</div>
 						<div class="action-row">
-							@ui.Badge(status(row.Status), requestTone(row.Status))
+							@ui.Badge(ownRequestStatus(row.DisplayStatus), requestTone(row.DisplayStatus))
 							if row.CanWithdraw {
 								@RequestDecision(row.ID, "withdraw", "Zurückziehen", requestsReturn(m), row.Title+" zurückziehen")
 							}
