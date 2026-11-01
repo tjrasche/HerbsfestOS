@@ -201,7 +201,7 @@ func (t *Tx) schedule(c Command, out *Result) error {
 			return err
 		}
 		candidate := Shift{StartsAt: start, EndsAt: end}
-		if !candidate.Within(edition) {
+		if (sh.ID == "" || !sh.StartsAt.Equal(start) || !sh.EndsAt.Equal(end)) && !candidate.Within(edition) {
 			return ErrInvalid
 		}
 		if sh.ID == "" {
