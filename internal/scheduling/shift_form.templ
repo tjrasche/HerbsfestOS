@@ -10,6 +10,9 @@ templ ShiftFormContent(m ShiftFormModel) {
 	<section class="panel form-panel">
 		@ui.Form(m.Action) {
 			@Hidden("return_to", m.ReturnURL)@Hidden("version", m.Form.Value("version", n(m.Shift.Version)))
+			if m.ReconciliationRequired {
+				@ShiftReconciliation(m)
+			}
 			@ui.InputField("shift-title", "title", "Dienstbezeichnung", m.Form.Value("title", m.Shift.Title), "Zum Beispiel: Aufbau oder Ausschank", m.Form.Error("title"), templ.Attributes{"required": true, "maxlength": "120"})
 			<div class="form-columns">
 				@ui.InputField("shift-start", "start", "Beginn", m.Form.Value("start", localInput(m.Shift.StartsAt)), "Berliner Ortszeit", m.Form.Error("start"), templ.Attributes{"type": "datetime-local", "required": true})

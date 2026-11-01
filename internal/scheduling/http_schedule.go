@@ -105,6 +105,7 @@ type ShiftFormModel struct {
 	Shift                        Shift
 	Form                         FormState
 	StartAmbiguous, EndAmbiguous bool
+	ReconciliationRequired       bool
 	ReturnURL, Action            string
 }
 
@@ -187,6 +188,11 @@ func (h *Handler) renderShiftForm(w http.ResponseWriter, r *http.Request, id, pa
 	m.EndAmbiguous = endAmbiguous
 	if r.Method == http.MethodPost {
 		m.ReturnURL = h.returnTo(r, r.PostForm.Get("return_to"), m.ReturnURL)
+		version, _ := strconv.Atoi(r.PostForm.Get("version"))
+		m.ReconciliationRequired = id != "" && (version != m.Shift.Version || r.PostForm.Has("reconcile_version"))
+		if m.ReconciliationRequired && status == http.StatusConflict {
+			m.Form.Summary = "Der Dienst wurde inzwischen geändert. Deine Eingaben bleiben erhalten. Bitte mit den aktuell gespeicherten Werten abgleichen und erneut bestätigen."
+		}
 	}
 	h.respond(w, r, status, scheduleMeta(shiftFormHeading(id)), m.Shell, ShiftFormContent(m))
 }
@@ -225,6 +231,18 @@ func (h *Handler) shiftSaveScreen(w http.ResponseWriter, r *http.Request) {
 	c.Start = start
 	c.End = end
 	c.Capacity = capacity
+	if id != "" && r.PostForm.Has("reconcile_version") {
+		version, err := strconv.Atoi(r.PostForm.Get("reconcile_version"))
+		if err != nil || version < 1 || r.PostForm.Get("reconcile_confirm") != "true" {
+			f.Errors["reconcile_confirm"] = "Bitte die aktuell gespeicherten Werte prüfen und den Abgleich ausdrücklich bestätigen."
+			h.renderShiftForm(w, r, id, part, f, ambiguousStart, ambiguousEnd, http.StatusConflict)
+			return
+		}
+		// The original edit revision stays in the form. Only an explicit
+		// acknowledgement may retry against the revision shown for comparison;
+		// Execute still checks that revision under its write lock.
+		c.Version = version
+	}
 	out, err := h.store.Execute(r.Context(), identity(r), c)
 	if err != nil {
 		if errors.Is(err, ErrInvalid) || errors.Is(err, ErrConflict) {

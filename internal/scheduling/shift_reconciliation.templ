@@ -1,0 +1,35 @@
+package scheduling
+
+templ ShiftReconciliation(m ShiftFormModel) {
+	<fieldset class="offset-choice" aria-describedby="shift-reconciliation-hint">
+		<legend>Aktuell gespeicherte Werte abgleichen</legend>
+		<p id="shift-reconciliation-hint">Diese Werte wurden inzwischen gespeichert. Deine vorgeschlagenen Werte stehen weiterhin in den Eingabefeldern darunter. Passe sie bei Bedarf an.</p>
+		<dl>
+			<dt>Dienstbezeichnung</dt>
+			<dd>{ m.Shift.Title }</dd>
+			<dt>Zeitraum</dt>
+			<dd>{ m.Shift.Time() }</dd>
+			<dt>Plätze</dt>
+			<dd>{ n(m.Shift.Capacity) }</dd>
+		</dl>
+		@Hidden("reconcile_version", n(m.Shift.Version))
+		<label for="shift-reconcile_confirm">
+			<input
+				id="shift-reconcile_confirm"
+				type="checkbox"
+				name="reconcile_confirm"
+				value="true"
+				required
+				aria-invalid={ m.Form.Error("reconcile_confirm") != "" }
+				if m.Form.Error("reconcile_confirm")!="" {
+					aria-describedby="shift-reconciliation-hint shift-reconcile_confirm-error"
+				} else {
+					aria-describedby="shift-reconciliation-hint"
+				}
+			/>Ich habe die aktuell gespeicherten Werte mit meinen Eingaben abgeglichen und möchte meine Eingaben speichern.
+		</label>
+		if m.Form.Error("reconcile_confirm")!="" {
+			<p class="field__error" id="shift-reconcile_confirm-error" role="alert">{ m.Form.Error("reconcile_confirm") }</p>
+		}
+	</fieldset>
+}
