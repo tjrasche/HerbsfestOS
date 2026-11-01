@@ -384,8 +384,17 @@ func (s *Store) Submit(ctx context.Context, who Identity, in SignupInput) (Submi
 				return err
 			}
 			if r.ID != "" {
-				if r.Status == "pending" || r.Status == "approved" {
+				if r.Status == "pending" {
 					continue
+				}
+				if r.Status == "approved" {
+					var active bool
+					if err = t.db.Raw("SELECT EXISTS(SELECT 1 FROM assignments WHERE shift_id=? AND worker_id=? AND active)", sh.ID, worker).Scan(&active).Error; err != nil {
+						return err
+					}
+					if active {
+						continue
+					}
 				}
 				if err = t.audit("request-resubmitted", r.ID, "{}"); err != nil {
 					return err
