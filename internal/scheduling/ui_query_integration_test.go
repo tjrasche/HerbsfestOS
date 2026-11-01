@@ -34,7 +34,7 @@ func (c *checkRecorder) CheckContext(ctx context.Context, user, relation, object
 
 func TestScheduleSummaryQueriesAreBoundedByStandPage(t *testing.T) {
 	app, db := setup(t)
-	_, part, _ := baseline(t, app)
+	edition, part, _ := baseline(t, app)
 	var actor string
 	must(t, db.Raw("SELECT id FROM accounts WHERE issuer=? AND subject=?", admin.Issuer, admin.Subject).Scan(&actor).Error)
 	// This isolated fixture intentionally writes trusted synthetic rows directly;
@@ -85,4 +85,42 @@ func TestScheduleSummaryQueriesAreBoundedByStandPage(t *testing.T) {
 		t.Fatalf("expected one bounded aggregate query, got %d", aggregates)
 	}
 	t.Logf("150 shifts/10 stands: chosen 15 summaries SQL=%d FGA=%d; all-stand bounded100 SQL=%d FGA=%d", defaultSQL, defaultFGA, len(queries.statements), checker.count)
+
+	exec(t, app, s.Command{Action: "edition-save", ID: edition, Label: "Korrigierte Ausgabe", StartDay: "2027-12-10", EndDay: "2027-12-12"})
+	for _, filter := range []s.ScheduleFilter{{}, {Stand: "all", Day: "2027-09-10"}} {
+		queries.statements = nil
+		checker.count = 0
+		retained, err := app.ScheduleSummary(ctx, admin, filter)
+		must(t, err)
+		want := 15
+		if filter.Stand == "all" {
+			want = 100
+		}
+		if len(retained.Shifts) != want || retained.HasNext != (want == 100) || len(queries.statements) > defaultSQL+1 || checker.count > defaultFGA {
+			t.Fatalf("retained summary costs grew: shifts=%d next=%t SQL/FGA=%d/%d, original=%d/%d", len(retained.Shifts), retained.HasNext, len(queries.statements), checker.count, defaultSQL, defaultFGA)
+		}
+		aggregates, existence := 0, 0
+		for _, q := range queries.statements {
+			if strings.Contains(q, "WITH chosen AS") {
+				aggregates++
+				if !strings.Contains(q, "LIMIT 101 OFFSET 0") {
+					t.Fatalf("retained summary aggregate lost its page bound: %s", q)
+				}
+			}
+			if strings.HasPrefix(q, "SELECT EXISTS(SELECT 1 FROM shifts WHERE participation_id IN ") {
+				existence++
+			}
+			if (strings.Contains(q, "JOIN workers") || strings.Contains(q, "FROM workers")) && !strings.HasPrefix(q, "SELECT id FROM workers WHERE account_id=") {
+				t.Fatalf("retained summary fetched worker details: %s", q)
+			}
+		}
+		if aggregates != 1 || existence != 1 {
+			t.Fatalf("retained summary expected one page query and one existence check: %d/%d", aggregates, existence)
+		}
+		for _, sh := range retained.Shifts {
+			if !sh.Outside {
+				t.Fatal("retained summary lost outside marker")
+			}
+		}
+	}
 }

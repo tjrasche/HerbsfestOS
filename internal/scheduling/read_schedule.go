@@ -169,7 +169,15 @@ func (t *Tx) scheduleSummary(shell ui.ShellModel, filter ScheduleFilter) (Schedu
 	}
 	dayEnd := dayStart.AddDate(0, 0, 1)
 	if dayStart.Before(day(out.Edition.StartDay).AddDate(0, 0, -14)) || dayStart.After(day(out.Edition.EndDay).AddDate(0, 0, 14)) {
-		return out, ErrInvalid
+		// Date corrections retain existing shifts. Admit their days only within
+		// the already authorized stand selection, independently of pagination.
+		var retained bool
+		if err = t.db.Raw("SELECT EXISTS(SELECT 1 FROM shifts WHERE participation_id IN ? AND starts_at<? AND ends_at>?)", ids, dayEnd, dayStart).Scan(&retained).Error; err != nil {
+			return out, err
+		}
+		if !retained {
+			return out, ErrInvalid
+		}
 	}
 	q := `WITH chosen AS (SELECT s.* FROM shifts s WHERE participation_id IN ? AND starts_at<? AND ends_at>? ORDER BY starts_at,id LIMIT 101 OFFSET ?), assigned AS (SELECT a.shift_id,count(*) AS confirmed FROM assignments a JOIN chosen c ON c.id=a.shift_id WHERE a.active GROUP BY a.shift_id), pending AS (SELECT r.shift_id,count(*) AS pending FROM requests r JOIN chosen c ON c.id=r.shift_id WHERE r.status='pending' GROUP BY r.shift_id) SELECT c.*,st.name AS stand,COALESCE(a.confirmed,0) AS confirmed,COALESCE(r.pending,0) AS pending FROM chosen c JOIN participations p ON p.id=c.participation_id JOIN stands st ON st.id=p.stand_id LEFT JOIN assigned a ON a.shift_id=c.id LEFT JOIN pending r ON r.shift_id=c.id ORDER BY c.starts_at,c.id`
 	if err = t.db.Raw(q, ids, dayEnd, dayStart, (out.Filter.Page-1)*100).Scan(&out.Shifts).Error; err != nil {
